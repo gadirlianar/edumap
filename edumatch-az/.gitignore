@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Next.js build output
+.next/
+**/.next/
+out/
+**/out/
+build/
+**/build/
+
+# TypeScript & test artifacts
+*.tsbuildinfo
+**/*.tsbuildinfo
+next-env.d.ts
+coverage/
+**/coverage/
+
+# Environment & secrets
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Vercel & IDE metadata
+.vercel/
+**/.vercel/
+.idea/
+.vscode/
+
+# OS & temporary files
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.html

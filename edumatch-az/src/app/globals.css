@@ -1,0 +1,365 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * EduMatch "Solaris Sky & Mint" Airy Design System
+ * Light Canvas: Sky-Blue -> Mint-Ice pastel gradient fading into #F7FAFD
+ * Surfaces:     Pure White (#FFFFFF) cards with airy soft borders (#E1EDF7)
+ * Accent:       Vibrant Emerald (#10B981 / #047857) + Solaris Neon-Lime (#C8F542)
+ * Action Pill:  Deep Midnight Slate (#0F172A) with Neon-Lime circular arrow
+ */
+
+:root {
+  --bg: #F6FAFE;
+  --surface: #FFFFFF;
+  --surface-subtle: #EFF6FC;
+  --surface-hover: #E5F1FA;
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.85);
+
+  --ink: #0F172A;
+  --ink-2: #334155;
+  --muted: #64748B;
+
+  --border: #E1EDF7;
+  --border-strong: #C6DAEC;
+
+  /* Fresh Emerald & Solaris Neon-Lime Accent System */
+  --accent: #10B981;
+  --accent-ink: #047857;
+  --accent-soft: #ECFDF5;
+  --accent-border: #A7F3D0;
+
+  --lime: #C8F542;
+  --lime-soft: #ECFCCB;
+  --lime-ink: #0F172A;
+
+  --sky-soft: #E0F2FE;
+
+  /* Primary Solaris Pill CTA */
+  --primary-btn: #0F172A;
+  --primary-btn-hover: #1E293B;
+  --primary-btn-ink: #FFFFFF;
+
+  /* Semantic Aliases */
+  --primary: #0F172A;
+  --primary-hover: #1E293B;
+  --primary-soft: rgba(15, 23, 42, 0.06);
+  --indigo: #0F172A;
+  --indigo-soft: rgba(14, 116, 144, 0.06);
+  --indigo-border: #CBE2F2;
+
+  --gold: #10B981;
+  --gold-soft: #ECFDF5;
+
+  --danger: #DC2626;
+  --danger-soft: rgba(220, 38, 38, 0.10);
+
+  --shadow-card: 0 4px 20px -12px rgba(14, 116, 144, 0.10), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-float: 0 24px 56px -20px rgba(14, 116, 144, 0.16), 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] {
+  --bg: #0B1220;
+  --surface: #121D30;
+  --surface-subtle: #182740;
+  --surface-hover: #1F3252;
+  --glass: rgba(11, 18, 32, 0.84);
+  --glass-border: rgba(225, 237, 247, 0.12);
+
+  --ink: #F8FAFC;
+  --ink-2: #E2E8F0;
+  --muted: #94A3B8;
+
+  --border: rgba(225, 237, 247, 0.12);
+  --border-strong: rgba(225, 237, 247, 0.24);
+
+  --accent: #34D399;
+  --accent-ink: #6EE7B7;
+  --accent-soft: rgba(16, 185, 129, 0.16);
+  --accent-border: rgba(52, 211, 153, 0.34);
+
+  --lime: #C8F542;
+  --lime-soft: rgba(200, 245, 66, 0.16);
+  --lime-ink: #0F172A;
+
+  --sky-soft: rgba(56, 189, 248, 0.14);
+
+  /* Crisp Neon-Lime Primary CTA in Dark Mode */
+  --primary-btn: #C8F542;
+  --primary-btn-hover: #D9F99D;
+  --primary-btn-ink: #0F172A;
+
+  --primary: #F8FAFC;
+  --primary-hover: #E2E8F0;
+  --primary-soft: rgba(248, 250, 252, 0.09);
+  --indigo: #F8FAFC;
+  --indigo-soft: rgba(248, 250, 252, 0.08);
+  --indigo-border: rgba(248, 250, 252, 0.20);
+
+  --gold: #34D399;
+  --gold-soft: rgba(52, 211, 153, 0.15);
+
+  --danger: #F87171;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 24px 52px -16px rgba(0, 0, 0, 0.56);
+}
+
+@layer base {
+  html {
+    max-width: 100%;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    margin: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    background-color: var(--bg);
+    color: var(--ink);
+    overflow-x: clip;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.font-serif-editorial {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.font-mono-num {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signature Solaris Sky-Blue & Pastel Mint Wash */
+.em-solaris-canvas {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(960px 440px at 50% 0%, rgba(167, 243, 208, 0.36), transparent 68%),
+    linear-gradient(180deg, #C7E6FF 0%, #DEF3FB 260px, #EDF8F5 540px, var(--bg) 840px);
+}
+
+[data-theme="dark"] .em-solaris-canvas {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(900px 420px at 50% 0%, rgba(16, 185, 129, 0.16), transparent 70%),
+    linear-gradient(180deg, #0F2038 0%, #0D1729 460px, var(--bg) 820px);
+}
+
+/* Airy Frosted Glass & Card Primitives */
+.em-glass {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.em-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.em-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-float);
+}
+
+.em-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.em-spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: radial-gradient(
+    280px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgba(16, 185, 129, 0.11),
+    transparent 65%
+  );
+}
+
+.em-spotlight-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-float);
+}
+
+.em-spotlight-card:hover::before {
+  opacity: 1;
+}
+
+@keyframes emShimmerSweep {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+.font-signature {
+  font-family: var(--font-signature), var(--font-serif), Georgia, serif;
+}
+
+.em-signature-badge {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(244, 63, 94, 0.38);
+  background: linear-gradient(
+    135deg,
+    rgba(251, 113, 133, 0.22) 0%,
+    rgba(236, 72, 153, 0.14) 52%,
+    rgba(255, 241, 245, 0.96) 100%
+  );
+  box-shadow:
+    0 8px 26px -10px rgba(244, 63, 94, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+[data-theme="dark"] .em-signature-badge {
+  border-color: rgba(244, 114, 182, 0.38);
+  background: linear-gradient(
+    135deg,
+    rgba(244, 63, 94, 0.24) 0%,
+    rgba(236, 72, 153, 0.16) 52%,
+    rgba(31, 19, 34, 0.92) 100%
+  );
+  box-shadow:
+    0 10px 28px -10px rgba(244, 114, 182, 0.35),
+    inset 0 1px 0 rgba(255, 228, 240, 0.14);
+}
+
+.em-signature-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 48%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 228, 240, 0.72),
+    transparent
+  );
+  animation: emShimmerSweep 3.8s ease-in-out infinite;
+}
+
+.em-signature-badge:hover {
+  transform: translateY(-2px);
+  border-color: #f43f5e;
+  box-shadow: 0 12px 30px -10px rgba(244, 63, 94, 0.48);
+}
+
+.em-signature-text {
+  background: linear-gradient(95deg, #be123c 0%, #e11d48 45%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-theme="dark"] .em-signature-text {
+  background: linear-gradient(95deg, #fecdd3 0%, #f472b6 50%, #fb7185 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.em-strategy-pill {
+  border-color: rgba(244, 63, 94, 0.35);
+  background: rgba(255, 241, 242, 0.85);
+  color: #be123c;
+}
+
+.em-strategy-pill:hover {
+  border-color: rgba(244, 63, 94, 0.65);
+  background: rgba(255, 228, 230, 0.95);
+}
+
+[data-theme="dark"] .em-strategy-pill {
+  border-color: rgba(244, 114, 182, 0.35);
+  background: rgba(80, 18, 45, 0.42);
+  color: #fbcfe8;
+}
+
+[data-theme="dark"] .em-strategy-pill:hover {
+  border-color: rgba(244, 114, 182, 0.68);
+  background: rgba(112, 26, 62, 0.56);
+}
+
+@keyframes slideUpToast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpToast 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  top: -12px;
+  z-index: 90;
+  pointer-events: none;
+  animation: confettiFall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
