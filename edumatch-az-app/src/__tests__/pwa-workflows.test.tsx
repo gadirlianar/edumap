@@ -787,4 +787,96 @@ describe('EduMatchApp end-to-end WebApp integration (Task 8)', () => {
     fireEvent.touchEnd(main!, { changedTouches: [{ clientX: 280, clientY: 305 }] });
     expect(within(nav).getByRole('button', { name: 'Поиск' })).toHaveAttribute('aria-current', 'page');
   });
+
+  test('LessonsWorkspace renders Student Profile Summary Card in RU, AZ, EN with stats and Book CTA', async () => {
+    const user = userEvent.setup();
+    const onGoToSearch = vi.fn();
+
+    const { rerender } = render(
+      <LessonsWorkspace
+        locale="ru"
+        xp={140}
+        locationName="Баку"
+        favoritesCount={2}
+        requests={[
+          {
+            ...INITIAL_REQUESTS[0],
+            id: 710,
+            tid: INITIAL_TUTORS[0].id,
+            mine: true,
+            status: 'accepted',
+          },
+        ]}
+        tutors={INITIAL_TUTORS}
+        content={INITIAL_CONTENT}
+        hwSubmissions={[]}
+        onOpenChat={vi.fn()}
+        onOpenTutorProfile={vi.fn()}
+        onMarkLessonDone={vi.fn()}
+        onSubmitReview={vi.fn()}
+        onGoToSearch={onGoToSearch}
+        onSelectRank={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Мадина Ханаева' })).toBeInTheDocument();
+    expect(screen.getByText(/Баку · 11 класс \(I \/ IV группа DİM\)/i)).toBeInTheDocument();
+    expect(screen.getByText('140 XP')).toBeInTheDocument();
+    expect(screen.getByText('текущий ранг')).toBeInTheDocument();
+    expect(screen.getByText('избранных')).toBeInTheDocument();
+    expect(screen.getByText('занятий')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Записаться/i }));
+    expect(onGoToSearch).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <LessonsWorkspace
+        locale="az"
+        xp={140}
+        locationName="Баку"
+        favoritesCount={2}
+        requests={[]}
+        tutors={INITIAL_TUTORS}
+        content={INITIAL_CONTENT}
+        hwSubmissions={[]}
+        onOpenChat={vi.fn()}
+        onOpenTutorProfile={vi.fn()}
+        onMarkLessonDone={vi.fn()}
+        onSubmitReview={vi.fn()}
+        onGoToSearch={onGoToSearch}
+        onSelectRank={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Mədinə Xanayeva' })).toBeInTheDocument();
+    expect(screen.getByText(/Bakı · 11 sinif \(I \/ IV qrup DİM\)/i)).toBeInTheDocument();
+    expect(screen.getByText('cari ranq')).toBeInTheDocument();
+    expect(screen.getByText('seçilmişlər')).toBeInTheDocument();
+  });
+
+  test('EduMatchApp allows editing student name and DİM group in Lessons profile summary card', async () => {
+    clearPersistedState();
+    resetUrlSyncState();
+    window.history.replaceState(null, '', '/');
+
+    const user = userEvent.setup();
+    render(<EduMatchApp />);
+
+    const nav = screen.getByRole('navigation', { name: 'Primary sections' });
+    await user.click(within(nav).getByRole('button', { name: 'Занятия' }));
+
+    expect(screen.getByRole('heading', { name: 'Мадина Ханаева' })).toBeInTheDocument();
+    expect(screen.getByText('120 XP')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Изменить профиль' }));
+    const nameInput = screen.getByLabelText('Имя и фамилия');
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Лейла Алиева');
+
+    await user.click(screen.getByRole('button', { name: 'II группа DİM' }));
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }));
+
+    expect(screen.getByRole('heading', { name: 'Лейла Алиева' })).toBeInTheDocument();
+    expect(screen.getByText(/Баку · 11 класс \(II группа DİM\)/i)).toBeInTheDocument();
+  });
 });

@@ -98,23 +98,18 @@ export function QuizWorkspace({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      {/* Header Banner */}
-      <div className="em-card relative overflow-hidden rounded-3xl p-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-extrabold text-[var(--accent-ink)]">
-              <Sparkle size={14} weight="fill" aria-hidden="true" />
-              <span>{copy.nav.test}</span>
-            </div>
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-              {copy.quiz.bannerTitle}
-            </h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">{copy.quiz.bannerSub}</p>
-          </div>
-          <AcademicEmblem iconKey="target" size="xl" />
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* Editorial Header */}
+      <header className="px-1 pt-1">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-extrabold text-[var(--accent-ink)]">
+          <Sparkle size={14} weight="fill" aria-hidden="true" />
+          <span>{copy.nav.test}</span>
         </div>
-      </div>
+        <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          {copy.quiz.bannerTitle}
+        </h1>
+        <p className="mt-1.5 max-w-2xl text-sm text-[var(--muted)]">{copy.quiz.bannerSub}</p>
+      </header>
 
       {/* Rank Card */}
       <RankProgressCard locale={locale} xp={student.xp} onSelectRank={onSelectRank} />

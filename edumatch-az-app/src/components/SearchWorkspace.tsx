@@ -203,7 +203,12 @@ export function SearchWorkspace({
       : null;
 
   const extraFilterCount =
-    (filters.lang ? 1 : 0) + (filters.sty ? 1 : 0) + (filters.price < 60 ? 1 : 0);
+    (filters.fmt ? 1 : 0) +
+    (filters.cat ? 1 : 0) +
+    (filters.sort !== 'match' ? 1 : 0) +
+    (filters.lang ? 1 : 0) +
+    (filters.sty ? 1 : 0) +
+    (filters.price < 60 ? 1 : 0);
 
   return (
     <div>
@@ -428,10 +433,9 @@ export function SearchWorkspace({
             </div>
           </div>
 
-          {/* Instant 1-Click Pill Filters (Zero Lag, Non-Boxy) */}
-          <div className="mt-4 space-y-3 border-t border-[var(--border)]/70 pt-3.5">
-            {/* Subject Row */}
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={copy.search.subject}>
+          {/* Primary 1-Row Subject Filter Bar (Secondary Filters Tucked into Drawer) */}
+          <div className="mt-4 border-t border-[var(--border)]/60 pt-3.5">
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label={copy.search.subject}>
               <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
                 {copy.search.subject}
               </span>
@@ -466,136 +470,9 @@ export function SearchWorkspace({
                 );
               })}
             </div>
-
-            {/* Format + Grade + Sort Segmented Tracks */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-              {/* Format */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.format}
-                </span>
-                <div
-                  role="group"
-                  aria-label={copy.search.format}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
-                >
-                  <button
-                    type="button"
-                    aria-pressed={filters.fmt === ''}
-                    onClick={() => onFiltersChange({ fmt: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
-                      filters.fmt === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                  >
-                    {copy.search.any}
-                  </button>
-                  {FORMATS.map((f) => {
-                    const active = filters.fmt === f;
-                    return (
-                      <button
-                        key={f}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ fmt: active ? '' : f })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {FORMAT_LABELS[f][locale]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Grade */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.grade}
-                </span>
-                <div
-                  role="group"
-                  aria-label={copy.search.grade}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
-                >
-                  <button
-                    type="button"
-                    aria-pressed={filters.cat === ''}
-                    onClick={() => onFiltersChange({ cat: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
-                      filters.cat === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                  >
-                    {copy.search.any}
-                  </button>
-                  {GRADES.map((g) => {
-                    const active = filters.cat === g;
-                    return (
-                      <button
-                        key={g}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ cat: active ? '' : g })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {GRADE_LABELS[g][locale]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Sort */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.sort}
-                </span>
-                <div
-                  role="group"
-                  aria-label={copy.search.sort}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
-                >
-                  {(
-                    [
-                      ['match', copy.search.sortMatch],
-                      ['dist', copy.search.sortDist],
-                      ['rating', copy.search.sortRating],
-                      ['price', copy.search.sortPrice],
-                    ] as Array<[SearchFilters['sort'], string]>
-                  ).map(([val, label]) => {
-                    const active = filters.sort === val;
-                    return (
-                      <button
-                        key={val}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ sort: val })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Progressive Extra Filters Drawer (Language, Max Price, Teaching Style) */}
+          {/* Progressive Extra Filters Drawer (Format, Grade, Sort, Language, Max Price, Style) */}
           <AnimatePresence initial={false}>
             {extraFiltersOpen ? (
               <motion.div
@@ -605,7 +482,134 @@ export function SearchWorkspace({
                 transition={{ duration: 0.14 }}
                 className="overflow-hidden"
               >
-                <div className="mt-4 space-y-3 border-t border-[var(--border)]/70 pt-3.5">
+                <div className="mt-4 space-y-3.5 border-t border-[var(--border)]/60 pt-4">
+                  {/* Format + Grade + Sort Segmented Tracks */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+                    {/* Format */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                        {copy.search.format}
+                      </span>
+                      <div
+                        role="group"
+                        aria-label={copy.search.format}
+                        className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                      >
+                        <button
+                          type="button"
+                          aria-pressed={filters.fmt === ''}
+                          onClick={() => onFiltersChange({ fmt: '' })}
+                          className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                            filters.fmt === ''
+                              ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                              : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                          }`}
+                        >
+                          {copy.search.any}
+                        </button>
+                        {FORMATS.map((f) => {
+                          const active = filters.fmt === f;
+                          return (
+                            <button
+                              key={f}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => onFiltersChange({ fmt: active ? '' : f })}
+                              className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                                active
+                                  ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                              }`}
+                            >
+                              {FORMAT_LABELS[f][locale]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Grade */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                        {copy.search.grade}
+                      </span>
+                      <div
+                        role="group"
+                        aria-label={copy.search.grade}
+                        className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                      >
+                        <button
+                          type="button"
+                          aria-pressed={filters.cat === ''}
+                          onClick={() => onFiltersChange({ cat: '' })}
+                          className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                            filters.cat === ''
+                              ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                              : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                          }`}
+                        >
+                          {copy.search.any}
+                        </button>
+                        {GRADES.map((g) => {
+                          const active = filters.cat === g;
+                          return (
+                            <button
+                              key={g}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => onFiltersChange({ cat: active ? '' : g })}
+                              className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                                active
+                                  ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                              }`}
+                            >
+                              {GRADE_LABELS[g][locale]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                        {copy.search.sort}
+                      </span>
+                      <div
+                        role="group"
+                        aria-label={copy.search.sort}
+                        className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                      >
+                        {(
+                          [
+                            ['match', copy.search.sortMatch],
+                            ['dist', copy.search.sortDist],
+                            ['rating', copy.search.sortRating],
+                            ['price', copy.search.sortPrice],
+                          ] as Array<[SearchFilters['sort'], string]>
+                        ).map(([val, label]) => {
+                          const active = filters.sort === val;
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => onFiltersChange({ sort: val })}
+                              className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                                active
+                                  ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
@@ -713,7 +717,7 @@ export function SearchWorkspace({
         {/* Feed / Swipe Results Area (Full-Width Balanced Grid — No Narrow Squeezed 3-Card Orphans) */}
         {filteredTutors.length > 0 ? (
           filters.mode === 'feed' ? (
-            <div className="grid min-w-0 gap-5 md:grid-cols-2">
+            <div className="grid min-w-0 gap-5 sm:gap-6 md:grid-cols-2">
               {filteredTutors.map((tutor, idx) => (
                 <div
                   key={tutor.id}

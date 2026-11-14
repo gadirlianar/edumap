@@ -3,25 +3,40 @@
 import React, { useState } from 'react';
 import {
   ArrowRight,
-  BookOpenText,
   CalendarCheck,
   ChalkboardTeacher,
   ChatCircleDots,
   CheckCircle,
   Clock,
+  PencilSimple,
+  Plus,
+  Sparkle,
   Star,
+  UserCircle,
 } from '@phosphor-icons/react';
-import { REVIEW_TAGS } from '@/data/catalog';
-import { COPY, FORMAT_LABELS, STATUS_LABELS, SUBJECT_LABELS } from '@/data/i18n';
+import { GRADES, RANK_TIERS, REVIEW_TAGS } from '@/data/catalog';
+import {
+  CITY_LABELS,
+  COPY,
+  FORMAT_LABELS,
+  GRADE_LABELS,
+  STATUS_LABELS,
+  SUBJECT_LABELS,
+  sectorLabel,
+} from '@/data/i18n';
 import { resolveLocalized, resolveTutorName } from '@/data/tutors';
 import { RankProgressCard } from '@/components/RankProgressCard';
 import { AcademicEmblem } from '@/components/ui/AcademicEmblem';
 import { PWA_COPY } from '@/lib/pwaCopy';
+import { getRankIndex } from '@/lib/matching';
 import { handleSpotlightMove } from '@/lib/spotlight';
 import type {
+  CityId,
+  GradeId,
   HomeworkSubmission,
   Locale,
   StudentRequest,
+  StudentState,
   TutorContent,
   TutorProfile,
 } from '@/types/edumatch';
@@ -29,6 +44,10 @@ import type {
 interface LessonsWorkspaceProps {
   locale: Locale;
   xp: number;
+  student?: StudentState;
+  studentName?: string;
+  locationName?: string;
+  favoritesCount?: number;
   requests: StudentRequest[];
   tutors: TutorProfile[];
   content: Record<string, TutorContent>;
@@ -40,13 +59,43 @@ interface LessonsWorkspaceProps {
   onAcceptInvite?: (requestId: number) => void;
   onMarkLessonDone: (requestId: number) => void;
   onSubmitReview: (requestId: number, stars: number, tags: string[], comment: string) => void;
+  onUpdateStudentProfile?: (patch: {
+    displayName?: string;
+    cat?: GradeId;
+    targetGroup?: string;
+  }) => void;
+  onOpenAccountHub?: () => void;
   onGoToSearch: () => void;
   onSelectRank: (rankIndex: number) => void;
 }
 
+function getStudentInitials(fullName: string): string {
+  const parts = fullName
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+  }
+  if (parts.length === 1 && parts[0].length >= 2) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return (parts[0]?.[0] ?? 'M').toUpperCase();
+}
+
+const DIM_GROUP_PRESETS: Record<Locale, string[]> = {
+  ru: ['I / IV группа DİM', 'I группа DİM', 'II группа DİM', 'III группа DİM', 'IV группа DİM', 'IELTS / SAT'],
+  az: ['I / IV qrup DİM', 'I qrup DİM', 'II qrup DİM', 'III qrup DİM', 'IV qrup DİM', 'IELTS / SAT'],
+  en: ['Group I / IV DİM', 'Group I DİM', 'Group II DİM', 'Group III DİM', 'Group IV DİM', 'IELTS / SAT'],
+};
+
 export function LessonsWorkspace({
   locale,
   xp,
+  student,
+  studentName,
+  locationName = 'Баку',
+  favoritesCount = 0,
   requests,
   tutors,
   content,
@@ -58,15 +107,46 @@ export function LessonsWorkspace({
   onAcceptInvite,
   onMarkLessonDone,
   onSubmitReview,
+  onUpdateStudentProfile,
+  onOpenAccountHub,
   onGoToSearch,
   onSelectRank,
 }: LessonsWorkspaceProps) {
   const copy = COPY[locale];
   const pwaCopy = PWA_COPY[locale];
+  const spCopy = pwaCopy.studentProfile;
   const myRequests = requests.filter((r) => r.mine);
   const scheduledLessons = myRequests.filter(
     (r) => (r.status === 'new' || r.status === 'accepted') && Boolean(r.schedule),
   );
+
+  const currentRankIndex = getRankIndex(xp);
+  const currentRank = RANK_TIERS[currentRankIndex] ?? RANK_TIERS[0];
+
+  const resolvedStudentName =
+    studentName?.trim() || student?.displayName?.trim() || spCopy.defaultName;
+  const resolvedCity = CITY_LABELS[locationName as CityId]?.[locale] ?? locationName;
+  const resolvedGradeKey: GradeId = student?.cat ?? '11 класс';
+  const resolvedGradeLabel = GRADE_LABELS[resolvedGradeKey]?.[locale] ?? resolvedGradeKey;
+  const resolvedGroup = student?.targetGroup?.trim() || spCopy.defaultGroup;
+  const resolvedSector = student?.sec ?? 'az';
+  const studentInitials = getStudentInitials(resolvedStudentName);
+
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [draftName, setDraftName] = useState(resolvedStudentName);
+  const [draftGrade, setDraftGrade] = useState<GradeId>(resolvedGradeKey);
+  const [draftGroup, setDraftGroup] = useState(resolvedGroup);
+
+  const toggleProfileEditor = () => {
+    setEditingProfile((prev) => {
+      if (!prev) {
+        setDraftName(resolvedStudentName);
+        setDraftGrade(resolvedGradeKey);
+        setDraftGroup(resolvedGroup);
+      }
+      return !prev;
+    });
+  };
 
   const [starsMap, setStarsMap] = useState<Record<number, number>>({});
   const [tagsMap, setTagsMap] = useState<Record<number, string[]>>({});
@@ -87,66 +167,239 @@ export function LessonsWorkspace({
     });
   };
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      {/* Banner */}
-      <div className="em-card flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gold-soft)] px-3 py-1 text-xs font-extrabold text-[var(--gold)]">
-            <BookOpenText size={14} weight="fill" aria-hidden="true" />
-            <span>{copy.nav.lessons}</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-            {copy.lessons.bannerTitle}
-          </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.lessons.bannerSub}</p>
-        </div>
-        <AcademicEmblem iconKey="write" size="xl" />
-      </div>
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onUpdateStudentProfile) {
+      onUpdateStudentProfile({
+        displayName: draftName.trim() || spCopy.defaultName,
+        cat: draftGrade,
+        targetGroup: draftGroup.trim() || spCopy.defaultGroup,
+      });
+    }
+    setEditingProfile(false);
+  };
 
-      {/* Glass KPI Stat Cards */}
-      <div className="grid grid-cols-3 gap-3">
+  return (
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* Student Profile Summary Card (Madina spec · Solaris Elevation) */}
+      <section
+        aria-label={resolvedStudentName}
+        onPointerMove={handleSpotlightMove}
+        className="em-spotlight-card em-card relative overflow-hidden rounded-3xl p-5 sm:p-6"
+      >
         <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--muted)]">
-              {copy.lessons.requestsTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--ink)]" aria-hidden="true" />
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#C8F542]/15 blur-2xl"
+        />
+
+        <div className="relative flex flex-wrap items-start justify-between gap-3.5 sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3.5">
+            <div className="relative shrink-0">
+              <div
+                aria-hidden="true"
+                className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-extrabold tracking-tight text-white shadow-sm ring-2 ring-[var(--border)] sm:h-[60px] sm:w-[60px] sm:text-xl"
+                style={{ background: 'linear-gradient(135deg, #111514 0%, #1B4332 100%)' }}
+              >
+                {studentInitials}
+              </div>
+              <span
+                aria-hidden="true"
+                className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[var(--surface)] bg-emerald-500"
+              />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-lg font-extrabold tracking-tight text-[var(--ink)] sm:text-xl">
+                  {resolvedStudentName}
+                </h1>
+                {onUpdateStudentProfile ? (
+                  <button
+                    type="button"
+                    onClick={toggleProfileEditor}
+                    aria-label={spCopy.editProfileLabel}
+                    title={spCopy.editProfileLabel}
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--muted)] transition hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
+                  >
+                    <PencilSimple size={12} weight="bold" aria-hidden="true" />
+                    <span className="hidden sm:inline">{spCopy.editProfileLabel}</span>
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs font-medium text-[var(--muted)] sm:text-[13px]">
+                <span>
+                  {resolvedCity} · {resolvedGradeLabel} ({resolvedGroup})
+                </span>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2 py-0.5 text-[10px] font-bold text-[var(--muted)]">
+                  {sectorLabel(resolvedSector, locale)}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="font-mono-num mt-1.5 text-2xl font-semibold text-[var(--ink)]">
+
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="font-mono-num inline-flex items-center gap-1 rounded-full bg-[#C8F542] px-3.5 py-1.5 text-xs font-extrabold text-[#0F172A] shadow-2xs sm:text-sm">
+              <Sparkle size={13} weight="fill" aria-hidden="true" />
+              {xp} XP
+            </span>
+          </div>
+        </div>
+
+        {/* 3-Column Student Stats Row */}
+        <div className="relative mt-4 grid grid-cols-3 gap-2.5">
+          <button
+            type="button"
+            onClick={() => onSelectRank(currentRankIndex)}
+            className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)]/80 px-2.5 py-3 text-center transition hover:border-[var(--border-strong)]"
+          >
+            <span className="max-w-full truncate text-sm font-extrabold text-[var(--ink)] sm:text-[15px]">
+              {resolveLocalized(currentRank.title, locale)}
+            </span>
+            <span className="mt-0.5 text-[11px] font-medium text-[var(--muted)]">
+              {spCopy.currentRankLabel}
+            </span>
+          </button>
+
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)]/80 px-2.5 py-3 text-center">
+            <span className="font-mono-num text-sm font-extrabold text-[var(--ink)] sm:text-[15px]">
+              {favoritesCount}
+            </span>
+            <span className="mt-0.5 text-[11px] font-medium text-[var(--muted)]">
+              {spCopy.favoritesLabel}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)]/80 px-2.5 py-3 text-center">
+            <span className="font-mono-num text-sm font-extrabold text-[var(--ink)] sm:text-[15px]">
+              {myRequests.length}
+            </span>
+            <span className="mt-0.5 text-[11px] font-medium text-[var(--muted)]">
+              {spCopy.lessonsLabel}
+            </span>
+          </div>
+        </div>
+
+        {/* Expandable Inline Student Profile Editor */}
+        {editingProfile && onUpdateStudentProfile ? (
+          <form
+            onSubmit={handleSaveProfile}
+            className="relative mt-4 space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)]/90 p-4"
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  {spCopy.fullNameLabel}
+                </span>
+                <input
+                  type="text"
+                  value={draftName}
+                  maxLength={80}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  placeholder={spCopy.fullNamePlaceholder}
+                  className="em-input w-full rounded-xl px-3 py-2 text-sm font-semibold"
+                />
+              </label>
+
+              <label className="block space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  {spCopy.gradeLabel}
+                </span>
+                <select
+                  value={draftGrade}
+                  onChange={(e) => setDraftGrade(e.target.value as GradeId)}
+                  className="em-input w-full rounded-xl px-3 py-2 text-sm font-semibold"
+                >
+                  {GRADES.map((g) => (
+                    <option key={g} value={g}>
+                      {GRADE_LABELS[g]?.[locale] ?? g}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  {spCopy.groupLabel}
+                </span>
+                <input
+                  type="text"
+                  value={draftGroup}
+                  maxLength={60}
+                  onChange={(e) => setDraftGroup(e.target.value)}
+                  placeholder={spCopy.groupPlaceholder}
+                  className="em-input w-full rounded-xl px-3 py-2 text-sm font-semibold"
+                />
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {DIM_GROUP_PRESETS[locale].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setDraftGroup(preset)}
+                    className={`cursor-pointer rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                      draftGroup === preset
+                        ? 'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-ink)]'
+                        : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)]'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setEditingProfile(false)}
+                className="cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-semibold text-[var(--ink)] hover:border-[var(--border-strong)]"
+              >
+                {spCopy.cancelBtn}
+              </button>
+              <button
+                type="submit"
+                className="cursor-pointer rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:opacity-90"
+              >
+                {spCopy.saveBtn}
+              </button>
+            </div>
+          </form>
+        ) : null}
+      </section>
+
+      {/* Lessons Section Action Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-lg font-extrabold tracking-tight text-[var(--ink)]">
+            {spCopy.myLessonsHeading}
+          </h2>
+          <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-0.5 font-mono text-xs font-bold text-[var(--muted)]">
             {myRequests.length}
-          </div>
+          </span>
         </div>
-        <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--muted)]">
-              {copy.lessons.lessonsTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-          </div>
-          <div className="font-mono-num mt-1.5 text-2xl font-semibold text-[var(--accent-ink)]">
-            {myRequests.filter((r) => r.status === 'done').length}
-          </div>
-        </div>
-        <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--muted)]">
-              {copy.lessons.xpTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-          </div>
-          <div className="font-mono-num mt-1.5 text-2xl font-semibold text-[var(--accent-ink)]">
-            {xp}
-          </div>
+
+        <div className="flex items-center gap-2">
+          {onOpenAccountHub ? (
+            <button
+              type="button"
+              onClick={onOpenAccountHub}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--border-strong)]"
+            >
+              <UserCircle size={14} weight="bold" aria-hidden="true" />
+              <span>{spCopy.accountCta}</span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onGoToSearch}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-extrabold text-[var(--accent-ink)] shadow-2xs transition hover:brightness-95"
+          >
+            <Plus size={13} weight="bold" aria-hidden="true" />
+            <span>{spCopy.bookCta.replace(/^\+\s*/, '')}</span>
+          </button>
         </div>
       </div>
 
@@ -228,7 +481,7 @@ export function LessonsWorkspace({
       {/* Homework Board */}
       <div className="em-card rounded-3xl p-5">
         <h2 className="text-base font-extrabold">{copy.lessons.homeworkTitle}</h2>
-        <div className="mt-3 space-y-2.5">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {allHomeworks.map(({ tutor, hw }) => {
             const sub = hwSubmissions.find((s) => s.hid === hw.id);
             return (
@@ -291,7 +544,7 @@ export function LessonsWorkspace({
 
       {/* Lesson Requests List */}
       {myRequests.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {myRequests.map((req) => {
             const tutor = tutors.find((t) => t.id === req.tid);
             if (!tutor) return null;

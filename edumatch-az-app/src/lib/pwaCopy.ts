@@ -137,6 +137,25 @@ export interface PwaCopyBundle {
     partnerEnrolledBadge: string;
     partnerEnrolledToast: string;
   };
+  studentProfile: {
+    defaultName: string;
+    defaultGroup: string;
+    currentRankLabel: string;
+    favoritesLabel: string;
+    lessonsLabel: string;
+    myLessonsHeading: string;
+    bookCta: string;
+    accountCta: string;
+    editProfileLabel: string;
+    fullNameLabel: string;
+    fullNamePlaceholder: string;
+    gradeLabel: string;
+    groupLabel: string;
+    groupPlaceholder: string;
+    saveBtn: string;
+    cancelBtn: string;
+    savedToast: string;
+  };
 }
 
 export const PWA_COPY: Record<Locale, PwaCopyBundle> = {
@@ -289,6 +308,25 @@ export const PWA_COPY: Record<Locale, PwaCopyBundle> = {
       partnerEnrolledBadge: 'Вы записаны',
       partnerEnrolledToast: 'Заявка на партнёрскую программу принята!',
     },
+    studentProfile: {
+      defaultName: 'Мадина Ханаева',
+      defaultGroup: 'I / IV группа DİM',
+      currentRankLabel: 'текущий ранг',
+      favoritesLabel: 'избранных',
+      lessonsLabel: 'занятий',
+      myLessonsHeading: 'Мои занятия',
+      bookCta: '+ Записаться',
+      accountCta: 'Кабина',
+      editProfileLabel: 'Изменить профиль',
+      fullNameLabel: 'Имя и фамилия',
+      fullNamePlaceholder: 'Например: Мадина Ханаева',
+      gradeLabel: 'Класс / курс',
+      groupLabel: 'Группа DİM / цель',
+      groupPlaceholder: 'Например: I / IV группа DİM',
+      saveBtn: 'Сохранить',
+      cancelBtn: 'Отмена',
+      savedToast: 'Профиль ученика обновлён',
+    },
   },
   az: {
     pwa: {
@@ -439,6 +477,25 @@ export const PWA_COPY: Record<Locale, PwaCopyBundle> = {
       partnerEnrolledBadge: 'Qoşulmusunuz',
       partnerEnrolledToast: 'Tərəfdaş proqramına müraciətiniz qeydə alındı!',
     },
+    studentProfile: {
+      defaultName: 'Mədinə Xanayeva',
+      defaultGroup: 'I / IV qrup DİM',
+      currentRankLabel: 'cari ranq',
+      favoritesLabel: 'seçilmişlər',
+      lessonsLabel: 'dərs',
+      myLessonsHeading: 'Mənim dərslərim',
+      bookCta: '+ Yazıl',
+      accountCta: 'Kabinet',
+      editProfileLabel: 'Profili redaktə et',
+      fullNameLabel: 'Ad və soyad',
+      fullNamePlaceholder: 'Məsələn: Mədinə Xanayeva',
+      gradeLabel: 'Sinif / kurs',
+      groupLabel: 'DİM qrupu / hədəf',
+      groupPlaceholder: 'Məsələn: I / IV qrup DİM',
+      saveBtn: 'Yadda saxla',
+      cancelBtn: 'Ləğv et',
+      savedToast: 'Şagird profili yeniləndi',
+    },
   },
   en: {
     pwa: {
@@ -588,6 +645,25 @@ export const PWA_COPY: Record<Locale, PwaCopyBundle> = {
       partnerEnrollBtn: 'Enroll in Program',
       partnerEnrolledBadge: 'Enrolled',
       partnerEnrolledToast: 'Enrolled in the partner methodology track!',
+    },
+    studentProfile: {
+      defaultName: 'Madina Khanayeva',
+      defaultGroup: 'Group I / IV DİM',
+      currentRankLabel: 'current rank',
+      favoritesLabel: 'saved tutors',
+      lessonsLabel: 'lessons',
+      myLessonsHeading: 'My Lessons',
+      bookCta: '+ Book',
+      accountCta: 'Account',
+      editProfileLabel: 'Edit profile',
+      fullNameLabel: 'Full name',
+      fullNamePlaceholder: 'e.g. Madina Khanayeva',
+      gradeLabel: 'Grade / Year',
+      groupLabel: 'DİM Group / Goal',
+      groupPlaceholder: 'e.g. Group I / IV DİM',
+      saveBtn: 'Save',
+      cancelBtn: 'Cancel',
+      savedToast: 'Student profile updated',
     },
   },
 };

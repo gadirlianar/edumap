@@ -287,6 +287,8 @@ export interface AccountProfile {
 }
 
 export interface StudentState {
+  displayName?: string;
+  targetGroup?: string;
   cat: GradeId;
   sec: SectorCode;
   test: {

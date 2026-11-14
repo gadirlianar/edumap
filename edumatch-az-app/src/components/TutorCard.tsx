@@ -188,8 +188,8 @@ export function TutorCard({
           </div>
         </div>
 
-        {/* 2. Soft Sky-Mint University & Verified Score Strip */}
-        <div className="flex min-w-0 items-center justify-between gap-3 rounded-[20px] bg-gradient-to-r from-[#F0F9FF]/95 to-[#ECFDF5]/95 px-4 py-3 dark:from-[#16273E] dark:to-[#122B28]">
+        {/* 2. Clean Borderless University & Verified Score Row */}
+        <div className="flex min-w-0 items-center justify-between gap-3 border-y border-[var(--border)]/60 py-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink)]">
               <GraduationCap
@@ -211,9 +211,9 @@ export function TutorCard({
           />
         </div>
 
-        {/* 3. Two Clean Outcomes + Single Superpower Differentiator */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3 rounded-[18px] bg-[var(--surface-subtle)]/65 p-3">
+        {/* 3. Open Outcomes & Quiet Differentiator (Zero Nested Boxes) */}
+        <div className="space-y-3.5">
+          <div className="grid grid-cols-2 gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-1 font-mono-num text-base font-bold text-[var(--ink)]">
                 <Trophy
@@ -231,7 +231,7 @@ export function TutorCard({
               </div>
             </div>
 
-            <div className="min-w-0 border-l border-[var(--border)]/70 pl-3">
+            <div className="min-w-0 border-l border-[var(--border)]/60 pl-4">
               <div className="font-mono-num text-base font-bold text-[var(--ink)]">
                 {secondaryAchievement?.metric ?? visual.trajectory.after}
               </div>
@@ -243,7 +243,7 @@ export function TutorCard({
             </div>
           </div>
 
-          <div className="rounded-[18px] border-l-2 border-[var(--accent)] bg-[var(--accent-soft)]/25 px-3.5 py-2.5">
+          <div className="border-l-2 border-[var(--accent)] pl-3">
             <div className="text-xs font-semibold text-[var(--accent-ink)]">
               {resolveLocalized(visual.superpowerTag, locale)}
             </div>

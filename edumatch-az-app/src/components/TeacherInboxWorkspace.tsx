@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Lock,
   Megaphone,
+  SlidersHorizontal,
   Warning,
   X,
 } from '@phosphor-icons/react';
@@ -75,6 +76,7 @@ export function TeacherInboxWorkspace({
   const [gradingId, setGradingId] = useState<string | null>(null);
   const [gradeScore, setGradeScore] = useState('95');
   const [gradeFeedback, setGradeFeedback] = useState('');
+  const [inboxFiltersOpen, setInboxFiltersOpen] = useState(false);
   const mySubmissions = hwSubmissions.filter((s) => s.tid === teacherKey);
   const [filters, setFilters] = useState<InboxFilters>({
     cat: '',
@@ -83,6 +85,8 @@ export function TeacherInboxWorkspace({
     lv: '',
     sort: 'new',
   });
+  const extraFilterCount =
+    (filters.subj ? 1 : 0) + (filters.lv ? 1 : 0) + (filters.sort !== 'new' ? 1 : 0);
 
   const mine = requests.filter((r) => r.tid === teacherKey);
   const approved = isTutorApproved(meTutor);
@@ -109,68 +113,49 @@ export function TeacherInboxWorkspace({
   const countByGrade = (g: GradeId) => mine.filter((r) => r.st.cat === g).length;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <div className="em-card flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
-        <div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      {/* Editorial Header + Compact Inline KPI Chips */}
+      <header className="flex flex-wrap items-end justify-between gap-4 px-1 pt-1">
+        <div className="max-w-xl">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-extrabold text-[var(--accent-ink)]">
             <ChatCircleDots size={14} weight="fill" aria-hidden="true" />
             <span>{copy.nav.inbox}</span>
           </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
             {copy.teacher.inboxBannerTitle}
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.teacher.inboxBannerSub}</p>
-        </div>
-        <AcademicEmblem iconKey="mentor" size="xl" />
-      </div>
-
-      {/* Frosted Glass KPI Stat Cards (Replaced Flat Gradient Rectangles) */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4 sm:p-5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[var(--muted)]">
-              {copy.teacher.newTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--ink)]" aria-hidden="true" />
-          </div>
-          <div className="font-mono-num mt-2 text-2xl font-extrabold text-[var(--ink)]">
-            {mine.filter((r) => r.status === 'new').length}
-          </div>
+          <p className="mt-1.5 text-sm text-[var(--muted)]">{copy.teacher.inboxBannerSub}</p>
         </div>
 
-        <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4 sm:p-5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[var(--muted)]">
-              {copy.teacher.trialTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-          </div>
-          <div className="font-mono-num mt-2 text-2xl font-extrabold text-[var(--accent)]">
-            {mine.filter((r) => r.trial).length}
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)]">
+            <span>{copy.teacher.newTile}</span>
+            <strong className="font-mono-num text-sm font-extrabold text-[var(--ink)]">
+              {mine.filter((r) => r.status === 'new').length}
+            </strong>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)]">
+            <span>{copy.teacher.trialTile}</span>
+            <strong className="font-mono-num text-sm font-extrabold text-[var(--accent)]">
+              {mine.filter((r) => r.trial).length}
+            </strong>
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)]">
+            <span>{copy.teacher.fitTile}</span>
+            <strong className="font-mono-num text-sm font-extrabold text-[var(--accent-ink)]">
+              {mine.filter(fitsMe).length}
+            </strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => (onOpenPartnerModal ? onOpenPartnerModal() : onNotifyAd(copy.teacher.adPartnerToast))}
+            className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3.5 py-1 text-xs font-bold text-[var(--accent-ink)] transition hover:brightness-95"
+          >
+            <Megaphone size={13} weight="fill" aria-hidden="true" />
+            <span>{copy.teacher.adPartnerCta}</span>
+          </button>
         </div>
-
-        <div
-          onPointerMove={handleSpotlightMove}
-          className="em-spotlight-card rounded-3xl p-4 sm:p-5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[var(--muted)]">
-              {copy.teacher.fitTile}
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" aria-hidden="true" />
-          </div>
-          <div className="font-mono-num mt-2 text-2xl font-extrabold text-[var(--accent-ink)]">
-            {mine.filter(fitsMe).length}
-          </div>
-        </div>
-      </div>
+      </header>
 
       {!approved ? (
         <div className="flex items-center gap-2 rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-3 text-sm font-bold text-[var(--accent-ink)]">
@@ -179,85 +164,41 @@ export function TeacherInboxWorkspace({
         </div>
       ) : null}
 
-      {/* Grade Filter Chips */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          type="button"
-          onClick={() => setFilters((p) => ({ ...p, cat: '' }))}
-          aria-pressed={!filters.cat}
-          className={`min-h-[38px] cursor-pointer rounded-full border px-3.5 py-1 text-xs font-extrabold transition ${
-            !filters.cat
-              ? 'border-transparent bg-[var(--ink)] text-[var(--bg)]'
-              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]'
-          }`}
-        >
-          {copy.teacher.all} ({mine.length})
-        </button>
-        {GRADES.filter((g) => countByGrade(g) > 0).map((g) => (
-          <button
-            key={g}
-            type="button"
-            onClick={() => setFilters((p) => ({ ...p, cat: g }))}
-            aria-pressed={filters.cat === g}
-            className={`min-h-[38px] cursor-pointer rounded-full border px-3.5 py-1 text-xs font-extrabold transition ${
-              filters.cat === g
-                ? 'border-transparent bg-[var(--ink)] text-[var(--bg)]'
-                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]'
-            }`}
-          >
-            {GRADE_LABELS[g][locale]} · {countByGrade(g)}
-          </button>
-        ))}
-      </div>
-
-      {/* Instant 1-Click Pill Filters (Non-Boxy, Zero-Lag) */}
+      {/* Compact Primary Filter Bar + Collapsible Secondary Filters */}
       <div className="em-card space-y-3 rounded-[28px] p-4 sm:p-5">
-        <div
-          role="group"
-          aria-label={copy.teacher.subject}
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-            {copy.teacher.subject}
-          </span>
-          <button
-            type="button"
-            aria-pressed={filters.subj === ''}
-            onClick={() => setFilters((p) => ({ ...p, subj: '' }))}
-            className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
-              filters.subj === ''
-                ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
-                : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55'
-            }`}
-          >
-            {copy.teacher.all}
-          </button>
-          {SUBJECTS.map((s) => {
-            const active = filters.subj === s;
-            return (
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setFilters((p) => ({ ...p, cat: '' }))}
+              aria-pressed={!filters.cat}
+              className={`min-h-[34px] cursor-pointer rounded-full border px-3.5 py-1 text-xs font-bold transition ${
+                !filters.cat
+                  ? 'border-transparent bg-[var(--ink)] text-[var(--bg)]'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]'
+              }`}
+            >
+              {copy.teacher.all} ({mine.length})
+            </button>
+            {GRADES.filter((g) => countByGrade(g) > 0).map((g) => (
               <button
-                key={s}
+                key={g}
                 type="button"
-                aria-pressed={active}
-                onClick={() => setFilters((p) => ({ ...p, subj: active ? '' : s }))}
-                className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
-                  active
-                    ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
-                    : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55'
+                onClick={() => setFilters((p) => ({ ...p, cat: g }))}
+                aria-pressed={filters.cat === g}
+                className={`min-h-[34px] cursor-pointer rounded-full border px-3.5 py-1 text-xs font-bold transition ${
+                  filters.cat === g
+                    ? 'border-transparent bg-[var(--ink)] text-[var(--bg)]'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]'
                 }`}
               >
-                {SUBJECT_LABELS[s][locale]}
+                {GRADE_LABELS[g][locale]} · {countByGrade(g)}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 border-t border-[var(--border)]/70 pt-3">
-          {/* Request Type */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-              {copy.teacher.type}
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Request Type (Always Accessible) */}
             <div
               role="group"
               aria-label={copy.teacher.type}
@@ -288,121 +229,160 @@ export function TeacherInboxWorkspace({
                 );
               })}
             </div>
-          </div>
 
-          {/* Student Level (Premium) */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-              {copy.teacher.level}
-              {!isPremium ? <Lock size={11} aria-hidden="true" /> : null}
-            </span>
-            <div
-              role="group"
-              aria-label={copy.teacher.level}
-              className={`inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1 ${
-                !isPremium ? 'opacity-55' : ''
+            <button
+              type="button"
+              aria-expanded={inboxFiltersOpen}
+              onClick={() => setInboxFiltersOpen((v) => !v)}
+              className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-all duration-150 ${
+                inboxFiltersOpen || extraFilterCount > 0
+                  ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
+                  : 'bg-[var(--surface-subtle)] text-[var(--ink)] hover:bg-[var(--accent-soft)]/50'
               }`}
             >
-              <button
-                type="button"
-                disabled={!isPremium}
-                aria-pressed={filters.lv === ''}
-                onClick={() => setFilters((p) => ({ ...p, lv: '' }))}
-                className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 disabled:cursor-not-allowed ${
-                  filters.lv === ''
-                    ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                    : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                }`}
-              >
-                {copy.search.any}
-              </button>
-              {LEVELS.map((l) => {
-                const active = filters.lv === l;
-                return (
-                  <button
-                    key={l}
-                    type="button"
-                    disabled={!isPremium}
-                    aria-pressed={active}
-                    onClick={() => setFilters((p) => ({ ...p, lv: active ? '' : l }))}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 disabled:cursor-not-allowed ${
-                      active
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                  >
-                    {LEVEL_LABELS[l][locale]}
-                  </button>
-                );
-              })}
-            </div>
+              <SlidersHorizontal size={13} weight="bold" aria-hidden="true" />
+              <span>
+                {copy.search.filtersBtn}
+                {extraFilterCount > 0 ? ` (${extraFilterCount})` : ''}
+              </span>
+            </button>
           </div>
+        </div>
 
-          {/* Sort */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-              {copy.teacher.sort}
-            </span>
+        {inboxFiltersOpen ? (
+          <div className="space-y-3 border-t border-[var(--border)]/70 pt-3">
             <div
               role="group"
-              aria-label={copy.teacher.sort}
-              className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+              aria-label={copy.teacher.subject}
+              className="flex flex-wrap items-center gap-1.5"
             >
-              {(
-                [
-                  ['new', copy.teacher.sortNew],
-                  ['cat', copy.teacher.sortCat],
-                ] as Array<[InboxFilters['sort'], string]>
-              ).map(([val, label]) => {
-                const active = filters.sort === val;
+              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                {copy.teacher.subject}
+              </span>
+              <button
+                type="button"
+                aria-pressed={filters.subj === ''}
+                onClick={() => setFilters((p) => ({ ...p, subj: '' }))}
+                className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
+                  filters.subj === ''
+                    ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
+                    : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55'
+                }`}
+              >
+                {copy.teacher.all}
+              </button>
+              {SUBJECTS.map((s) => {
+                const active = filters.subj === s;
                 return (
                   <button
-                    key={val}
+                    key={s}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => setFilters((p) => ({ ...p, sort: val }))}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                    onClick={() => setFilters((p) => ({ ...p, subj: active ? '' : s }))}
+                    className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
                       active
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                        ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
+                        : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55'
                     }`}
                   >
-                    {label}
+                    {SUBJECT_LABELS[s][locale]}
                   </button>
                 );
               })}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Sleek Partner Capsule */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-[var(--accent-border)]/70 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--accent-soft)]/35 px-5 py-4 shadow-[var(--shadow-card)]">
-        <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-ink)]">
-            <Megaphone size={11} weight="fill" aria-hidden="true" />
-            {copy.teacher.adPartnerTag}
-          </span>
-          <h3 className="mt-1.5 text-sm font-bold text-[var(--ink)]">
-            {copy.teacher.adPartnerTitle}
-          </h3>
-          <p className="mt-0.5 text-xs text-[var(--muted)]">{copy.teacher.adPartnerDesc}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <AcademicEmblem iconKey="mega" size="md" />
-          <button
-            type="button"
-            onClick={() => (onOpenPartnerModal ? onOpenPartnerModal() : onNotifyAd(copy.teacher.adPartnerToast))}
-            className="inline-flex min-h-[38px] shrink-0 cursor-pointer items-center rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition-all duration-150 hover:bg-[var(--primary-btn-hover)] active:scale-[0.97]"
-          >
-            {copy.teacher.adPartnerCta}
-          </button>
-        </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 border-t border-[var(--border)]/60 pt-2.5">
+              {/* Student Level (Premium) */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                  {copy.teacher.level}
+                  {!isPremium ? <Lock size={11} aria-hidden="true" /> : null}
+                </span>
+                <div
+                  role="group"
+                  aria-label={copy.teacher.level}
+                  className={`inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1 ${
+                    !isPremium ? 'opacity-55' : ''
+                  }`}
+                >
+                  <button
+                    type="button"
+                    disabled={!isPremium}
+                    aria-pressed={filters.lv === ''}
+                    onClick={() => setFilters((p) => ({ ...p, lv: '' }))}
+                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 disabled:cursor-not-allowed ${
+                      filters.lv === ''
+                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    {copy.search.any}
+                  </button>
+                  {LEVELS.map((l) => {
+                    const active = filters.lv === l;
+                    return (
+                      <button
+                        key={l}
+                        type="button"
+                        disabled={!isPremium}
+                        aria-pressed={active}
+                        onClick={() => setFilters((p) => ({ ...p, lv: active ? '' : l }))}
+                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 disabled:cursor-not-allowed ${
+                          active
+                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                        }`}
+                      >
+                        {LEVEL_LABELS[l][locale]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sort */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+                  {copy.teacher.sort}
+                </span>
+                <div
+                  role="group"
+                  aria-label={copy.teacher.sort}
+                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                >
+                  {(
+                    [
+                      ['new', copy.teacher.sortNew],
+                      ['cat', copy.teacher.sortCat],
+                    ] as Array<[InboxFilters['sort'], string]>
+                  ).map(([val, label]) => {
+                    const active = filters.sort === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setFilters((p) => ({ ...p, sort: val }))}
+                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                          active
+                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Request Cards */}
       {filtered.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           {filtered.map((r, i) => {
             const lastMsg = r.msgs[r.msgs.length - 1];
             const studentName = resolvePersonName(r.st.name, locale);
@@ -410,82 +390,82 @@ export function TeacherInboxWorkspace({
               <div
                 key={r.id}
                 onPointerMove={handleSpotlightMove}
-                className="em-spotlight-card rounded-3xl p-4 sm:p-5"
+                className="em-spotlight-card flex flex-col justify-between rounded-3xl p-5"
               >
-                <div className="flex items-center gap-3">
-                  <Avatar name={studentName} index={i} size="md" />
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-extrabold">{studentName}</h3>
-                    <p className="truncate text-xs text-[var(--muted)]">
-                      {lastMsg?.img
+                <div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Avatar name={studentName} index={i} size="md" />
+                      <div className="min-w-0">
+                        <h3 className="truncate text-base font-extrabold">{studentName}</h3>
+                        <p className="truncate text-xs font-medium text-[var(--muted)]">
+                          {sectorLabel(r.st.sec, locale)} · {GRADE_LABELS[r.st.cat][locale]} ·{' '}
+                          {SUBJECT_LABELS[r.st.subj][locale]}
+                        </p>
+                      </div>
+                    </div>
+                    {r.status === 'new' ? (
+                      <span className="shrink-0 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--accent-ink)]">
+                        {copy.teacher.newBadge}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {lastMsg ? (
+                    <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-[var(--ink-2)]">
+                      {lastMsg.img
                         ? copy.teacher.stickerMsg
-                        : lastMsg?.text
+                        : lastMsg.text
                           ? resolveChatMessageText(lastMsg.text, locale)
                           : ''}
                     </p>
+                  ) : null}
+
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    {r.trial ? (
+                      <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent-ink)]">
+                        {copy.teacher.typeTrial}
+                      </span>
+                    ) : null}
+                    {r.invited ? (
+                      <span className="rounded-full border border-[var(--accent-border)] bg-[var(--lime)]/25 px-2.5 py-0.5 text-[11px] font-extrabold text-[var(--ink)]">
+                        {bk.invitedTag}
+                      </span>
+                    ) : null}
+                    {r.schedule ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--ink-2)]">
+                        <CalendarCheck size={12} weight="bold" aria-hidden="true" />
+                        {r.schedule.dateLabel} · {r.schedule.time}
+                      </span>
+                    ) : null}
+                    {isPremium ? (
+                      <span className="text-[11px] font-semibold text-[var(--muted)]">
+                        · {copy.teacher.levelPrefix}{' '}
+                        {r.st.level ? LEVEL_LABELS[r.st.level][locale] : copy.teacher.notTested}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={onOpenPremium}
+                        className="em-lock-pattern inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[var(--ink)]"
+                      >
+                        <Lock size={10} weight="bold" aria-hidden="true" />
+                        {copy.teacher.levelLocked}
+                      </button>
+                    )}
+                    {fitsMe(r) ? (
+                      <span className="text-[11px] font-bold text-[var(--accent-ink)]">
+                        · {copy.teacher.matchesCriteria}
+                      </span>
+                    ) : null}
                   </div>
-                  {r.status === 'new' ? (
-                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                      {copy.teacher.newBadge}
-                    </span>
-                  ) : null}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                    {sectorLabel(r.st.sec, locale)}
-                  </span>
-                  <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)]">
-                    {GRADE_LABELS[r.st.cat][locale]}
-                  </span>
-                  <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--ink)]">
-                    {SUBJECT_LABELS[r.st.subj][locale]}
-                  </span>
-                  {r.trial ? (
-                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                      {copy.teacher.typeTrial}
-                    </span>
-                  ) : null}
-                  {r.invited ? (
-                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--lime)]/25 px-2.5 py-1 text-xs font-extrabold text-[var(--ink)]">
-                      {bk.invitedTag}
-                    </span>
-                  ) : null}
-                  {r.schedule ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-2)]">
-                      <CalendarCheck size={12} weight="bold" aria-hidden="true" />
-                      {r.schedule.dateLabel} · {r.schedule.time}
-                    </span>
-                  ) : null}
-                  {isPremium ? (
-                    <span className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-2)]">
-                      {copy.teacher.levelPrefix}{' '}
-                      {r.st.level
-                        ? LEVEL_LABELS[r.st.level][locale]
-                        : copy.teacher.notTested}
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onOpenPremium}
-                      className="em-lock-pattern inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-[var(--ink)]"
-                    >
-                      <Lock size={11} weight="bold" aria-hidden="true" />
-                      {copy.teacher.levelLocked}
-                    </button>
-                  )}
-                  {fitsMe(r) ? (
-                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                      {copy.teacher.matchesCriteria}
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border)]/60 pt-3.5">
                   <button
                     type="button"
                     onClick={() => onOpenChat(r.id)}
-                    className="inline-flex min-h-[38px] cursor-pointer items-center gap-1.5 rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
                   >
                     <ChatCircleDots size={14} weight="bold" aria-hidden="true" />
                     {copy.lessons.openChat}
@@ -494,7 +474,7 @@ export function TeacherInboxWorkspace({
                     <button
                       type="button"
                       onClick={() => onOpenClassroom(r.id)}
-                      className="inline-flex min-h-[38px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-bold text-[var(--accent-ink)] transition hover:brightness-95"
+                      className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-bold text-[var(--accent-ink)] transition hover:brightness-95"
                     >
                       <CalendarCheck size={14} weight="bold" aria-hidden="true" />
                       {bk.enterClassroom}
@@ -505,7 +485,7 @@ export function TeacherInboxWorkspace({
                       <button
                         type="button"
                         onClick={() => onAcceptRequest(r.id)}
-                        className="inline-flex min-h-[38px] cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-bold text-[var(--ink)] hover:border-[var(--accent)]"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-bold text-[var(--ink)] hover:border-[var(--accent)]"
                       >
                         <Check size={14} weight="bold" aria-hidden="true" />
                         {copy.teacher.accept}
@@ -513,14 +493,14 @@ export function TeacherInboxWorkspace({
                       <button
                         type="button"
                         onClick={() => onDeclineRequest(r.id)}
-                        className="inline-flex min-h-[38px] cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-bold text-[var(--ink)] hover:border-[var(--danger)]"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-full border border-transparent px-3 py-1.5 text-xs font-bold text-[var(--muted)] hover:border-[var(--danger)] hover:text-[var(--danger)]"
                       >
                         <X size={14} weight="bold" aria-hidden="true" />
                         {copy.teacher.decline}
                       </button>
                     </>
                   ) : (
-                    <span className="text-xs font-bold text-[var(--muted)]">
+                    <span className="ml-auto text-xs font-bold text-[var(--muted)]">
                       {STATUS_LABELS[r.status][locale]}
                     </span>
                   )}

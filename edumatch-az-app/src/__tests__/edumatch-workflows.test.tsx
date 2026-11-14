@@ -320,4 +320,52 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
       ).not.toBeInTheDocument();
     });
   });
+
+  it('keeps secondary filters collapsed behind Фильтры drawer across Search, Teacher Inbox, and Teacher Students', async () => {
+    const user = userEvent.setup();
+    render(<EduMatchApp />);
+
+    // 1. SearchWorkspace: secondary Format, Grade, Sort, and Teaching Style stay collapsed until Фильтры is toggled
+    const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
+    await user.click(within(showcase).getByRole('button', { name: /Показать репетиторов/i }));
+    const catalog = document.getElementById('tutor-catalog')!;
+    expect(within(catalog).getByRole('group', { name: 'Предмет' })).toBeInTheDocument();
+    expect(within(catalog).queryByRole('group', { name: 'Формат' })).not.toBeInTheDocument();
+    expect(within(catalog).queryByRole('group', { name: 'Сортировка' })).not.toBeInTheDocument();
+    expect(within(catalog).queryByText(/Стиль преподавания/i)).not.toBeInTheDocument();
+
+    const searchFilterBtn = within(catalog).getByRole('button', { name: /Фильтры/i });
+    expect(searchFilterBtn).toHaveAttribute('aria-expanded', 'false');
+    await user.click(searchFilterBtn);
+    expect(searchFilterBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(within(catalog).getByRole('group', { name: 'Формат' })).toBeInTheDocument();
+    expect(within(catalog).getByRole('group', { name: 'Класс / курс' })).toBeInTheDocument();
+    expect(within(catalog).getByRole('group', { name: 'Сортировка' })).toBeInTheDocument();
+    expect(within(catalog).getByText(/Стиль преподавания/i)).toBeInTheDocument();
+
+    // 2. Teacher Inbox: Тип заявки stays visible while Предмет and Сортировка stay collapsed
+    await switchToTeacher(user);
+    expect(screen.getByRole('group', { name: 'Тип заявки' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Предмет' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Сортировка' })).not.toBeInTheDocument();
+
+    const inboxFilterBtn = screen.getByRole('button', { name: /Фильтры/i });
+    expect(inboxFilterBtn).toHaveAttribute('aria-expanded', 'false');
+    await user.click(inboxFilterBtn);
+    expect(inboxFilterBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('group', { name: 'Предмет' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Сортировка' })).toBeInTheDocument();
+
+    // 3. Teacher Students: Сектор stays visible while Класс / курс stays collapsed until toggled
+    const nav = screen.getByRole('navigation', { name: 'Primary sections' });
+    await user.click(within(nav).getByRole('button', { name: 'Ученики' }));
+    expect(screen.getByRole('group', { name: 'Сектор' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Класс / курс' })).not.toBeInTheDocument();
+
+    const studentFilterBtn = screen.getByRole('button', { name: /Фильтры/i });
+    expect(studentFilterBtn).toHaveAttribute('aria-expanded', 'false');
+    await user.click(studentFilterBtn);
+    expect(studentFilterBtn).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('group', { name: 'Класс / курс' })).toBeInTheDocument();
+  });
 });

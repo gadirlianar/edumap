@@ -125,7 +125,7 @@ export function HeroOpening({
   return (
     <section
       aria-label="EduMatch showcase"
-      className="mx-auto mb-10 w-full max-w-4xl pb-2 pt-5 text-center sm:pt-10"
+      className="mx-auto mb-12 w-full max-w-4xl pb-2 pt-6 text-center sm:pt-12"
     >
       {/* 1. Minimalist Verified Platform Badge */}
       <motion.div
@@ -176,7 +176,7 @@ export function HeroOpening({
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42, delay: 0.12, ease: EASE_EDITORIAL }}
-        className="em-liquid-sheet mx-auto mt-7 w-full rounded-[28px] p-4 text-left sm:p-6"
+        className="em-liquid-sheet mx-auto mt-8 w-full rounded-[28px] p-5 text-left sm:p-7"
       >
         {/* Step 1: Primary Goal / Intent */}
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">

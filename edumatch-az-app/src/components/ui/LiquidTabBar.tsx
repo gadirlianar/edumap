@@ -218,8 +218,8 @@ export function LiquidTabBar({
             }}
             className={`relative z-10 cursor-pointer transition-colors ${
               isDock
-                ? 'flex min-h-[42px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1 text-[10px]'
-                : 'inline-flex min-h-[34px] items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[12.5px] lg:px-3.5 lg:text-[13px]'
+                ? 'flex min-h-[44px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1.5 py-1 text-[10px]'
+                : 'inline-flex min-h-[34px] items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[12.5px] lg:px-4 lg:text-[13px]'
             } ${
               active
                 ? 'font-semibold text-[var(--ink)]'

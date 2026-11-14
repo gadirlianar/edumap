@@ -11,7 +11,6 @@ import {
 import { LEVELS } from '@/data/catalog';
 import { COPY, LEVEL_LABELS } from '@/data/i18n';
 import { resolveLocalized } from '@/data/tutors';
-import { AcademicEmblem } from '@/components/ui/AcademicEmblem';
 import type {
   HomeworkSubmission,
   LevelId,
@@ -89,20 +88,17 @@ export function TeacherStudioWorkspace({
   const mySubmissions = hwSubmissions.filter((s) => s.tid === 'me');
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <div className="em-card flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-extrabold text-[var(--primary)]">
-            <FilmSlate size={14} weight="fill" aria-hidden="true" />
-            <span>{copy.nav.studio}</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-            {copy.teacher.studioBannerTitle}
-          </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.teacher.studioBannerSub}</p>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <header className="px-1 pt-1">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-extrabold text-[var(--primary)]">
+          <FilmSlate size={14} weight="fill" aria-hidden="true" />
+          <span>{copy.nav.studio}</span>
         </div>
-        <AcademicEmblem iconKey="studio" size="xl" />
-      </div>
+        <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          {copy.teacher.studioBannerTitle}
+        </h1>
+        <p className="mt-1.5 max-w-2xl text-sm text-[var(--muted)]">{copy.teacher.studioBannerSub}</p>
+      </header>
 
       {/* Sub Tabs */}
       <div
@@ -129,8 +125,8 @@ export function TeacherStudioWorkspace({
 
       {/* Videos Tab */}
       {tab === 'videos' ? (
-        <div className="space-y-4">
-          <div className="em-card rounded-3xl p-5 space-y-3">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+          <div className="em-card space-y-3 rounded-3xl p-5 lg:col-span-5">
             <h2 className="text-base font-extrabold">{copy.teacher.addVideo}</h2>
             <input
               type="text"
@@ -171,7 +167,7 @@ export function TeacherStudioWorkspace({
             </button>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:col-span-7">
             {content.videos.map((v) => (
               <button
                 key={v.id}
@@ -201,8 +197,8 @@ export function TeacherStudioWorkspace({
 
       {/* Courses Tab */}
       {tab === 'courses' ? (
-        <div className="space-y-4">
-          <div className="em-card rounded-3xl p-5 space-y-3">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+          <div className="em-card space-y-3 rounded-3xl p-5 lg:col-span-7">
             <h2 className="text-base font-extrabold">{copy.teacher.newCourse}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <input
@@ -268,7 +264,7 @@ export function TeacherStudioWorkspace({
             </button>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:col-span-5">
             {content.courses.map((c) => (
               <div key={c.id} className="em-card rounded-2xl p-4">
                 <div className="flex items-center justify-between">
@@ -289,9 +285,10 @@ export function TeacherStudioWorkspace({
 
       {/* Tests Tab */}
       {tab === 'tests' ? (
-        <div className="space-y-4">
-          {isPremium ? (
-            <div className="em-card rounded-3xl p-5 space-y-3">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-7">
+            {isPremium ? (
+              <div className="em-card space-y-3 rounded-3xl p-5">
               <h2 className="text-base font-extrabold">{copy.teacher.newTest}</h2>
               <input
                 type="text"
@@ -465,24 +462,27 @@ export function TeacherStudioWorkspace({
               </div>
             </div>
           )}
+          </div>
 
-          {content.tests.map((te) => (
-            <div key={te.id} className="em-card rounded-2xl p-4">
-              <h3 className="text-base font-extrabold">
-                {resolveLocalized(te.title, locale)}
-              </h3>
-              <p className="mt-0.5 text-xs text-[var(--muted)]">
-                {te.qs.length} {copy.profileModal.questionsShort} · {LEVEL_LABELS[te.thr][locale]}
-              </p>
-            </div>
-          ))}
+          <div className="space-y-2.5 lg:col-span-5">
+            {content.tests.map((te) => (
+              <div key={te.id} className="em-card rounded-2xl p-4">
+                <h3 className="text-base font-extrabold">
+                  {resolveLocalized(te.title, locale)}
+                </h3>
+                <p className="mt-0.5 text-xs text-[var(--muted)]">
+                  {te.qs.length} {copy.profileModal.questionsShort} · {LEVEL_LABELS[te.thr][locale]}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 
       {/* Homework Tab */}
       {tab === 'hw' ? (
-        <div className="space-y-4">
-          <div className="em-card rounded-3xl p-5 space-y-3">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+          <div className="em-card space-y-3 rounded-3xl p-5 lg:col-span-5">
             <h2 className="text-base font-extrabold">{copy.teacher.newHw}</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               <input
@@ -517,55 +517,57 @@ export function TeacherStudioWorkspace({
             </button>
           </div>
 
-          <div className="space-y-2.5">
-            {content.hw.map((h) => (
-              <div
-                key={h.id}
-                className="em-card flex items-center justify-between rounded-2xl p-4"
-              >
-                <h3 className="text-sm font-extrabold">
-                  {resolveLocalized(h.title, locale)}
-                </h3>
-                <span className="font-mono-num rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                  +{h.pts} XP
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {mySubmissions.length > 0 ? (
-            <div className="space-y-2.5 pt-2">
-              <h3 className="text-base font-extrabold">{copy.teacher.submittedWork}</h3>
-              {mySubmissions.map((s) => (
+          <div className="space-y-4 lg:col-span-7">
+            <div className="space-y-2.5">
+              {content.hw.map((h) => (
                 <div
-                  key={s.id}
-                  className="em-card flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4"
+                  key={h.id}
+                  className="em-card flex items-center justify-between rounded-2xl p-4"
                 >
-                  <div>
-                    <div className="text-sm font-extrabold">{s.who}</div>
-                    <div className="text-xs text-[var(--muted)]">
-                      {s.title}
-                      {s.fn ? ` · ${s.fn}` : ''}
-                    </div>
-                    {s.text ? <p className="mt-1 text-xs">{s.text}</p> : null}
-                  </div>
-                  {s.st === 'ok' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-bold text-[var(--accent-ink)]">
-                      <Check size={14} weight="bold" aria-hidden="true" />
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => onApproveHomework(s.id)}
-                      className="min-h-[38px] cursor-pointer rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
-                    >
-                      {copy.teacher.acceptXp} +{s.pts}
-                    </button>
-                  )}
+                  <h3 className="text-sm font-extrabold">
+                    {resolveLocalized(h.title, locale)}
+                  </h3>
+                  <span className="font-mono-num rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1 text-xs font-bold text-[var(--accent-ink)]">
+                    +{h.pts} XP
+                  </span>
                 </div>
               ))}
             </div>
-          ) : null}
+
+            {mySubmissions.length > 0 ? (
+              <div className="space-y-2.5 pt-1">
+                <h3 className="text-base font-extrabold">{copy.teacher.submittedWork}</h3>
+                {mySubmissions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="em-card flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4"
+                  >
+                    <div>
+                      <div className="text-sm font-extrabold">{s.who}</div>
+                      <div className="text-xs text-[var(--muted)]">
+                        {s.title}
+                        {s.fn ? ` · ${s.fn}` : ''}
+                      </div>
+                      {s.text ? <p className="mt-1 text-xs">{s.text}</p> : null}
+                    </div>
+                    {s.st === 'ok' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-bold text-[var(--accent-ink)]">
+                        <Check size={14} weight="bold" aria-hidden="true" />
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onApproveHomework(s.id)}
+                        className="min-h-[38px] cursor-pointer rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
+                      >
+                        {copy.teacher.acceptXp} +{s.pts}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>

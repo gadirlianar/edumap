@@ -20,7 +20,6 @@ import {
   SUBJECT_LABELS,
 } from '@/data/i18n';
 import { resolveLocalized, resolveReviewText, resolveTutorName } from '@/data/tutors';
-import { AcademicEmblem } from '@/components/ui/AcademicEmblem';
 import { isTutorApproved } from '@/lib/matching';
 import type {
   GradeId,
@@ -116,28 +115,27 @@ export function TeacherProfileWorkspace({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <div className="em-card flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
+    <div className="mx-auto max-w-6xl space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 px-1 pt-1">
         <div>
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-3 py-1 text-xs font-extrabold text-[var(--primary)]">
             <IdentificationCard size={14} weight="fill" aria-hidden="true" />
             <span>{copy.nav.profile}</span>
           </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
             {copy.teacher.profileBannerTitle}
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.teacher.profileBannerSub}</p>
-          <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-[var(--muted)]">
-            <span>{resolveTutorName(meTutor, locale)}</span>
-            <span>·</span>
-            <span className="inline-flex items-center gap-1 text-[var(--gold)]">
-              <Star size={13} weight="fill" aria-hidden="true" />
-              {meTutor.rating.toFixed(1)} ({meTutor.n})
-            </span>
-          </p>
+          <p className="mt-1.5 max-w-2xl text-sm text-[var(--muted)]">{copy.teacher.profileBannerSub}</p>
         </div>
-        <AcademicEmblem iconKey="glasses" size="xl" />
-      </div>
+        <p className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-bold text-[var(--muted)]">
+          <span className="text-[var(--ink)]">{resolveTutorName(meTutor, locale)}</span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1 text-[var(--gold)]">
+            <Star size={13} weight="fill" aria-hidden="true" />
+            {meTutor.rating.toFixed(1)} ({meTutor.n})
+          </span>
+        </p>
+      </header>
 
       {/* Visibility banner */}
       <div
@@ -155,8 +153,11 @@ export function TeacherProfileWorkspace({
         <span>{approved ? copy.teacher.visibleStatus : copy.teacher.hiddenStatus}</span>
       </div>
 
-      {/* University & Score + Strengths Editor */}
-      <div className="em-card rounded-3xl p-5 space-y-4">
+      {/* 2-Column Desktop Bento */}
+      <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+        <div className="space-y-5 lg:col-span-7">
+          {/* University & Score + Strengths Editor */}
+          <div className="em-card rounded-3xl p-5 space-y-4">
         <div className="flex items-center gap-2">
           <GraduationCap size={20} weight="fill" className="text-[var(--primary)]" aria-hidden="true" />
           <h2 className="text-base font-extrabold">{copy.teacher.academicCardTitle}</h2>
@@ -247,66 +248,6 @@ export function TeacherProfileWorkspace({
         >
           {copy.teacher.saveAcademicBtn}
         </button>
-      </div>
-
-      {/* Certificates */}
-      <div className="em-card rounded-3xl p-5">
-        <div className="flex items-center gap-2">
-          <ShieldCheck size={18} weight="fill" className="text-[var(--accent-ink)]" aria-hidden="true" />
-          <h2 className="text-base font-bold">{copy.teacher.certsCardTitle}</h2>
-        </div>
-
-        <div className="mt-3 space-y-2">
-          {meTutor.certs.map((c, idx) => (
-            <div
-              key={c.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-[var(--surface-subtle)] px-3.5 py-2.5 text-sm font-bold"
-            >
-              <span>{resolveLocalized(c.name, locale)}</span>
-              {c.ok ? (
-                <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--accent-ink)]">
-                  {copy.profileModal.verified}
-                </span>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-xs font-bold text-[var(--muted)]">
-                    {copy.teacher.certPending}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onApproveCertificate(idx)}
-                    className="cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-extrabold text-[var(--ink)] hover:border-[var(--accent)]"
-                  >
-                    {copy.teacher.certApproveDemo}
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-3 flex gap-2">
-          <input
-            type="text"
-            value={certName}
-            onChange={(e) => setCertName(e.target.value)}
-            placeholder={copy.teacher.certPlaceholder}
-            className="h-11 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-sm text-[var(--ink)]"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              if (!certName.trim()) return;
-              onAddCertificate(certName.trim());
-              setCertName('');
-            }}
-            className="inline-flex min-h-[44px] cursor-pointer items-center gap-1 rounded-full bg-[var(--primary-btn)] px-4 py-2 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
-          >
-            <Plus size={14} weight="bold" aria-hidden="true" />
-            {copy.teacher.addBtn}
-          </button>
-        </div>
-        <p className="mt-2 text-xs text-[var(--muted)]">{copy.teacher.certNote}</p>
       </div>
 
       {/* Subjects, Grades, Levels, Styles, Price */}
@@ -430,23 +371,87 @@ export function TeacherProfileWorkspace({
             className="h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-sm font-bold text-[var(--ink)]"
           />
         </label>
-      </div>
-
-      {/* Reviews */}
-      <div className="em-card rounded-3xl p-5">
-        <h2 className="text-base font-extrabold">{copy.profileModal.reviewsTitle}</h2>
-        {meTutor.rev.length > 0 ? (
-          <div className="mt-3 space-y-2">
-            {meTutor.rev.map((r, i) => (
-              <div key={r.id ?? i} className="rounded-2xl bg-[var(--surface-subtle)] p-3 text-sm">
-                <span className="font-bold text-[var(--gold)]">{r.stars}.0 ★</span>{' '}
-                <span>{resolveReviewText(r, locale)}</span>
-              </div>
-            ))}
           </div>
-        ) : (
-          <p className="mt-2 text-xs text-[var(--muted)]">{copy.profileModal.noReviewsYet}</p>
-        )}
+        </div>
+
+        <div className="space-y-5 lg:col-span-5">
+          {/* Certificates */}
+          <div className="em-card rounded-3xl p-5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={18} weight="fill" className="text-[var(--accent-ink)]" aria-hidden="true" />
+              <h2 className="text-base font-bold">{copy.teacher.certsCardTitle}</h2>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {meTutor.certs.map((c, idx) => (
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-[var(--surface-subtle)] px-3.5 py-2.5 text-sm font-bold"
+                >
+                  <span>{resolveLocalized(c.name, locale)}</span>
+                  {c.ok ? (
+                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--accent-ink)]">
+                      {copy.profileModal.verified}
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-xs font-bold text-[var(--muted)]">
+                        {copy.teacher.certPending}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onApproveCertificate(idx)}
+                        className="cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-extrabold text-[var(--ink)] hover:border-[var(--accent)]"
+                      >
+                        {copy.teacher.certApproveDemo}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 flex gap-2">
+              <input
+                type="text"
+                value={certName}
+                onChange={(e) => setCertName(e.target.value)}
+                placeholder={copy.teacher.certPlaceholder}
+                className="h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 text-sm text-[var(--ink)]"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!certName.trim()) return;
+                  onAddCertificate(certName.trim());
+                  setCertName('');
+                }}
+                className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center gap-1 rounded-full bg-[var(--primary-btn)] px-4 py-2 text-xs font-bold text-[var(--primary-btn-ink)] transition hover:bg-[var(--primary-btn-hover)]"
+              >
+                <Plus size={14} weight="bold" aria-hidden="true" />
+                {copy.teacher.addBtn}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-[var(--muted)]">{copy.teacher.certNote}</p>
+          </div>
+
+          {/* Reviews */}
+          <div className="em-card rounded-3xl p-5">
+            <h2 className="text-base font-extrabold">{copy.profileModal.reviewsTitle}</h2>
+            {meTutor.rev.length > 0 ? (
+              <div className="mt-3 space-y-2">
+                {meTutor.rev.map((r, i) => (
+                  <div key={r.id ?? i} className="rounded-2xl bg-[var(--surface-subtle)] p-3 text-sm">
+                    <span className="font-bold text-[var(--gold)]">{r.stars}.0 ★</span>{' '}
+                    <span>{resolveReviewText(r, locale)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-[var(--muted)]">{copy.profileModal.noReviewsYet}</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

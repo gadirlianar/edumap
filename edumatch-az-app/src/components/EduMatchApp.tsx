@@ -61,6 +61,7 @@ import { ClassroomModal } from '@/components/ClassroomModal';
 import { NotificationDrawer } from '@/components/NotificationDrawer';
 import { PwaStatusOverlay, usePwaInstall } from '@/components/PwaManager';
 import { PWA_COPY } from '@/lib/pwaCopy';
+import { resolvePersonName } from '@/lib/localizeData';
 import {
   getUrlSearchSnapshot,
   readNavigationFromUrl,
@@ -1199,7 +1200,7 @@ export function EduMatchApp() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="em-solaris-canvas min-h-screen pb-20 sm:pb-12">
+      <div className="em-solaris-canvas min-h-screen pb-24 sm:pb-16">
         <CursorCatTrail />
       <Header
         locale={locale}
@@ -1227,7 +1228,7 @@ export function EduMatchApp() {
       <main
         onTouchStart={handleMainTouchStart}
         onTouchEnd={handleMainTouchEnd}
-        className="mx-auto max-w-7xl px-4 pt-6 sm:px-6"
+        className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
       >
         <motion.div
           key={`${role}-${role === 'student' ? studentTab : teacherTab}`}
@@ -1307,6 +1308,15 @@ export function EduMatchApp() {
               <LessonsWorkspace
                 locale={locale}
                 xp={student.xp}
+                student={student}
+                studentName={
+                  student.displayName?.trim() ||
+                  (account.authenticated && role === 'student' && account.name.trim()
+                    ? resolvePersonName(account.name, locale)
+                    : PWA_COPY[locale].studentProfile.defaultName)
+                }
+                locationName={location.name}
+                favoritesCount={favorites.size}
                 requests={requests}
                 tutors={tutors}
                 content={content}
@@ -1321,6 +1331,23 @@ export function EduMatchApp() {
                   if (!target) return;
                   setBookingModalTarget({ tutorId: target.tid, requestId: target.id });
                 }}
+                onUpdateStudentProfile={(patch) => {
+                  updatePersistedState((prev) => ({
+                    ...prev,
+                    student: {
+                      ...prev.student,
+                      displayName: patch.displayName ?? prev.student.displayName,
+                      cat: patch.cat ?? prev.student.cat,
+                      targetGroup: patch.targetGroup ?? prev.student.targetGroup,
+                    },
+                    account:
+                      prev.account.authenticated && prev.role === 'student' && patch.displayName
+                        ? { ...prev.account, name: patch.displayName }
+                        : prev.account,
+                  }));
+                  notify(PWA_COPY[locale].studentProfile.savedToast, 'smile');
+                }}
+                onOpenAccountHub={() => setAccountHubOpen(true)}
                 onAcceptInvite={(reqId) => {
                   setRequests((prev) =>
                     prev.map((r) =>
@@ -2110,6 +2137,10 @@ export function EduMatchApp() {
               email: persona.email,
               authenticated: true,
             },
+            student:
+              persona.role === 'student'
+                ? { ...prev.student, displayName: persona.name }
+                : prev.student,
             activeTeacherId:
               persona.role === 'teacher' && persona.tutorId ? persona.tutorId : 'me',
           }));

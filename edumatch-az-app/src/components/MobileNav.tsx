@@ -153,7 +153,9 @@ export function MobileNav({
       ariaLabel="Mobile navigation"
       layoutId={`mobile-nav-liquid-lens-${role}`}
       variant="dock"
-      className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto flex max-w-sm sm:hidden"
+      className={`fixed inset-x-2 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto flex sm:hidden ${
+        role === 'teacher' ? 'max-w-[calc(100vw-1rem)]' : 'max-w-sm'
+      }`}
     />
   );
 }

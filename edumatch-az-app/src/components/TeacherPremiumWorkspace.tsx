@@ -30,20 +30,17 @@ export function TeacherPremiumWorkspace({
   const copy = COPY[locale];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <div className="em-card flex flex-wrap items-center justify-between gap-4 rounded-3xl p-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-extrabold text-[var(--accent-ink)]">
-            <Crown size={14} weight="fill" aria-hidden="true" />
-            <span>{copy.nav.premium}</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-            {copy.teacher.premiumBannerTitle}
-          </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.teacher.premiumBannerSub}</p>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <header className="px-1 pt-1">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-extrabold text-[var(--accent-ink)]">
+          <Crown size={14} weight="fill" aria-hidden="true" />
+          <span>{copy.nav.premium}</span>
         </div>
-        <AcademicEmblem iconKey="money" size="xl" />
-      </div>
+        <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          {copy.teacher.premiumBannerTitle}
+        </h1>
+        <p className="mt-1.5 max-w-2xl text-sm text-[var(--muted)]">{copy.teacher.premiumBannerSub}</p>
+      </header>
 
       {/* Premium Card */}
       <div className="em-card rounded-3xl p-5 sm:p-6">
@@ -114,68 +111,72 @@ export function TeacherPremiumWorkspace({
         ) : null}
       </div>
 
-      {/* Search Boost */}
-      <div className="em-card rounded-3xl p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-[var(--ink)]">{copy.teacher.promoHeading}</h2>
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-semibold uppercase text-[var(--accent-ink)]">
-            <Megaphone size={12} weight="fill" aria-hidden="true" />
-            {copy.teacher.adPartnerTag}
-          </span>
-        </div>
-        <p className="mt-1.5 text-sm text-[var(--muted)]">{copy.teacher.promoDesc}</p>
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-stretch">
+        {/* Search Boost */}
+        <div className="em-card flex flex-col justify-between rounded-3xl p-5 sm:p-6">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold text-[var(--ink)]">{copy.teacher.promoHeading}</h2>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-semibold uppercase text-[var(--accent-ink)]">
+                <Megaphone size={12} weight="fill" aria-hidden="true" />
+                {copy.teacher.adPartnerTag}
+              </span>
+            </div>
+            <p className="mt-1.5 text-sm text-[var(--muted)]">{copy.teacher.promoDesc}</p>
 
-        {promoDays > 0 ? (
-          <div className="mt-3 rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-2.5 text-xs font-semibold text-[var(--accent-ink)]">
-            {copy.teacher.promoActive} {promoDays} {copy.teacher.daysUnit}
+            {promoDays > 0 ? (
+              <div className="mt-3 rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-2.5 text-xs font-semibold text-[var(--accent-ink)]">
+                {copy.teacher.promoActive} {promoDays} {copy.teacher.daysUnit}
+              </div>
+            ) : null}
           </div>
-        ) : null}
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => onSetPromo(7)}
-            className="min-h-[38px] cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-semibold text-[var(--ink)] hover:border-[var(--ink)]"
-          >
-            {copy.teacher.promo7}
-          </button>
-          <button
-            type="button"
-            onClick={() => onSetPromo(30)}
-            className="min-h-[38px] cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-semibold text-[var(--ink)] hover:border-[var(--ink)]"
-          >
-            {copy.teacher.promo30}
-          </button>
-          {promoDays > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => onSetPromo(0)}
-              className="min-h-[38px] cursor-pointer rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-semibold text-[var(--accent-ink)]"
+              onClick={() => onSetPromo(7)}
+              className="min-h-[38px] cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-semibold text-[var(--ink)] hover:border-[var(--ink)]"
             >
-              {copy.teacher.promoOff}
+              {copy.teacher.promo7}
             </button>
-          ) : null}
+            <button
+              type="button"
+              onClick={() => onSetPromo(30)}
+              className="min-h-[38px] cursor-pointer rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-1.5 text-xs font-semibold text-[var(--ink)] hover:border-[var(--ink)]"
+            >
+              {copy.teacher.promo30}
+            </button>
+            {promoDays > 0 ? (
+              <button
+                type="button"
+                onClick={() => onSetPromo(0)}
+                className="min-h-[38px] cursor-pointer rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-semibold text-[var(--accent-ink)]"
+              >
+                {copy.teacher.promoOff}
+              </button>
+            ) : null}
+          </div>
         </div>
-      </div>
 
-      {/* Sleek Partner Capsule */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--accent-border)]/70 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--accent-soft)]/35 p-5 shadow-[var(--shadow-card)]">
-        <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--accent-ink)]">
-            {copy.teacher.adPartnerTag}
-          </span>
-          <h3 className="mt-1.5 text-sm font-semibold text-[var(--ink)]">{copy.teacher.adPartnerTitle}</h3>
-          <p className="mt-0.5 text-xs text-[var(--muted)]">{copy.teacher.adPartnerDesc}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <AcademicEmblem iconKey="mega" size="md" />
-          <button
-            type="button"
-            onClick={() => (onOpenPartnerModal ? onOpenPartnerModal() : onNotifyAd(copy.teacher.adPartnerToast))}
-            className="min-h-[38px] shrink-0 cursor-pointer rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-semibold text-[var(--primary-btn-ink)] transition-all duration-150 hover:bg-[var(--primary-btn-hover)] active:scale-[0.97]"
-          >
-            {copy.teacher.adPartnerCta}
-          </button>
+        {/* Sleek Partner Capsule */}
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--accent-border)]/70 bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--accent-soft)]/35 p-5 sm:p-6 shadow-[var(--shadow-card)]">
+          <div className="min-w-0 flex-1">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--accent-ink)]">
+              {copy.teacher.adPartnerTag}
+            </span>
+            <h3 className="mt-1.5 text-sm font-semibold text-[var(--ink)]">{copy.teacher.adPartnerTitle}</h3>
+            <p className="mt-0.5 text-xs text-[var(--muted)]">{copy.teacher.adPartnerDesc}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <AcademicEmblem iconKey="mega" size="md" />
+            <button
+              type="button"
+              onClick={() => (onOpenPartnerModal ? onOpenPartnerModal() : onNotifyAd(copy.teacher.adPartnerToast))}
+              className="min-h-[38px] shrink-0 cursor-pointer rounded-full bg-[var(--primary-btn)] px-4 py-1.5 text-xs font-semibold text-[var(--primary-btn-ink)] transition-all duration-150 hover:bg-[var(--primary-btn-hover)] active:scale-[0.97]"
+            >
+              {copy.teacher.adPartnerCta}
+            </button>
+          </div>
         </div>
       </div>
     </div>

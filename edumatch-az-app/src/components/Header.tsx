@@ -122,71 +122,75 @@ export function Header({
           className="hidden sm:flex"
         />
 
-        {/* Clean Frosted Utilities & Solaris CTA */}
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          {/* Language Switcher */}
-          <div
-            className="em-liquid-pill flex items-center rounded-full p-0.5"
-            role="group"
-            aria-label={copy.nav.langToggle}
-          >
-            {(['ru', 'az', 'en'] as const).map((l) => {
-              const active = locale === l;
-              return (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => onLocaleChange(l)}
-                  aria-pressed={active}
-                  className={`relative min-h-[28px] cursor-pointer rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase transition-colors sm:px-2.5 sm:text-[11px] ${active
-                    ? 'text-[var(--primary-btn-ink)]'
-                    : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                >
-                  {active ? (
-                    <motion.span
-                      layoutId="header-locale-pill"
-                      transition={SPRING_PILL}
-                      className="absolute inset-0 rounded-full bg-[var(--primary-btn)]"
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                  <span className="relative z-10">{l}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Clean Utilities & Solaris CTA (Single Unified Cluster — Less Chrome Noise) */}
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          {/* Unified Utility Capsule: Language + Theme + Bell */}
+          <div className="em-liquid-pill flex items-center gap-1 rounded-full p-0.5 sm:gap-1.5 sm:p-1">
+            <div
+              className="flex items-center rounded-full"
+              role="group"
+              aria-label={copy.nav.langToggle}
+            >
+              {(['ru', 'az', 'en'] as const).map((l) => {
+                const active = locale === l;
+                return (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => onLocaleChange(l)}
+                    aria-pressed={active}
+                    className={`relative min-h-[26px] cursor-pointer rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase transition-colors sm:px-2 sm:text-[11px] ${active
+                      ? 'text-[var(--primary-btn-ink)]'
+                      : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                      }`}
+                  >
+                    {active ? (
+                      <motion.span
+                        layoutId="header-locale-pill"
+                        transition={SPRING_PILL}
+                        className="absolute inset-0 rounded-full bg-[var(--primary-btn)]"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <span className="relative z-10">{l}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Theme Toggle */}
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            aria-label={copy.nav.themeToggle}
-            className="em-liquid-pill flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[var(--ink)] transition-transform hover:scale-105 sm:h-8 sm:w-8"
-          >
-            {isDark ? (
-              <Sun size={14} weight="bold" aria-hidden="true" />
-            ) : (
-              <Moon size={14} weight="bold" aria-hidden="true" />
-            )}
-          </button>
+            <span className="h-3.5 w-px bg-[var(--border)]" aria-hidden="true" />
 
-          {/* Notification Center Bell */}
-          {onOpenNotifications ? (
+            {/* Theme Toggle */}
             <button
               type="button"
-              onClick={onOpenNotifications}
-              aria-label={`${PWA_COPY[locale].notifications.bellLabel}${unreadNotifications > 0 ? ` (${unreadNotifications})` : ''}`}
-              className="em-liquid-pill relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[var(--ink)] transition-transform hover:scale-105 sm:h-8 sm:w-8"
+              onClick={onToggleTheme}
+              aria-label={copy.nav.themeToggle}
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[var(--ink)] transition-colors hover:bg-[var(--surface-subtle)]"
             >
-              <Bell size={14} weight="bold" aria-hidden="true" />
-              {unreadNotifications > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#C8F542] px-1 font-mono text-[9px] font-bold leading-none text-[#0F172A] shadow-xs ring-2 ring-[var(--surface)]">
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </span>
+              {isDark ? (
+                <Sun size={14} weight="bold" aria-hidden="true" />
+              ) : (
+                <Moon size={14} weight="bold" aria-hidden="true" />
               )}
             </button>
-          ) : null}
+
+            {/* Notification Center Bell */}
+            {onOpenNotifications ? (
+              <button
+                type="button"
+                onClick={onOpenNotifications}
+                aria-label={`${PWA_COPY[locale].notifications.bellLabel}${unreadNotifications > 0 ? ` (${unreadNotifications})` : ''}`}
+                className="relative flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[var(--ink)] transition-colors hover:bg-[var(--surface-subtle)]"
+              >
+                <Bell size={14} weight="bold" aria-hidden="true" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#C8F542] px-1 font-mono text-[9px] font-bold leading-none text-[#0F172A] shadow-xs ring-2 ring-[var(--surface)]">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  </span>
+                )}
+              </button>
+            ) : null}
+          </div>
 
           {/* Guided Tour */}
           <button

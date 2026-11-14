@@ -330,6 +330,14 @@ export function sanitizePersistedState(parsed: unknown): PersistedAppState {
     },
     activeTeacherId,
     student: {
+      displayName:
+        rawStudent && typeof rawStudent.displayName === 'string' && rawStudent.displayName.trim()
+          ? rawStudent.displayName.trim().slice(0, 80)
+          : baseStudent.displayName,
+      targetGroup:
+        rawStudent && typeof rawStudent.targetGroup === 'string' && rawStudent.targetGroup.trim()
+          ? rawStudent.targetGroup.trim().slice(0, 60)
+          : baseStudent.targetGroup,
       cat:
         rawStudent && typeof rawStudent.cat === 'string'
           ? (rawStudent.cat as StudentState['cat'])
