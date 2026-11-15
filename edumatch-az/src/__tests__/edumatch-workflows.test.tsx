@@ -320,4 +320,34 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
       ).not.toBeInTheDocument();
     });
   });
+
+  it('updates live Hero Spotlight tutor card by subject and carousel while keeping catalog collapsed initially', async () => {
+    const user = userEvent.setup();
+    render(<EduMatchApp />);
+
+    // Catalog remains collapsed initially per product constraint
+    expect(document.getElementById('tutor-catalog')).toBeNull();
+    expect(document.getElementById('tutor-catalog-toggle')).toBeInTheDocument();
+
+    const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
+
+    // Switch subject in Hero selector -> right-hand live spotlight card updates immediately
+    await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
+    expect(within(showcase).getByText('Эльнур Гасанов')).toBeInTheDocument();
+
+    // Switch back to all subjects and step to next spotlight tutor via carousel control
+    await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
+    const firstSpotlightName = within(showcase).getByRole('heading', { level: 2 }).textContent;
+    await user.click(within(showcase).getByRole('button', { name: 'Следующий ментор' }));
+    const nextSpotlightName = within(showcase).getByRole('heading', { level: 2 }).textContent;
+    expect(nextSpotlightName).not.toBe(firstSpotlightName);
+
+    // Clickable VS Bento card opens Compare modal directly
+    await user.click(screen.getByRole('button', { name: /1v1 VS/i }));
+    expect(
+      within(screen.getByRole('dialog')).getByRole('heading', {
+        name: /Сравнение досье: 1-на-1 \(VS\)/i,
+      }),
+    ).toBeInTheDocument();
+  });
 });

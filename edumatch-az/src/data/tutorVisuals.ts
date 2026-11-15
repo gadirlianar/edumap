@@ -390,6 +390,80 @@ export function getTutorVisual(id?: string, index = 0): TutorVisualMeta {
   return FALLBACK_VISUALS[Math.abs(index) % FALLBACK_VISUALS.length];
 }
 
+export interface SubjectVisualTheme {
+  pillClass: string;
+  barGradientClass: string;
+  topStripClass: string;
+  softBoxClass: string;
+  dotColorClass: string;
+}
+
+export const DEFAULT_SUBJECT_THEME: SubjectVisualTheme = {
+  pillClass:
+    'border-emerald-200/80 bg-emerald-50 text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-950/60 dark:text-emerald-300',
+  barGradientClass: 'from-emerald-500 to-teal-400',
+  topStripClass: 'from-emerald-400 via-teal-400 to-[#C8F542]',
+  softBoxClass:
+    'border-emerald-200/60 bg-emerald-50/75 dark:border-emerald-800/50 dark:bg-emerald-950/35',
+  dotColorClass: 'bg-emerald-500',
+};
+
+export const SUBJECT_THEMES: Record<SubjectId, SubjectVisualTheme> = {
+  Математика: DEFAULT_SUBJECT_THEME,
+  Физика: {
+    pillClass:
+      'border-sky-200/80 bg-sky-50 text-sky-700 dark:border-sky-800/70 dark:bg-sky-950/60 dark:text-sky-300',
+    barGradientClass: 'from-sky-500 to-blue-500',
+    topStripClass: 'from-sky-400 via-blue-500 to-cyan-300',
+    softBoxClass:
+      'border-sky-200/60 bg-sky-50/75 dark:border-sky-800/50 dark:bg-sky-950/35',
+    dotColorClass: 'bg-sky-500',
+  },
+  Химия: {
+    pillClass:
+      'border-violet-200/80 bg-violet-50 text-violet-700 dark:border-violet-800/70 dark:bg-violet-950/60 dark:text-violet-300',
+    barGradientClass: 'from-violet-500 to-fuchsia-500',
+    topStripClass: 'from-violet-400 via-fuchsia-500 to-pink-400',
+    softBoxClass:
+      'border-violet-200/60 bg-violet-50/75 dark:border-violet-800/50 dark:bg-violet-950/35',
+    dotColorClass: 'bg-violet-500',
+  },
+  'Английский язык': {
+    pillClass:
+      'border-amber-200/80 bg-amber-50 text-amber-800 dark:border-amber-800/70 dark:bg-amber-950/60 dark:text-amber-300',
+    barGradientClass: 'from-amber-500 to-orange-400',
+    topStripClass: 'from-amber-400 via-orange-400 to-yellow-300',
+    softBoxClass:
+      'border-amber-200/60 bg-amber-50/75 dark:border-amber-800/50 dark:bg-amber-950/35',
+    dotColorClass: 'bg-amber-500',
+  },
+  'Азербайджанский язык': {
+    pillClass:
+      'border-rose-200/80 bg-rose-50 text-rose-700 dark:border-rose-800/70 dark:bg-rose-950/60 dark:text-rose-300',
+    barGradientClass: 'from-rose-500 to-pink-500',
+    topStripClass: 'from-rose-400 via-pink-500 to-orange-300',
+    softBoxClass:
+      'border-rose-200/60 bg-rose-50/75 dark:border-rose-800/50 dark:bg-rose-950/35',
+    dotColorClass: 'bg-rose-500',
+  },
+  Информатика: {
+    pillClass:
+      'border-indigo-200/80 bg-indigo-50 text-indigo-700 dark:border-indigo-800/70 dark:bg-indigo-950/60 dark:text-indigo-300',
+    barGradientClass: 'from-indigo-500 to-cyan-500',
+    topStripClass: 'from-indigo-400 via-cyan-400 to-[#C8F542]',
+    softBoxClass:
+      'border-indigo-200/60 bg-indigo-50/75 dark:border-indigo-800/50 dark:bg-indigo-950/35',
+    dotColorClass: 'bg-indigo-500',
+  },
+};
+
+export function getSubjectTheme(subject?: SubjectId): SubjectVisualTheme {
+  if (subject && SUBJECT_THEMES[subject]) {
+    return SUBJECT_THEMES[subject];
+  }
+  return DEFAULT_SUBJECT_THEME;
+}
+
 export interface HeroGoalPreset {
   id: string;
   label: LocalizedText;

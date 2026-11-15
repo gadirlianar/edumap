@@ -10,6 +10,7 @@ import {
   MapPin,
   PaperPlaneTilt,
   Scales,
+  SealCheck,
   SlidersHorizontal,
   Sparkle,
   Star,
@@ -203,14 +204,112 @@ export function SearchWorkspace({
   const extraFilterCount =
     (filters.lang ? 1 : 0) + (filters.sty ? 1 : 0) + (filters.price < 60 ? 1 : 0);
 
+  const bentoCards: {
+    id: string;
+    icon: typeof SealCheck;
+    value: string;
+    title: string;
+    sub: string;
+    iconClass: string;
+    borderHover: string;
+    action?: 'compare' | 'catalog';
+  }[] = [
+    {
+      id: 'bento-dim',
+      icon: SealCheck,
+      value: '650+',
+      title:
+        locale === 'az'
+          ? 'DİM & Diplom'
+          : locale === 'en'
+            ? 'Verified DİM'
+            : 'DİM и дипломы',
+      sub:
+        locale === 'az'
+          ? '100% təsdiqlənmiş nəticə'
+          : locale === 'en'
+            ? '100% verified entrance scores'
+            : '100% проверка документов',
+      iconClass:
+        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300',
+      borderHover: 'hover:border-emerald-300/80 dark:hover:border-emerald-700/80',
+    },
+    {
+      id: 'bento-vs',
+      icon: Scales,
+      value: '1v1 VS',
+      title:
+        locale === 'az'
+          ? 'Müəllim müqayisəsi'
+          : locale === 'en'
+            ? 'Side-by-Side VS'
+            : 'Сравнение 1-на-1',
+      sub:
+        locale === 'az'
+          ? 'Balları yan-yana tutuşdur'
+          : locale === 'en'
+            ? 'Compare scores & outcomes'
+            : 'Сравните баллы и методику',
+      iconClass: 'bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300',
+      borderHover: 'hover:border-sky-300/80 dark:hover:border-sky-700/80',
+      action: 'compare',
+    },
+    {
+      id: 'bento-growth',
+      icon: TrendUp,
+      value: '+145',
+      title:
+        locale === 'az'
+          ? 'Orta bal sıçrayışı'
+          : locale === 'en'
+            ? 'Avg. score gain'
+            : 'Средний рост DİM',
+      sub:
+        locale === 'az'
+          ? 'Real sınaq artımı qrafiki'
+          : locale === 'en'
+            ? 'Measured mock exam track'
+            : 'Подтверждённая динамика',
+      iconClass:
+        'bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-300',
+      borderHover: 'hover:border-violet-300/80 dark:hover:border-violet-700/80',
+    },
+    {
+      id: 'bento-trial',
+      icon: Sparkle,
+      value: '0 ₼',
+      title:
+        locale === 'az'
+          ? 'İlk sınaq dərsi'
+          : locale === 'en'
+            ? 'Free trial class'
+            : 'Пробный урок',
+      sub:
+        locale === 'az'
+          ? 'Ödənişsiz ilk tanışlıq'
+          : locale === 'en'
+            ? 'Risk-free starter session'
+            : 'Бесплатное знакомство',
+      iconClass:
+        'bg-[#ECFCCB] text-[#3F6212] dark:bg-[#C8F542]/20 dark:text-[#C8F542]',
+      borderHover: 'hover:border-lime-400/80 dark:hover:border-lime-500/70',
+      action: 'catalog',
+    },
+  ];
+
+  const stackedPreviewTutors = (
+    filteredTutors.length > 0 ? filteredTutors : tutors
+  ).slice(0, 4);
+
   return (
     <div>
-      {/* Minimalist Guided Progressive Opening */}
+      {/* 2-Column Solaris Split-Hero with Live Top-Mentor Showcase */}
       <HeroOpening
         locale={locale}
         selectedSubject={filters.subj}
         selectedGrade={filters.cat}
         resultCount={filteredTutors.length}
+        spotlightTutors={filteredTutors.length > 0 ? filteredTutors : tutors}
         onSubjectChange={(subj) => onFiltersChange({ subj })}
         onGradeChange={(cat) => onFiltersChange({ cat })}
         onQuickApply={openCatalog}
@@ -219,30 +318,106 @@ export function SearchWorkspace({
         onOpenTour={onOpenTour}
         onSwitchToTeacher={onSwitchToTeacher}
         onOpenCompare={handleOpenCompareNow}
+        onOpenProfile={onOpenProfile}
+        onSendRequest={onSendRequest}
       />
 
-      {/* Tutors Catalog: Compact Toggle Button by Default, Full Interactive Feed on Demand */}
+      {/* 4-Card Visual Bento Strip (Colorful Scannable Platform Proof) */}
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {bentoCards.map((card) => {
+          const IconComp = card.icon;
+          const inner = (
+            <>
+              <span
+                aria-hidden="true"
+                className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${card.iconClass}`}
+              >
+                <IconComp size={19} weight="fill" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-1.5">
+                  <span className="font-mono-num text-sm font-extrabold text-[var(--ink)] sm:text-base">
+                    {card.value}
+                  </span>
+                  <span className="text-xs font-semibold text-[var(--ink)]">
+                    {card.title}
+                  </span>
+                </div>
+                <p className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
+                  {card.sub}
+                </p>
+              </div>
+            </>
+          );
+
+          if (card.action) {
+            const handleBentoAction =
+              card.action === 'compare' ? handleOpenCompareNow : openCatalog;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={handleBentoAction}
+                className={`em-card flex cursor-pointer items-start gap-3 rounded-[22px] p-3.5 text-left sm:p-4 ${card.borderHover}`}
+              >
+                {inner}
+              </button>
+            );
+          }
+
+          return (
+            <div
+              key={card.id}
+              className={`em-card flex items-start gap-3 rounded-[22px] p-3.5 text-left sm:p-4 ${card.borderHover}`}
+            >
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tutors Catalog: Compact Stacked-Avatar Bar by Default, Full Interactive Feed on Demand */}
       {!tutorsOpen ? (
         <div
           id="tutor-catalog-toggle"
           className="em-card flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:px-6 sm:py-5"
         >
-          <div className="min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)] sm:text-xl">
-                {copy.search.title}
-              </h2>
-              <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono-num text-xs font-semibold text-[var(--accent-ink)]">
-                {filteredTutors.length}
-              </span>
+          <div className="flex min-w-0 items-center gap-3.5 sm:gap-4">
+            {/* Stacked Real Mentor Portraits */}
+            <div className="hidden -space-x-2.5 sm:flex" aria-hidden="true">
+              {stackedPreviewTutors.map((t, i) => (
+                <div
+                  key={t.id}
+                  className="rounded-full ring-2 ring-[var(--surface)]"
+                >
+                  <Avatar
+                    id={t.id}
+                    name={resolveTutorName(t, locale)}
+                    index={i}
+                    size="sm"
+                  />
+                </div>
+              ))}
             </div>
-            <p className="text-xs text-[var(--muted)] sm:text-sm">
-              {locale === 'az'
-                ? 'Müəllimlərin tam siyahısını, filtrləri və müqayisəni açmaq üçün düyməyə toxunun.'
-                : locale === 'en'
-                  ? 'Click to open the full tutor catalog, filters, and side-by-side comparison.'
-                  : 'Нажмите, чтобы открыть полный каталог репетиторов, фильтры и сравнение.'}
-            </p>
+
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)] sm:text-xl">
+                  {copy.search.title}
+                </h2>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono-num text-xs font-semibold text-[var(--accent-ink)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {filteredTutors.length}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--muted)] sm:text-sm">
+                {locale === 'az'
+                  ? 'Müəllimlərin tam siyahısını, filtrləri və müqayisəni açmaq üçün düyməyə toxunun.'
+                  : locale === 'en'
+                    ? 'Click to open the full tutor catalog, filters, and side-by-side comparison.'
+                    : 'Нажмите, чтобы открыть полный каталог репетиторов, фильтры и сравнение.'}
+              </p>
+            </div>
           </div>
 
           <button

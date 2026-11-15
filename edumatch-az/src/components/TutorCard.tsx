@@ -16,9 +16,10 @@ import {
 import { motion } from 'motion/react';
 import { COPY, FORMAT_LABELS, SUBJECT_LABELS } from '@/data/i18n';
 import { resolveLocalized, resolveTutorName } from '@/data/tutors';
-import { COMPARE_COPY, getTutorVisual } from '@/data/tutorVisuals';
+import { COMPARE_COPY, getSubjectTheme, getTutorVisual } from '@/data/tutorVisuals';
 import { Avatar } from '@/components/ui/Avatar';
 import { ScoreGauge } from '@/components/ui/ScoreGauge';
+import { ScoreTrajectoryBar } from '@/components/ui/ScoreTrajectoryBar';
 import type { LevelId, Locale, TutorProfile } from '@/types/edumatch';
 
 interface TutorCardProps {
@@ -64,6 +65,7 @@ export function TutorCard({
   const primaryAchievement = tutor.achievements[0];
   const secondaryAchievement = tutor.achievements[1];
   const primarySubject = tutor.subj[0];
+  const subjectTheme = getSubjectTheme(primarySubject);
 
   return (
     <motion.article
@@ -71,14 +73,19 @@ export function TutorCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -2 }}
       transition={{ duration: 0.14, ease: EASE_CARD }}
-      className={`group flex w-full min-w-0 flex-col justify-between rounded-[28px] border bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-150 sm:p-6 ${
+      className={`group flex w-full min-w-0 flex-col justify-between overflow-hidden rounded-[28px] border bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-150 ${
         isCompared
           ? 'border-[var(--accent)] ring-1 ring-[var(--accent-border)]'
           : 'border-[var(--border)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-float)]'
       }`}
     >
+      <div
+        aria-hidden="true"
+        className={`h-1.5 w-full bg-gradient-to-r ${subjectTheme.topStripClass}`}
+      />
+      <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
       <div className="space-y-4">
-        {/* 1. Clean Top Row: Photo, Name, Primary Subject & Rate */}
+        {/* 1. Clean Top Row: Photo, Name, Subject Pill & Rate */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3.5">
             <Avatar
@@ -118,14 +125,20 @@ export function TutorCard({
                   <Star
                     size={12}
                     weight="fill"
-                    className="text-[var(--accent)]"
+                    className="text-amber-500"
                     aria-hidden="true"
                   />
                   {tutor.rating.toFixed(1)}
                   <span className="font-normal text-[var(--muted)]">({tutor.n})</span>
                 </span>
                 {primarySubject ? (
-                  <span className="rounded-full bg-[var(--surface-subtle)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-2)]">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${subjectTheme.pillClass}`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`h-1.5 w-1.5 rounded-full ${subjectTheme.dotColorClass}`}
+                    />
                     {SUBJECT_LABELS[primarySubject][locale]}
                   </span>
                 ) : null}
@@ -249,7 +262,26 @@ export function TutorCard({
             </p>
           </div>
 
+          <ScoreTrajectoryBar
+            before={visual.trajectory.before}
+            after={visual.trajectory.after}
+            delta={visual.trajectory.delta}
+            label={resolveLocalized(visual.trajectory.label, locale)}
+            progressPct={visual.trajectory.bar1Pct}
+            subject={primarySubject}
+            compact
+          />
+
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-medium text-[var(--muted)]">
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {locale === 'az'
+                ? 'Boş yer var'
+                : locale === 'en'
+                  ? 'Slots open'
+                  : 'Есть места'}
+            </span>
+            <span aria-hidden="true">·</span>
             <span>{tutor.fmt.map((f) => FORMAT_LABELS[f][locale]).join(' · ')}</span>
             <span aria-hidden="true">·</span>
             <span className="font-mono-num font-semibold text-[var(--accent-ink)]">
@@ -302,6 +334,7 @@ export function TutorCard({
         >
           <ChatCircleDots size={16} weight="bold" aria-hidden="true" />
         </button>
+      </div>
       </div>
     </motion.article>
   );
