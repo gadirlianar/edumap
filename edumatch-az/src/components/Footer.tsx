@@ -5,7 +5,6 @@ import {
   ArrowCounterClockwise,
   ArrowUpRight,
   CheckCircle,
-  GraduationCap,
   Lock,
   ShieldCheck,
 } from '@phosphor-icons/react';
@@ -131,10 +130,24 @@ export function Footer({
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--lime)] text-[#0F172A] shadow-xs ring-1 ring-emerald-500/20"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#C8F542] shadow-xs ring-1 ring-[#0F172A]/10"
                 aria-hidden="true"
               >
-                <GraduationCap size={18} weight="fill" />
+                <svg viewBox="0 0 64 64" fill="none" className="h-7 w-7">
+                  <path d="M32 16L12 26L32 36L52 26L32 16Z" fill="#0F172A" />
+                  <path
+                    d="M20 31V41C20 44.5 25.4 48 32 48C38.6 48 44 44.5 44 41V31L32 37L20 31Z"
+                    fill="#0F172A"
+                    opacity="0.88"
+                  />
+                  <path
+                    d="M50 28V40"
+                    stroke="#047857"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="50" cy="42" r="2.75" fill="#047857" />
+                </svg>
               </span>
               <span className="text-base font-extrabold tracking-tight text-[var(--ink)]">
                 EduMatch

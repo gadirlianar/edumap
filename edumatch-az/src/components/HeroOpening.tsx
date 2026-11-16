@@ -280,15 +280,15 @@ export function HeroOpening({
             <div
               aria-hidden="true"
               style={{
-                transform: 'translateZ(-10px) rotateX(68deg) rotateY(-16deg)',
+                transform: 'translateZ(-12px) rotateX(70deg) rotateY(-18deg)',
                 transformStyle: 'preserve-3d',
               }}
-              className="pointer-events-none absolute h-[300px] w-[300px] sm:h-[340px] sm:w-[340px]"
+              className="pointer-events-none absolute h-[300px] w-[300px] sm:h-[346px] sm:w-[346px]"
             >
               <motion.div
                 animate={{ rotateZ: 360 }}
-                transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
-                className="h-full w-full rounded-full border-2 border-dashed border-emerald-500/45 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border-2 border-dashed border-emerald-500/50 shadow-[0_0_32px_rgba(16,185,129,0.25)]"
               >
                 <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[#C8F542] shadow-[0_0_18px_#C8F542]" />
               </motion.div>
@@ -298,60 +298,84 @@ export function HeroOpening({
             <div
               aria-hidden="true"
               style={{
-                transform: 'translateZ(5px) rotateX(62deg) rotateY(22deg)',
+                transform: 'translateZ(8px) rotateX(60deg) rotateY(24deg)',
                 transformStyle: 'preserve-3d',
               }}
-              className="pointer-events-none absolute h-[240px] w-[240px] sm:h-[276px] sm:w-[276px]"
+              className="pointer-events-none absolute h-[242px] w-[242px] sm:h-[280px] sm:w-[280px]"
             >
               <motion.div
                 animate={{ rotateZ: -360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-                className="h-full w-full rounded-full border border-sky-400/50 dark:border-[#C8F542]/45"
+                transition={{ duration: 11, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border border-sky-400/55 dark:border-[#C8F542]/45"
               >
                 <span className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-emerald-400 shadow-[0_0_16px_#10B981]" />
               </motion.div>
             </div>
 
-            {/* Central 3D Volumetric Glowing Core Sphere (Z = +20px) */}
+            {/* 3D Animated Vertical Gyroscope Ring 3 */}
+            <div
+              aria-hidden="true"
+              style={{
+                transform: 'translateZ(14px) rotateY(72deg) rotateX(18deg)',
+                transformStyle: 'preserve-3d',
+              }}
+              className="pointer-events-none absolute h-[215px] w-[215px] sm:h-[248px] sm:w-[248px]"
+            >
+              <motion.div
+                animate={{ rotateZ: 360 }}
+                transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border border-[#C8F542]/45 shadow-[0_0_24px_rgba(200,245,66,0.2)]"
+              >
+                <span className="absolute top-1/2 -right-1.5 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-sky-400 shadow-[0_0_14px_#38BDF8]" />
+              </motion.div>
+            </div>
+
+            {/* Central True 6-Face 3D Holographic Glass Cube + Glowing Core (Z = +26px) */}
             <motion.div
               animate={{ y: [-7, 7, -7] }}
               transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ transform: 'translateZ(20px)' }}
-              className="relative z-10 flex h-36 w-36 flex-col items-center justify-center rounded-full border border-white/40 bg-gradient-to-br from-[#0F172A] via-[#0F4C5C] to-[#10B981] text-white shadow-[0_28px_60px_-10px_rgba(16,185,129,0.55),inset_0_4px_14px_rgba(255,255,255,0.4)] sm:h-40 sm:w-40"
+              style={{ transform: 'translateZ(26px)', transformStyle: 'preserve-3d' }}
+              className="relative z-10 flex h-36 w-36 items-center justify-center sm:h-40 sm:w-40"
             >
-              {/* Gloss Specular Reflection on 3D Sphere */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute top-2.5 left-4 h-12 w-20 -rotate-20 rounded-full bg-gradient-to-b from-white/45 to-transparent blur-[2px]"
-              />
-              {/* Spinning 3D Polyhedron Geometric Ring inside Core */}
-              <motion.svg
-                viewBox="0 0 100 100"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-                className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] opacity-35"
-                aria-hidden="true"
-              >
-                <polygon
-                  points="50,6 90,28 90,72 50,94 10,72 10,28"
-                  fill="none"
-                  stroke="#C8F542"
-                  strokeWidth="1.2"
+              {/* Ambient Sphere Core */}
+              <div className="relative flex h-full w-full flex-col items-center justify-center rounded-full border border-white/45 bg-gradient-to-br from-[#0F172A] via-[#0F4C5C] to-[#10B981] text-white shadow-[0_28px_64px_-10px_rgba(16,185,129,0.58),inset_0_4px_14px_rgba(255,255,255,0.45)]">
+                {/* Specular Reflection */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-2.5 left-4 h-12 w-20 -rotate-20 rounded-full bg-gradient-to-b from-white/45 to-transparent blur-[2px]"
                 />
-                <polygon
-                  points="50,16 80,50 50,84 20,50"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="0.9"
-                />
-              </motion.svg>
 
-              <span className="font-mono-num relative z-10 text-xs font-black tracking-[0.22em] text-[#C8F542]">
-                {hc.orbCenterTop}
-              </span>
-              <span className="relative z-10 mt-0.5 font-mono-num text-[10px] font-semibold tracking-wider text-emerald-100/90">
-                {hc.orbCenterSub}
-              </span>
+                {/* Real 3D Rotating 6-Face Wireframe Cube Inside Core */}
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ rotateX: [18, 378], rotateY: [24, 384] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                  className="pointer-events-none absolute h-[74px] w-[74px]"
+                >
+                  {[
+                    'translateZ(37px)',
+                    'rotateY(180deg) translateZ(37px)',
+                    'rotateY(90deg) translateZ(37px)',
+                    'rotateY(-90deg) translateZ(37px)',
+                    'rotateX(90deg) translateZ(37px)',
+                    'rotateX(-90deg) translateZ(37px)',
+                  ].map((faceTransform, i) => (
+                    <span
+                      key={i}
+                      style={{ transform: faceTransform }}
+                      className="absolute inset-0 rounded-lg border border-[#C8F542]/45 bg-emerald-400/5"
+                    />
+                  ))}
+                </motion.div>
+
+                <span className="font-mono-num relative z-10 text-xs font-black tracking-[0.22em] text-[#C8F542] drop-shadow-xs">
+                  {hc.orbCenterTop}
+                </span>
+                <span className="relative z-10 mt-0.5 font-mono-num text-[10px] font-semibold tracking-wider text-emerald-100/95">
+                  {hc.orbCenterSub}
+                </span>
+              </div>
             </motion.div>
 
             {/* Floating 3D Card 1 — Student Trial Funnel (Top Left, Z = +50px) */}

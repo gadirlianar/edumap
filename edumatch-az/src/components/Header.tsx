@@ -7,7 +7,6 @@ import {
   BookOpenText,
   ChalkboardTeacher,
   Compass,
-  GraduationCap,
   MagnifyingGlass,
   Moon,
   Sparkle,
@@ -83,9 +82,9 @@ export function Header({
   const displayName = userName ? resolvePersonName(userName, locale) : '';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)]/80 bg-[var(--glass)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[#B9D7F2]/80 bg-[#E6F3FF]/88 backdrop-blur-xl dark:border-slate-700/60 dark:bg-[#0B1220]/90">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
-        {/* Solaris Neon-Lime & Electric Brand Mark */}
+        {/* Crisp Signature EduMatch Brand Mark */}
         <button
           type="button"
           onClick={() =>
@@ -93,15 +92,29 @@ export function Header({
               ? onStudentTabChange('search')
               : onTeacherTabChange('inbox')
           }
-          className="group flex shrink-0 cursor-pointer items-center gap-2 text-left"
+          className="group flex shrink-0 cursor-pointer items-center gap-2.5 text-left"
         >
           <span
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#C8F542] via-[#86EFAC] to-[#34D399] text-[#0F172A] shadow-xs ring-1 ring-emerald-500/25 transition-transform duration-200 group-hover:scale-105 sm:h-9 sm:w-9"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C8F542] shadow-[0_6px_16px_-4px_rgba(16,185,129,0.35)] ring-1 ring-[#0F172A]/10 transition-transform duration-200 group-hover:scale-105 sm:h-9 sm:w-9"
             aria-hidden="true"
           >
-            <GraduationCap size={18} weight="fill" />
+            <svg viewBox="0 0 64 64" fill="none" className="h-7 w-7">
+              <path d="M32 16L12 26L32 36L52 26L32 16Z" fill="#0F172A" />
+              <path
+                d="M20 31V41C20 44.5 25.4 48 32 48C38.6 48 44 44.5 44 41V31L32 37L20 31Z"
+                fill="#0F172A"
+                opacity="0.88"
+              />
+              <path
+                d="M50 28V40"
+                stroke="#047857"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <circle cx="50" cy="42" r="2.75" fill="#047857" />
+            </svg>
           </span>
-          <span className="whitespace-nowrap text-[14px] font-extrabold tracking-tight text-[var(--ink)] sm:text-[16px]">
+          <span className="whitespace-nowrap text-[15px] font-extrabold tracking-tight text-[var(--ink)] sm:text-[17px]">
             EduMatch
           </span>
         </button>
