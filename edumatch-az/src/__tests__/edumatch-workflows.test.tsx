@@ -27,10 +27,8 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
-    const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-
-    // Open catalog from Hero CTA, then pick Математика + 9 класс inside catalog filters -> shows Damir
-    await user.click(within(showcase).getByRole('button', { name: /Показать репетиторов/i }));
+    // Open catalog from toggle bar, then pick Математика + 9 класс inside catalog filters -> shows Damir
+    await user.click(screen.getAllByRole('button', { name: /Показать репетиторов/i })[0]);
     const catalog = document.getElementById('tutor-catalog')!;
     await user.click(within(catalog).getByRole('button', { name: 'Математика' }));
     await user.click(within(catalog).getByRole('button', { name: '9 класс' }));
@@ -231,7 +229,8 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     await user.click(within(header).getByRole('button', { name: 'az' }));
 
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-    const azFindBtn = within(showcase).getByRole('button', { name: /Müəllimləri göstər/i });
+    expect(within(showcase).getByRole('button', { name: /Səviyyə testi keç/i })).toBeInTheDocument();
+    const azFindBtn = screen.getAllByRole('button', { name: /Müəllimləri göstər/i })[0];
     expect(azFindBtn).toBeInTheDocument();
     await user.click(azFindBtn);
 
@@ -264,9 +263,8 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     const user = userEvent.setup();
     const { container } = render(<EduMatchApp />);
 
-    // Open catalog from clean Hero CTA
-    const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-    await user.click(within(showcase).getByRole('button', { name: /Показать репетиторов/i }));
+    // Open catalog from toggle bar
+    await user.click(screen.getAllByRole('button', { name: /Показать репетиторов/i })[0]);
 
     // Real human studio portrait <img> is rendered inside Avatar
     const portraitImgs = container.querySelectorAll('img[src*="images.unsplash.com"]');

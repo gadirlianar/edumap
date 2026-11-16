@@ -206,105 +206,109 @@ export function TutorCard({
           </div>
         </div>
 
-        {/* 2. Soft Sky-Mint University & Verified Score Strip */}
-        <div className="flex min-w-0 items-center justify-between gap-3 rounded-[20px] bg-gradient-to-r from-[#F0F9FF]/95 to-[#ECFDF5]/95 px-4 py-3 dark:from-[#16273E] dark:to-[#122B28]">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink)]">
-              <GraduationCap
-                size={15}
-                weight="fill"
-                className="shrink-0 text-[var(--accent-ink)]"
-                aria-hidden="true"
-              />
-              <span className="truncate">{university}</span>
-            </div>
-            <div className="mt-0.5 truncate text-[11px] text-[var(--muted)]">{faculty}</div>
-          </div>
-
-          <ScoreGauge
-            score={tutor.education.admissionScore}
-            maxScore={tutor.education.maxScore}
-            size="sm"
-            tone="emerald"
-          />
-        </div>
-
-        {/* 3. Two Clean Outcomes + Single Superpower Differentiator */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3 rounded-[18px] bg-[var(--surface-subtle)]/65 p-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1 font-mono-num text-base font-bold text-[var(--ink)]">
-                <Trophy
-                  size={14}
+        {/* 2. Unified Academic Dossier & Proven Outcomes Panel (Clean 2-Part Card) */}
+        <div className="overflow-hidden rounded-[22px] border border-[var(--border)]/85 bg-[var(--surface-subtle)]/55">
+          {/* University + DİM Score Gauge Header */}
+          <div className="flex min-w-0 items-center justify-between gap-3 bg-gradient-to-r from-[#F0F9FF]/90 to-[#ECFDF5]/90 px-4 py-3 dark:from-[#16273E] dark:to-[#122B28]">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink)]">
+                <GraduationCap
+                  size={15}
                   weight="fill"
-                  className="shrink-0 text-[var(--accent)]"
+                  className="shrink-0 text-[var(--accent-ink)]"
                   aria-hidden="true"
                 />
-                <span>{primaryAchievement?.metric ?? visual.trajectory.delta}</span>
+                <span className="truncate">{university}</span>
               </div>
-              <div className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
-                {primaryAchievement
-                  ? resolveLocalized(primaryAchievement.label, locale)
-                  : resolveLocalized(visual.trajectory.label, locale)}
+              <div className="mt-0.5 truncate text-[11px] text-[var(--muted)]">{faculty}</div>
+            </div>
+
+            <ScoreGauge
+              score={tutor.education.admissionScore}
+              maxScore={tutor.education.maxScore}
+              size="sm"
+              tone="emerald"
+            />
+          </div>
+
+          {/* Metrics + Superpower + Trajectory Inside One Cohesive Body */}
+          <div className="space-y-3 px-4 py-3.5">
+            <div className="grid grid-cols-2 gap-3 border-b border-[var(--border)]/70 pb-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1 font-mono-num text-base font-bold text-[var(--ink)]">
+                  <Trophy
+                    size={14}
+                    weight="fill"
+                    className="shrink-0 text-[var(--accent)]"
+                    aria-hidden="true"
+                  />
+                  <span>{primaryAchievement?.metric ?? visual.trajectory.delta}</span>
+                </div>
+                <div className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
+                  {primaryAchievement
+                    ? resolveLocalized(primaryAchievement.label, locale)
+                    : resolveLocalized(visual.trajectory.label, locale)}
+                </div>
+              </div>
+
+              <div className="min-w-0 border-l border-[var(--border)]/70 pl-3">
+                <div className="font-mono-num text-base font-bold text-[var(--ink)]">
+                  {secondaryAchievement?.metric ?? visual.trajectory.after}
+                </div>
+                <div className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
+                  {secondaryAchievement
+                    ? resolveLocalized(secondaryAchievement.label, locale)
+                    : resolveLocalized(visual.trajectory.label, locale)}
+                </div>
               </div>
             </div>
 
-            <div className="min-w-0 border-l border-[var(--border)]/70 pl-3">
-              <div className="font-mono-num text-base font-bold text-[var(--ink)]">
-                {secondaryAchievement?.metric ?? visual.trajectory.after}
+            <div className="border-l-2 border-[var(--accent)] pl-3">
+              <div className="text-xs font-semibold text-[var(--accent-ink)]">
+                {resolveLocalized(visual.superpowerTag, locale)}
               </div>
-              <div className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
-                {secondaryAchievement
-                  ? resolveLocalized(secondaryAchievement.label, locale)
-                  : resolveLocalized(visual.trajectory.label, locale)}
-              </div>
+              <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-[var(--ink-2)]">
+                {differentiator}
+              </p>
             </div>
-          </div>
 
-          <div className="rounded-[18px] border-l-2 border-[var(--accent)] bg-[var(--accent-soft)]/25 px-3.5 py-2.5">
-            <div className="text-xs font-semibold text-[var(--accent-ink)]">
-              {resolveLocalized(visual.superpowerTag, locale)}
-            </div>
-            <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-[var(--ink-2)]">
-              {differentiator}
-            </p>
+            <ScoreTrajectoryBar
+              before={visual.trajectory.before}
+              after={visual.trajectory.after}
+              delta={visual.trajectory.delta}
+              label={resolveLocalized(visual.trajectory.label, locale)}
+              progressPct={visual.trajectory.bar1Pct}
+              subject={primarySubject}
+              compact
+            />
           </div>
+        </div>
 
-          <ScoreTrajectoryBar
-            before={visual.trajectory.before}
-            after={visual.trajectory.after}
-            delta={visual.trajectory.delta}
-            label={resolveLocalized(visual.trajectory.label, locale)}
-            progressPct={visual.trajectory.bar1Pct}
-            subject={primarySubject}
-            compact
-          />
-
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-medium text-[var(--muted)]">
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {locale === 'az'
-                ? 'Boş yer var'
-                : locale === 'en'
-                  ? 'Slots open'
-                  : 'Есть места'}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>{tutor.fmt.map((f) => FORMAT_LABELS[f][locale]).join(' · ')}</span>
-            <span aria-hidden="true">·</span>
-            <span className="font-mono-num font-semibold text-[var(--accent-ink)]">
-              {matchScore}% {copy.tutorCard.match}
-            </span>
-            {distanceKm !== null ? (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="inline-flex items-center gap-0.5 font-mono-num">
-                  <MapPin size={11} weight="bold" aria-hidden="true" />
-                  {distanceKm.toFixed(1)} {copy.tutorCard.km}
-                </span>
-              </>
-            ) : null}
-          </div>
+        {/* 3. Crisp Availability, Format & Match Strip */}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-medium text-[var(--muted)]">
+          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {locale === 'az'
+              ? 'Boş yer var'
+              : locale === 'en'
+                ? 'Slots open'
+                : 'Есть места'}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>{tutor.fmt.map((f) => FORMAT_LABELS[f][locale]).join(' · ')}</span>
+          <span aria-hidden="true">·</span>
+          <span className="font-mono-num font-semibold text-[var(--accent-ink)]">
+            {matchScore}% {copy.tutorCard.match}
+          </span>
+          {distanceKm !== null ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="inline-flex items-center gap-0.5 font-mono-num">
+                <MapPin size={11} weight="bold" aria-hidden="true" />
+                {distanceKm.toFixed(1)} {copy.tutorCard.km}
+              </span>
+            </>
+          ) : null}
         </div>
       </div>
 

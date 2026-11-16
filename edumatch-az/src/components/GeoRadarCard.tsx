@@ -167,26 +167,36 @@ export function GeoRadarCard({
     const cityScoped = withDist.filter((item) => item.dist <= 20);
     const activeList = cityScoped.length > 0 ? cityScoped : withDist.slice(0, 4);
 
-    // Deterministic clean scatter anchors kept outside the top-left info card and landmark label
-    const anchorPositions: Array<[number, number]> = [
-      [48, 63],
-      [75, 36],
-      [68, 74],
-      [28, 69],
-      [83, 60],
-      [58, 34],
-    ];
+    // Stable per-tutor map anchors keyed by tutor.id so pins NEVER jump when radiusKm changes
+    const fixedAnchors: Record<string, [number, number]> = {
+      t1: [34, 68],
+      t2: [68, 36],
+      t3: [46, 62],
+      t4: [76, 66],
+      t5: [64, 48],
+      t6: [57, 42],
+      t7: [44, 76],
+      me: [56, 64],
+      t8: [73, 38],
+      t9: [64, 74],
+      t10: [72, 42],
+      t11: [42, 70],
+    };
 
     return activeList.map(({ tutor, dist }, idx) => {
-      const anchor = anchorPositions[idx % anchorPositions.length];
-      const latDelta = (baseCoords[0] - tutor.coords[0]) * 780;
-      const lonDelta = (tutor.coords[1] - baseCoords[1]) * 780;
-      const rawLeft = 58 + lonDelta * 0.68 + (anchor[0] - 58) * 0.35;
-      const rawTop = 54 + latDelta * 0.68 + (anchor[1] - 54) * 0.35;
-      const leftPct = Math.min(86, Math.max(20, rawLeft));
-      const clampedTop = Math.min(82, Math.max(26, rawTop));
-      // Prevent any pin (or its hover/active label pill) from colliding with the top-left info card
-      const topPct = leftPct < 52 ? Math.max(58, clampedTop) : clampedTop;
+      const fallbackAnchor: [number, number] = [
+        48 + ((idx * 17) % 30),
+        38 + ((idx * 23) % 36),
+      ];
+      const anchor = fixedAnchors[tutor.id] ?? fallbackAnchor;
+      const latDelta = (baseCoords[0] - tutor.coords[0]) * 640;
+      const lonDelta = (tutor.coords[1] - baseCoords[1]) * 640;
+      const rawLeft = anchor[0] * 0.72 + (56 + lonDelta * 0.45) * 0.28;
+      const rawTop = anchor[1] * 0.72 + (56 + latDelta * 0.45) * 0.28;
+      const leftPct = Math.min(86, Math.max(22, Number(rawLeft.toFixed(2))));
+      const clampedTop = Math.min(82, Math.max(28, Number(rawTop.toFixed(2))));
+      // Keep top-left info card clear of pins
+      const topPct = leftPct < 50 ? Math.max(60, clampedTop) : clampedTop;
 
       return {
         tutor,
@@ -197,6 +207,8 @@ export function GeoRadarCard({
       };
     });
   }, [tutors, location, radiusKm, subject]);
+
+  const radarSvgRadius = radiusKm > 50 ? 255 : Math.max(38, Math.min(235, radiusKm * 4.4));
 
   const inRangeCount = mapPins.filter((d) => d.within).length;
   const activePin =
@@ -216,8 +228,8 @@ export function GeoRadarCard({
       className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-6"
     >
       <div className="grid items-stretch gap-5 lg:grid-cols-12">
-        {/* Left: Crisp Google-Maps-Style Street Canvas */}
-        <div className="relative min-h-[340px] overflow-hidden rounded-[22px] border border-[var(--border)] bg-[#F3F2EC] dark:bg-[#132033] sm:min-h-[390px] lg:col-span-7">
+        {/* Left: Realistic Google/Apple Maps Style City Cartography */}
+        <div className="relative min-h-[340px] overflow-hidden rounded-[22px] border border-[var(--border)] bg-[#F1EFE9] dark:bg-[#101B2D] sm:min-h-[395px] lg:col-span-7">
           {/* Vector Street Grid SVG */}
           <svg
             viewBox="0 0 800 500"
@@ -229,108 +241,152 @@ export function GeoRadarCard({
             <rect
               width="800"
               height="500"
-              className="fill-[#F4F3EE] dark:fill-[#132033]"
+              className="fill-[#F3F1EB] dark:fill-[#101B2D]"
+            />
+
+            {/* Realistic Seaside / Bay Water + Boulevard Strip */}
+            <path
+              d="M 520 500 C 575 430, 645 405, 800 370 L 800 500 Z"
+              className="fill-[#CFE4F7] dark:fill-[#16324F]"
+            />
+            <path
+              d="M 495 500 C 555 415, 635 388, 800 352 L 800 370 C 645 405, 575 430, 520 500 Z"
+              className="fill-[#D9ECD8] dark:fill-[#15362B]"
             />
 
             {/* Parks */}
             {!cleanLayer ? (
               <>
                 <path
-                  d="M 520 55 C 585 45, 690 70, 705 160 L 555 215 L 510 120 Z"
-                  className="fill-[#D4ECD2] dark:fill-[#16382C]"
+                  d="M 545 48 C 610 38, 705 68, 718 148 L 578 192 L 535 108 Z"
+                  className="fill-[#D7EBD4] dark:fill-[#15352A]"
                 />
                 <path
-                  d="M 18 320 C 115 305, 165 360, 145 480 L 18 480 Z"
-                  className="fill-[#D4ECD2] dark:fill-[#16382C]"
+                  d="M 18 330 C 110 318, 152 368, 138 480 L 18 480 Z"
+                  className="fill-[#D7EBD4] dark:fill-[#15352A]"
                 />
               </>
             ) : null}
 
-            {/* Caspian / River Curve */}
-            <path
-              d="M 110 215 C 245 190, 390 255, 530 240 C 635 230, 725 270, 800 315"
-              fill="none"
-              strokeWidth="20"
-              className="stroke-[#D0E4FB] dark:stroke-[#1B3A5C]"
-            />
-
-            {/* Urban City Blocks */}
+            {/* Realistic Building Footprints (Low-contrast cartographic texture) */}
             {!cleanLayer ? (
-              <g className="fill-[#EAE8E0] dark:fill-[#1A2B45]">
-                <rect x="135" y="135" width="120" height="85" rx="8" />
-                <rect x="295" y="140" width="95" height="75" rx="8" />
-                <rect x="445" y="295" width="135" height="105" rx="8" />
-                <rect x="130" y="300" width="115" height="115" rx="8" />
-                <rect x="615" y="280" width="115" height="90" rx="8" />
+              <g className="fill-[#E7E4DC] dark:fill-[#18273E]">
+                <rect x="145" y="142" width="44" height="32" rx="3" />
+                <rect x="198" y="146" width="52" height="28" rx="3" />
+                <rect x="148" y="182" width="96" height="26" rx="3" />
+                <rect x="304" y="142" width="38" height="34" rx="3" />
+                <rect x="350" y="144" width="40" height="30" rx="3" />
+                <rect x="458" y="294" width="54" height="36" rx="3" />
+                <rect x="520" y="296" width="46" height="34" rx="3" />
+                <rect x="462" y="340" width="88" height="28" rx="3" />
+                <rect x="152" y="302" width="52" height="38" rx="3" />
+                <rect x="212" y="305" width="42" height="34" rx="3" />
+                <rect x="630" y="256" width="58" height="34" rx="3" />
+                <rect x="696" y="258" width="48" height="32" rx="3" />
               </g>
             ) : null}
 
-            {/* Minor White Streets */}
-            <g className="stroke-white dark:stroke-[#233754]" strokeWidth="10">
-              <line x1="0" y1="115" x2="800" y2="115" />
-              <line x1="0" y1="225" x2="800" y2="225" />
-              <line x1="0" y1="395" x2="800" y2="395" />
-              <line x1="120" y1="0" x2="120" y2="500" />
-              <line x1="275" y1="0" x2="275" y2="500" />
-              <line x1="600" y1="0" x2="600" y2="500" />
-              <line x1="720" y1="0" x2="720" y2="500" />
+            {/* Fine Local Street Network */}
+            <g className="stroke-white/95 dark:stroke-[#1E314D]" strokeWidth="4.5">
+              <line x1="0" y1="78" x2="800" y2="78" />
+              <line x1="0" y1="128" x2="800" y2="128" />
+              <line x1="0" y1="176" x2="800" y2="176" />
+              <line x1="0" y1="226" x2="800" y2="226" />
+              <line x1="0" y1="358" x2="720" y2="358" />
+              <line x1="0" y1="418" x2="580" y2="418" />
+              <line x1="92" y1="0" x2="92" y2="500" />
+              <line x1="138" y1="0" x2="138" y2="500" />
+              <line x1="278" y1="0" x2="278" y2="500" />
+              <line x1="342" y1="0" x2="342" y2="500" />
+              <line x1="504" y1="0" x2="504" y2="460" />
+              <line x1="606" y1="0" x2="606" y2="410" />
+              <line x1="712" y1="0" x2="712" y2="380" />
             </g>
 
-            {/* Primary Pastel-Amber Avenues (casing + fill) */}
+            {/* Secondary Collector Roads */}
+            <g className="stroke-white dark:stroke-[#243A59]" strokeWidth="7.5">
+              <line x1="0" y1="274" x2="800" y2="274" />
+              <line x1="210" y1="0" x2="210" y2="500" />
+              <line x1="564" y1="0" x2="564" y2="430" />
+            </g>
+
+            {/* Primary Arterial Avenues (Realistic Casing + Cream Highway Fill) */}
             <g fill="none" strokeLinecap="round">
-              {/* Avenue Outer Border */}
-              <g className="stroke-[#E3B84E] dark:stroke-[#465770]" strokeWidth="19">
-                <line x1="0" y1="305" x2="800" y2="305" />
-                <line x1="418" y1="0" x2="418" y2="500" />
-                <line x1="45" y1="475" x2="685" y2="35" />
+              <g className="stroke-[#E3C978] dark:stroke-[#3E526E]" strokeWidth="11.5">
+                <line x1="0" y1="274" x2="800" y2="274" />
+                <line x1="422" y1="0" x2="422" y2="500" />
+                <line x1="65" y1="468" x2="695" y2="38" />
               </g>
-              {/* Avenue Inner Fill */}
-              <g className="stroke-[#FCE192] dark:stroke-[#2E4466]" strokeWidth="14">
-                <line x1="0" y1="305" x2="800" y2="305" />
-                <line x1="418" y1="0" x2="418" y2="500" />
-                <line x1="45" y1="475" x2="685" y2="35" />
+              <g className="stroke-[#FCE69D] dark:stroke-[#2B405E]" strokeWidth="8.5">
+                <line x1="0" y1="274" x2="800" y2="274" />
+                <line x1="422" y1="0" x2="422" y2="500" />
+                <line x1="65" y1="468" x2="695" y2="38" />
               </g>
+              {/* City Center Traffic Roundabout */}
+              <circle
+                cx="422"
+                cy="274"
+                r="14"
+                className="fill-[#F3F1EB] stroke-[#E3C978] dark:fill-[#101B2D] dark:stroke-[#3E526E]"
+                strokeWidth="3"
+              />
+              <circle
+                cx="422"
+                cy="274"
+                r="6"
+                className="fill-[#D7EBD4] dark:fill-[#15352A]"
+              />
             </g>
 
-            {/* Street & University Labels */}
-            <g className="fill-[#475569] text-[12px] font-semibold dark:fill-[#94A3B8]">
-              <text x="565" y="138">
+            {/* Live Geographic Radar Radius Ring (Visualizes slider smoothly) */}
+            <circle
+              cx="450"
+              cy="274"
+              r={radarSvgRadius}
+              className="fill-emerald-500/6 stroke-emerald-500/40 transition-all duration-200 dark:fill-emerald-400/8 dark:stroke-emerald-400/40"
+              strokeWidth="1.5"
+              strokeDasharray="6 5"
+            />
+
+            {/* Street & Park Labels */}
+            <g className="fill-[#526071] text-[11px] font-semibold dark:fill-[#94A3B8]">
+              <text x="582" y="118">
                 {landmarks.parkTopRight}
               </text>
-              <text x="72" y="405">
+              <text x="48" y="404">
                 {landmarks.parkBottomLeft}
               </text>
-              <text x="145" y="309" className="fill-[#334155] dark:fill-[#CBD5E1]">
+              <text x="150" y="278" className="fill-[#334155] text-[10.5px] dark:fill-[#CBD5E1]">
                 {landmarks.mainRoadH}
               </text>
-              <text x="550" y="309" className="fill-[#334155] dark:fill-[#CBD5E1]">
+              <text x="585" y="278" className="fill-[#334155] text-[10.5px] dark:fill-[#CBD5E1]">
                 {landmarks.mainRoadH}
               </text>
               <text
-                x="230"
-                y="348"
-                transform="rotate(-35 230 348)"
-                className="fill-[#334155] dark:fill-[#CBD5E1]"
+                x="235"
+                y="344"
+                transform="rotate(-34 235 344)"
+                className="fill-[#334155] text-[10.5px] dark:fill-[#CBD5E1]"
               >
                 {landmarks.diagRoad}
               </text>
             </g>
 
-            {/* University / Landmark Dots */}
+            {/* University / Landmark Badges (Positioned cleanly away from pins) */}
             <g>
-              <circle cx="430" cy="448" r="5" fill="#10B981" />
+              <circle cx="385" cy="452" r="4.5" fill="#10B981" />
               <text
-                x="442"
-                y="452"
-                className="fill-[#047857] text-[13px] font-bold dark:fill-[#6EE7B7]"
+                x="396"
+                y="456"
+                className="fill-[#047857] text-[11.5px] font-bold dark:fill-[#6EE7B7]"
               >
                 {landmarks.campusLabel}
               </text>
-              <circle cx="485" cy="248" r="5" fill="#2563EB" />
+              <circle cx="536" cy="212" r="4.5" fill="#2563EB" />
               <text
-                x="496"
-                y="252"
-                className="fill-[#1D4ED8] text-[12px] font-bold dark:fill-[#93C5FD]"
+                x="546"
+                y="216"
+                className="fill-[#1D4ED8] text-[11.5px] font-bold dark:fill-[#93C5FD]"
               >
                 {landmarks.hubLabel}
               </text>
@@ -404,9 +460,9 @@ export function GeoRadarCard({
                 onClick={() => setSelectedId(pin.tutor.id)}
                 aria-label={`${localizedName} (${pin.dist.toFixed(1)} ${copy.tutorCard.km})`}
                 style={{ left: `${pin.leftPct}%`, top: `${pin.topPct}%` }}
-                className={`group absolute z-10 -translate-x-1/2 -translate-y-full cursor-pointer transition-transform ${
-                  pin.within ? 'opacity-100' : 'opacity-45'
-                } ${isSelected ? 'z-20 scale-110' : 'hover:scale-105'}`}
+                className={`group absolute z-10 -translate-x-1/2 -translate-y-full cursor-pointer transition-opacity duration-150 ${
+                  pin.within ? 'opacity-100' : 'opacity-40'
+                } ${isSelected ? 'z-20' : ''}`}
               >
                 {isSelected ? (
                   <span className="mb-1 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--ink)] shadow-md">

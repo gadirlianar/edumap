@@ -19,15 +19,15 @@ describe('EduMatch Tier-1 UI Integration', () => {
 
     // Clean 3D Hero Showcase + visible City Street Map + collapsed tutors catalog + no signature badge
     const heroRegion = screen.getByRole('region', { name: /EduMatch showcase/i });
-    expect(within(heroRegion).getByRole('button', { name: /Показать репетиторов/i })).toBeInTheDocument();
     expect(within(heroRegion).getByRole('button', { name: /Пройти тест уровня/i })).toBeInTheDocument();
     expect(document.getElementById('tutor-catalog')).toBeNull();
-    expect(document.getElementById('tutor-catalog-toggle')).toBeInTheDocument();
+    const toggleBar = document.getElementById('tutor-catalog-toggle')!;
+    expect(toggleBar).toBeInTheDocument();
     expect(document.getElementById('tutor-map')).toBeInTheDocument();
     expect(screen.queryByText('by M')).not.toBeInTheDocument();
 
     // Clicking "Показать репетиторов" reveals #tutor-catalog cleanly, then Физика filter narrows inside catalog (t1, t7, t9, t11)
-    await user.click(within(heroRegion).getByRole('button', { name: /Показать репетиторов/i }));
+    await user.click(within(toggleBar).getByRole('button', { name: /Показать репетиторов/i }));
     const catalog = document.getElementById('tutor-catalog')!;
     expect(catalog).toBeInTheDocument();
     await user.click(within(catalog).getByRole('button', { name: 'Физика' }));

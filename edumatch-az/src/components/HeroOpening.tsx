@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   ArrowRight,
-  ChalkboardTeacher,
   Crown,
   CurrencyCircleDollar,
   FilmSlate,
@@ -149,9 +148,9 @@ const HERO_COPY: Record<
 
 export function HeroOpening({
   locale,
-  resultCount,
   onQuickApply,
   onOpenQuiz,
+  onOpenTour,
   onSwitchToTeacher,
 }: HeroOpeningProps) {
   const hc = HERO_COPY[locale];
@@ -175,12 +174,13 @@ export function HeroOpening({
   return (
     <section
       aria-label="EduMatch showcase"
-      className="mx-auto mb-6 w-full max-w-7xl pt-4 pb-2 sm:pt-8"
+      className="mx-auto mb-6 w-full max-w-7xl pt-5 pb-3 sm:pt-9"
     >
       <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-8 lg:gap-12">
-        {/* LEFT COLUMN: Clean Commercial Positioning & Two Action Buttons */}
+        {/* LEFT COLUMN: Clean Commercial Positioning & Primary Level Quiz CTA */}
         <div className="text-center md:col-span-6 md:text-left">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-bold text-[var(--accent-ink)]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-white/80 px-3.5 py-1.5 text-[11px] font-bold tracking-wide text-[var(--accent-ink)] shadow-2xs backdrop-blur-md dark:border-emerald-400/25 dark:bg-[#121D30]/85">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
             <RocketLaunch size={13} weight="fill" aria-hidden="true" />
             <span>{hc.eyebrow}</span>
           </span>
@@ -189,39 +189,37 @@ export function HeroOpening({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.34, ease: EASE_EDITORIAL }}
-            className="mx-auto mt-4 max-w-xl break-words text-[2.1rem] font-bold leading-[1.06] tracking-[-0.04em] text-[var(--ink)] sm:text-[2.8rem] lg:text-[3.4rem] md:mx-0"
+            className="mx-auto mt-4 max-w-xl break-words text-[2.2rem] font-extrabold leading-[1.04] tracking-[-0.035em] text-[var(--ink)] sm:text-[2.95rem] lg:text-[3.5rem] md:mx-0"
           >
             {hc.titleStart}{' '}
             <em className="relative inline-block font-serif-editorial font-normal italic text-[var(--accent-ink)]">
               {hc.titleAccent}
               <span
                 aria-hidden="true"
-                className="absolute inset-x-0 bottom-1 -z-10 h-3 rounded-full bg-[var(--lime)]/70 dark:bg-emerald-500/35"
+                className="absolute inset-x-0 bottom-1 -z-10 h-2.5 rounded-full bg-[var(--lime)]/75 dark:bg-emerald-500/35"
               />
-            </em>{' '}
-            {hc.titleEnd}
+            </em>
+            {hc.titleEnd ? ` ${hc.titleEnd}` : ''}
           </motion.h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm font-medium leading-relaxed text-[var(--ink-2)] sm:text-base md:mx-0">
+          <p className="mx-auto mt-4 max-w-lg text-[15px] font-medium leading-relaxed text-[var(--ink-2)] sm:text-[17px] md:mx-0">
             {hc.subtitleLead}{' '}
-            <strong className="whitespace-nowrap font-mono-num font-bold text-[var(--ink)]">
+            <strong className="whitespace-nowrap rounded-md bg-[var(--lime-soft)] px-1.5 py-0.5 font-mono-num font-bold text-[#0F172A] dark:bg-emerald-500/20 dark:text-[var(--lime)]">
               {hc.subtitlePrice}
             </strong>
             .
           </p>
 
-          {/* Clean Two-Button CTA Pair */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+          {/* Single Primary CTA (Take Level Quiz — no duplicate Show Tutors button above toggle bar) */}
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3 md:justify-start">
             <motion.button
               type="button"
-              onClick={onQuickApply}
+              onClick={onOpenQuiz}
               whileTap={{ scale: 0.98 }}
-              className="group inline-flex min-h-[48px] cursor-pointer items-center gap-3 rounded-full bg-[var(--primary-btn)] py-1.5 pl-6 pr-1.5 text-sm font-semibold text-[var(--primary-btn-ink)] shadow-[var(--shadow-float)] transition-colors hover:bg-[var(--primary-btn-hover)]"
+              className="group inline-flex min-h-[52px] cursor-pointer items-center gap-3.5 rounded-full bg-[var(--primary-btn)] py-2 pl-6 pr-2 text-sm font-bold text-[var(--primary-btn-ink)] shadow-[var(--shadow-float)] transition-all duration-150 hover:-translate-y-0.5 hover:bg-[var(--primary-btn-hover)] sm:text-[15px]"
             >
-              <ChalkboardTeacher size={17} weight="bold" aria-hidden="true" />
-              <span>
-                {hc.primaryCta} ({resultCount})
-              </span>
+              <Sparkle size={18} weight="fill" className="text-[var(--lime)] dark:text-[#0F172A]" aria-hidden="true" />
+              <span>{hc.quizCta}</span>
               <span
                 aria-hidden="true"
                 className="grid h-9 w-9 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover:translate-x-0.5"
@@ -232,11 +230,16 @@ export function HeroOpening({
 
             <button
               type="button"
-              onClick={onOpenQuiz}
-              className="inline-flex min-h-[48px] cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/92 px-5 text-sm font-semibold text-[var(--ink)] shadow-xs backdrop-blur-md transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-ink)]"
+              onClick={onOpenTour}
+              className="inline-flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/92 px-5 text-sm font-semibold text-[var(--ink)] shadow-2xs backdrop-blur-md transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
             >
-              <Sparkle size={16} weight="fill" className="text-[var(--accent)]" aria-hidden="true" />
-              <span>{hc.quizCta}</span>
+              <span>
+                {locale === 'az'
+                  ? 'Necə işləyir'
+                  : locale === 'en'
+                    ? 'How it works'
+                    : 'Как работает'}
+              </span>
             </button>
           </div>
 
