@@ -273,7 +273,39 @@ export function HeroOpening({
             <div
               aria-hidden="true"
               style={{ transform: 'translateZ(-40px)' }}
-              className="pointer-events-none absolute inset-6 rounded-full bg-gradient-to-tr from-emerald-400/25 via-sky-400/20 to-[#C8F542]/30 blur-3xl"
+              className="pointer-events-none absolute inset-6 rounded-full bg-gradient-to-tr from-emerald-400/30 via-sky-400/24 to-[#C8F542]/35 blur-3xl"
+            />
+
+            {/* 3D Isometric Glowing Base Platform Disc (Holographic Diorama Stage) */}
+            <div
+              aria-hidden="true"
+              style={{
+                transform: 'translateY(82px) translateZ(-26px) rotateX(72deg)',
+                transformStyle: 'preserve-3d',
+              }}
+              className="pointer-events-none absolute h-[250px] w-[250px] sm:h-[290px] sm:w-[290px]"
+            >
+              <motion.div
+                animate={{ rotateZ: 360 }}
+                transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border border-emerald-500/35 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.22)_0%,rgba(200,245,66,0.08)_48%,transparent_72%)] shadow-[0_0_45px_rgba(16,185,129,0.25)]"
+              />
+            </div>
+
+            {/* Floating 3D Geometric Glass Prisms */}
+            <motion.div
+              aria-hidden="true"
+              animate={{ y: [-8, 8, -8], rotateX: [15, 45, 15], rotateY: [20, 70, 20] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(35px)', transformStyle: 'preserve-3d' }}
+              className="pointer-events-none absolute top-14 right-14 hidden h-8 w-8 rounded-lg border border-white/60 bg-gradient-to-br from-[#C8F542]/50 to-emerald-400/30 shadow-lg backdrop-blur-xs sm:block"
+            />
+            <motion.div
+              aria-hidden="true"
+              animate={{ y: [7, -7, 7], rotateZ: [0, 90, 0], rotateX: [25, 65, 25] }}
+              transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}
+              className="pointer-events-none absolute bottom-16 left-12 hidden h-6 w-6 rounded-md border border-sky-300/60 bg-gradient-to-br from-sky-400/40 to-emerald-400/30 shadow-md backdrop-blur-xs sm:block"
             />
 
             {/* 3D Animated Tilted Orbit Ring 1 */}

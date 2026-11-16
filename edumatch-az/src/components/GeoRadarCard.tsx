@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ArrowSquareOut,
   ArrowUpRight,
@@ -40,24 +40,6 @@ interface GeoRadarCardProps {
   getMatchScore: (tutor: TutorProfile) => number;
 }
 
-const TILE_SIZE = 256;
-const MIN_ZOOM = 10;
-const MAX_ZOOM = 16;
-
-function latLonToWorldPx(lat: number, lon: number, zoom: number): [number, number] {
-  const scale = TILE_SIZE * Math.pow(2, zoom);
-  const clampedLat = Math.max(-85.05112878, Math.min(85.05112878, lat));
-  const latRad = (clampedLat * Math.PI) / 180;
-  const x = ((lon + 180) / 360) * scale;
-  const y =
-    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * scale;
-  return [x, y];
-}
-
-function metersPerPixel(lat: number, zoom: number): number {
-  return (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
-}
-
 const MAP_COPY: Record<
   Locale,
   {
@@ -74,8 +56,8 @@ const MAP_COPY: Record<
   ru: {
     mapBadge: 'Карта преподавателей',
     availableNow: 'Открыт для уроков',
-    mapAttribution: '© OpenStreetMap · CARTO',
-    switchLayerLabel: 'Сменить слой карты',
+    mapAttribution: 'Топографическая карта · 2026',
+    switchLayerLabel: 'Сменить вид карты',
     zoomInLabel: 'Приблизить',
     zoomOutLabel: 'Отдалить',
     offlineNearbyTitle: 'Менторы на карте рядом',
@@ -84,17 +66,17 @@ const MAP_COPY: Record<
   az: {
     mapBadge: 'Müəllim xəritəsi',
     availableNow: 'Dərsə açıqdır',
-    mapAttribution: '© OpenStreetMap · CARTO',
-    switchLayerLabel: 'Xəritə qatını dəyiş',
+    mapAttribution: 'Şəhər xəritəsi · 2026',
+    switchLayerLabel: 'Xəritə görünüşünü dəyiş',
     zoomInLabel: 'Yaxınlaşdır',
     zoomOutLabel: 'Uzaqlaşdır',
     offlineNearbyTitle: 'Xəritədə yaxın müəllimlər',
     noOfflineFallback: 'Seçilən fənn üzrə dərslər ölkə üzrə onlayn keçirilir.',
   },
   en: {
-    mapBadge: 'Live Tutor Map',
+    mapBadge: 'Interactive City Map',
     availableNow: 'Open Now',
-    mapAttribution: '© OpenStreetMap · CARTO',
+    mapAttribution: 'Vector city map · 2026',
     switchLayerLabel: 'Switch map layer',
     zoomInLabel: 'Zoom in',
     zoomOutLabel: 'Zoom out',
@@ -118,6 +100,196 @@ const TUTOR_DISTRICTS: Record<string, Record<Locale, string>> = {
   t11: { ru: 'Гянджа · пр. Г. Алиева', az: 'Gəncə · H. Əliyev pr.', en: 'Ganja · H. Aliyev Ave' },
 };
 
+// Realistic fixed SVG coordinates (in 800x500 space) per tutor so pins match landmarks and never jump on radius change
+const TUTOR_MAP_COORDS: Record<string, [number, number]> = {
+  // Baku tutors around Elmlar/BDU, 28 May, Narimanov, Khatai, Old City
+  t1: [305, 322],
+  t2: [525, 178],
+  t4: [628, 255],
+  t6: [485, 248],
+  t7: [392, 378],
+  me: [445, 224],
+  // Sumgayit tutors
+  t3: [432, 265],
+  t8: [575, 238],
+  t9: [338, 295],
+  // Ganja tutors
+  t5: [438, 260],
+  t10: [555, 218],
+  t11: [345, 315],
+};
+
+interface CityMapProfile {
+  waterPath: string;
+  boulevardPath?: string;
+  parks: string[];
+  arterials: string[];
+  highways: string[];
+  localStreets: [number, number, number, number][];
+  roundabouts: [number, number, number][];
+  metros: { x: number; y: number; label: string }[];
+  roadLabels: { x: number; y: number; text: string; rotate?: number }[];
+  waterLabel?: { x: number; y: number; text: string };
+}
+
+const CITY_MAPS: Record<string, CityMapProfile> = {
+  Баку: {
+    waterPath:
+      'M 210 500 C 260 448, 340 430, 425 415 C 505 400, 565 360, 625 322 C 685 284, 745 278, 800 288 L 800 500 Z',
+    boulevardPath:
+      'M 235 488 C 285 438, 355 422, 432 406 C 510 390, 570 350, 632 312 C 688 276, 745 268, 800 278 L 800 292 C 745 282, 688 288, 628 326 C 565 364, 505 404, 425 418 C 342 434, 264 452, 214 500 Z',
+    parks: [
+      'M 548 52 C 618 42, 702 72, 712 142 L 584 185 L 538 106 Z',
+      'M 272 288 C 306 276, 338 290, 344 334 L 284 348 Z',
+      'M 122 332 C 178 322, 206 355, 198 430 L 122 438 Z',
+    ],
+    highways: [
+      'M 0 182 Q 360 198 800 132',
+      'M 188 0 Q 285 215 385 415',
+      'M 428 0 Q 465 185 492 385',
+      'M 95 452 Q 395 292 758 68',
+    ],
+    arterials: [
+      'M 0 264 Q 380 278 730 232',
+      'M 0 335 Q 290 342 560 315',
+      'M 272 68 L 284 440',
+      'M 578 40 L 635 335',
+    ],
+    localStreets: [
+      [0, 96, 800, 96],
+      [0, 140, 800, 140],
+      [0, 224, 780, 224],
+      [0, 388, 520, 388],
+      [96, 0, 96, 500],
+      [148, 0, 148, 500],
+      [345, 0, 345, 440],
+      [525, 0, 525, 370],
+      [678, 0, 678, 300],
+    ],
+    roundabouts: [
+      [458, 256, 13],
+      [278, 268, 10],
+      [526, 174, 10],
+    ],
+    metros: [
+      { x: 304, y: 312, label: 'Elmlər' },
+      { x: 486, y: 242, label: '28 May' },
+      { x: 526, y: 164, label: 'Nərimanov' },
+      { x: 630, y: 250, label: 'Xətai' },
+    ],
+    roadLabels: [
+      { x: 118, y: 192, text: 'Heydər Əliyev pr.' },
+      { x: 545, y: 158, text: 'Heydər Əliyev pr.' },
+      { x: 332, y: 294, text: 'Nizami küç.', rotate: -26 },
+      { x: 405, y: 406, text: 'Dənizkənarı Bulvar' },
+    ],
+    waterLabel: { x: 635, y: 448, text: 'Xəzər dənizi · Bakı buxtası' },
+  },
+  Сумгайыт: {
+    waterPath: 'M 0 0 L 800 0 L 800 92 C 560 118, 280 86, 0 112 Z',
+    boulevardPath:
+      'M 0 112 C 280 86, 560 118, 800 92 L 800 118 C 560 144, 280 112, 0 136 Z',
+    parks: [
+      'M 210 138 L 365 138 L 352 198 L 210 198 Z',
+      'M 548 258 L 680 258 L 668 355 L 548 355 Z',
+    ],
+    highways: [
+      'M 0 252 L 800 252',
+      'M 426 115 L 426 500',
+      'M 0 368 Q 380 340 800 315',
+    ],
+    arterials: [
+      'M 0 185 L 800 175',
+      'M 235 122 L 235 500',
+      'M 610 110 L 610 500',
+    ],
+    localStreets: [
+      [0, 310, 800, 310],
+      [0, 428, 800, 428],
+      [125, 130, 125, 500],
+      [330, 125, 330, 500],
+      [518, 125, 518, 500],
+      [710, 115, 710, 500],
+    ],
+    roundabouts: [
+      [426, 252, 13],
+      [235, 252, 9],
+    ],
+    metros: [
+      { x: 426, y: 236, label: 'Mərkəz' },
+      { x: 575, y: 238, label: '6-cı mkr' },
+    ],
+    roadLabels: [
+      { x: 165, y: 256, text: 'Sülh küçəsi' },
+      { x: 465, y: 256, text: 'Azərbaycan pr.' },
+    ],
+    waterLabel: { x: 350, y: 55, text: 'Xəzər dənizi' },
+  },
+  Гянджа: {
+    waterPath: 'M 472 0 C 455 155, 508 310, 488 500 L 516 500 C 536 310, 483 155, 500 0 Z',
+    parks: [
+      'M 342 188 L 435 188 L 435 268 L 342 268 Z',
+      'M 555 292 L 668 292 L 668 388 L 555 388 Z',
+    ],
+    highways: [
+      'M 0 264 L 800 248',
+      'M 412 0 L 412 500',
+      'M 80 465 L 710 65',
+    ],
+    arterials: [
+      'M 0 164 L 800 164',
+      'M 0 368 L 800 368',
+      'M 225 0 L 225 500',
+      'M 615 0 L 615 500',
+    ],
+    localStreets: [
+      [0, 95, 800, 95],
+      [0, 315, 800, 315],
+      [0, 432, 800, 432],
+      [130, 0, 130, 500],
+      [318, 0, 318, 500],
+      [705, 0, 705, 500],
+    ],
+    roundabouts: [
+      [412, 256, 13],
+      [225, 260, 9],
+    ],
+    metros: [
+      { x: 438, y: 256, label: 'GDU' },
+      { x: 555, y: 218, label: 'Xan bağı' },
+    ],
+    roadLabels: [
+      { x: 120, y: 268, text: 'H. Əliyev pr.' },
+      { x: 555, y: 254, text: 'Atatürk pr.' },
+    ],
+    waterLabel: { x: 492, y: 425, text: 'Gəncəçay' },
+  },
+};
+
+// Building footprint blocks for realistic urban density
+const URBAN_BLOCKS: [number, number, number, number][] = [
+  [105, 105, 34, 24],
+  [158, 106, 42, 24],
+  [215, 104, 38, 26],
+  [292, 104, 44, 26],
+  [355, 104, 48, 25],
+  [104, 150, 36, 26],
+  [156, 150, 44, 24],
+  [292, 148, 42, 26],
+  [354, 148, 52, 24],
+  [158, 232, 42, 24],
+  [216, 232, 46, 24],
+  [356, 230, 52, 26],
+  [158, 276, 42, 26],
+  [216, 276, 44, 26],
+  [356, 276, 54, 26],
+  [358, 344, 48, 32],
+  [426, 314, 52, 30],
+  [486, 308, 44, 28],
+  [548, 240, 44, 26],
+  [615, 198, 48, 28],
+];
+
 export function GeoRadarCard({
   locale,
   location,
@@ -133,42 +305,18 @@ export function GeoRadarCard({
   const copy = COPY[locale];
   const mc = MAP_COPY[locale];
 
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const [viewportSize, setViewportSize] = useState<{ w: number; h: number }>({
-    w: 680,
-    h: 400,
-  });
-  const [zoom, setZoom] = useState<number>(12);
-  const [panOffset, setPanOffset] = useState<{ dx: number; dy: number }>({ dx: 0, dy: 0 });
+  const [zoom, setZoom] = useState<number>(1.08);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [osmStandardLayer, setOsmStandardLayer] = useState(false);
+  const [cleanLayer, setCleanLayer] = useState(false);
 
   const dragRef = useRef<{
     active: boolean;
     startX: number;
     startY: number;
-    baseDx: number;
-    baseDy: number;
-  }>({ active: false, startX: 0, startY: 0, baseDx: 0, baseDy: 0 });
-
-  // Measure real map canvas size for accurate Mercator tile tiling
-  useEffect(() => {
-    const el = viewportRef.current;
-    if (!el) return;
-    const updateSize = () => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        setViewportSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
-      }
-    };
-    updateSize();
-    if (typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(updateSize);
-      ro.observe(el);
-      return () => ro.disconnect();
-    }
-    return undefined;
-  }, []);
+    baseX: number;
+    baseY: number;
+  }>({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 });
 
   const mapPins = useMemo(() => {
     const offlineOrFiltered = tutors
@@ -186,11 +334,21 @@ export function GeoRadarCard({
     const cityScoped = withDist.filter((item) => item.dist <= 25);
     const activeList = cityScoped.length > 0 ? cityScoped : withDist.slice(0, 5);
 
-    return activeList.map(({ tutor, dist }) => ({
-      tutor,
-      dist,
-      within: radiusKm > 50 || dist <= radiusKm,
-    }));
+    return activeList.map(({ tutor, dist }, idx) => {
+      const fallback: [number, number] = [
+        340 + ((idx * 75) % 240),
+        195 + ((idx * 55) % 140),
+      ];
+      const [svgX, svgY] = TUTOR_MAP_COORDS[tutor.id] ?? fallback;
+
+      return {
+        tutor,
+        dist,
+        within: radiusKm > 50 || dist <= radiusKm,
+        svgX,
+        svgY,
+      };
+    });
   }, [tutors, location, radiusKm, subject]);
 
   const inRangeCount = mapPins.filter((d) => d.within).length;
@@ -202,52 +360,8 @@ export function GeoRadarCard({
       ? CITY_LABELS[location.name as CityId][locale]
       : location.name;
 
-  // Real Mercator center world pixels
-  const [cityCenterX, cityCenterY] = latLonToWorldPx(location.lat, location.lon, zoom);
-  const centerWorldX = cityCenterX - panOffset.dx;
-  const centerWorldY = cityCenterY - panOffset.dy;
-
-  const halfW = viewportSize.w / 2;
-  const halfH = viewportSize.h / 2;
-  const topLeftX = centerWorldX - halfW;
-  const topLeftY = centerWorldY - halfH;
-
-  // Compute visible 256px Mercator tiles
-  const minTileX = Math.floor(topLeftX / TILE_SIZE);
-  const maxTileX = Math.floor((topLeftX + viewportSize.w) / TILE_SIZE);
-  const minTileY = Math.floor(topLeftY / TILE_SIZE);
-  const maxTileY = Math.floor((topLeftY + viewportSize.h) / TILE_SIZE);
-  const maxTileIdx = Math.pow(2, zoom);
-
-  const tiles: {
-    key: string;
-    src: string;
-    left: number;
-    top: number;
-  }[] = [];
-
-  for (let ty = minTileY; ty <= maxTileY; ty++) {
-    if (ty < 0 || ty >= maxTileIdx) continue;
-    for (let tx = minTileX; tx <= maxTileX; tx++) {
-      const wrappedX = ((tx % maxTileIdx) + maxTileIdx) % maxTileIdx;
-      const src = osmStandardLayer
-        ? `https://tile.openstreetmap.org/${zoom}/${wrappedX}/${ty}.png`
-        : `https://basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${wrappedX}/${ty}@2x.png`;
-      tiles.push({
-        key: `${osmStandardLayer ? 'osm' : 'carto'}-${zoom}-${tx}-${ty}`,
-        src,
-        left: tx * TILE_SIZE - topLeftX,
-        top: ty * TILE_SIZE - topLeftY,
-      });
-    }
-  }
-
-  // Real geographic radius ring in screen pixels
-  const mpp = metersPerPixel(location.lat, zoom);
-  const cityCenterScreenX = cityCenterX - topLeftX;
-  const cityCenterScreenY = cityCenterY - topLeftY;
-  const radarRadiusPx =
-    radiusKm > 50 ? 0 : Math.max(24, (radiusKm * 1000) / mpp);
+  const cityProfile = CITY_MAPS[location.name] ?? CITY_MAPS['Баку'];
+  const radarSvgRadius = radiusKm > 50 ? 0 : Math.max(38, Math.min(245, radiusKm * 4.5));
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button')) return;
@@ -255,22 +369,33 @@ export function GeoRadarCard({
       active: true,
       startX: e.clientX,
       startY: e.clientY,
-      baseDx: panOffset.dx,
-      baseDy: panOffset.dy,
+      baseX: pan.x,
+      baseY: pan.y,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current.active) return;
-    setPanOffset({
-      dx: dragRef.current.baseDx + (e.clientX - dragRef.current.startX),
-      dy: dragRef.current.baseDy + (e.clientY - dragRef.current.startY),
-    });
+    const dx = Math.max(-220, Math.min(220, dragRef.current.baseX + (e.clientX - dragRef.current.startX)));
+    const dy = Math.max(-140, Math.min(140, dragRef.current.baseY + (e.clientY - dragRef.current.startY)));
+    setPan({ x: dx, y: dy });
   };
 
   const handlePointerUp = () => {
     dragRef.current.active = false;
+  };
+
+  // Convert SVG (800x500) coords into zoom+pan transformed viewport percentages
+  const projectPoint = (svgX: number, svgY: number): { leftPct: number; topPct: number } => {
+    const cx = 400;
+    const cy = 250;
+    const tx = cx + (svgX - cx) * zoom + pan.x;
+    const ty = cy + (svgY - cy) * zoom + pan.y;
+    return {
+      leftPct: (tx / 800) * 100,
+      topPct: (ty / 500) * 100,
+    };
   };
 
   return (
@@ -280,65 +405,175 @@ export function GeoRadarCard({
       className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-6"
     >
       <div className="grid items-stretch gap-5 lg:grid-cols-12">
-        {/* Left: Real Interactive OpenStreetMap / CARTO Mercator Map */}
+        {/* Left: 100% Self-Contained Interactive Zoomable & Pannable Apple/Google Maps Cartography */}
         <div
-          ref={viewportRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative min-h-[360px] cursor-grab overflow-hidden rounded-[22px] border border-[var(--border)] bg-[#EBF1F6] select-none active:cursor-grabbing dark:bg-[#101B2D] sm:min-h-[420px] lg:col-span-7"
+          className="relative min-h-[360px] cursor-grab overflow-hidden rounded-[22px] border border-[var(--border)] bg-[#F2EFE8] select-none active:cursor-grabbing dark:bg-[#0F192B] sm:min-h-[420px] lg:col-span-7"
         >
-          {/* Real Mercator Raster Map Tiles */}
+          {/* Zoom + Pan Transformed Cartographic Layer */}
           <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 overflow-hidden dark:brightness-90 dark:contrast-110"
-          >
-            {tiles.map((tile) => (
-              <img
-                key={tile.key}
-                src={tile.src}
-                alt=""
-                draggable={false}
-                style={{
-                  left: `${tile.left}px`,
-                  top: `${tile.top}px`,
-                  width: `${TILE_SIZE}px`,
-                  height: `${TILE_SIZE}px`,
-                }}
-                className="absolute max-w-none select-none"
-              />
-            ))}
-          </div>
-
-          {/* Accurate Geographic Radar Circle Overlay */}
-          {radarRadiusPx > 0 ? (
-            <div
-              aria-hidden="true"
-              style={{
-                left: `${cityCenterScreenX}px`,
-                top: `${cityCenterScreenY}px`,
-                width: `${radarRadiusPx * 2}px`,
-                height: `${radarRadiusPx * 2}px`,
-              }}
-              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-emerald-600/55 bg-emerald-500/10 transition-all duration-200"
-            />
-          ) : null}
-
-          {/* User / City Center Pulse Dot */}
-          <div
-            aria-hidden="true"
             style={{
-              left: `${cityCenterScreenX}px`,
-              top: `${cityCenterScreenY}px`,
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: 'center center',
             }}
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute inset-0 transition-transform duration-150 ease-out"
           >
-            <span className="absolute -inset-2.5 rounded-full bg-indigo-500/25 animate-ping" />
-            <span className="relative block h-3.5 w-3.5 rounded-full border-2 border-white bg-indigo-600 shadow-md" />
+            <svg
+              viewBox="0 0 800 500"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+              className="h-full w-full"
+            >
+              {/* Warm Editorial Terrain */}
+              <rect
+                width="800"
+                height="500"
+                className="fill-[#F3F0E8] dark:fill-[#0F192B]"
+              />
+
+              {/* Parks & Greenbelts */}
+              {!cleanLayer
+                ? cityProfile.parks.map((d, i) => (
+                    <path
+                      key={i}
+                      d={d}
+                      className="fill-[#D4EAD2] dark:fill-[#133528]"
+                    />
+                  ))
+                : null}
+
+              {/* Caspian Sea / River */}
+              <path
+                d={cityProfile.waterPath}
+                className="fill-[#C8E1FA] dark:fill-[#132E4D]"
+              />
+              {cityProfile.boulevardPath ? (
+                <path
+                  d={cityProfile.boulevardPath}
+                  className="fill-[#DCEFD9] dark:fill-[#15392C]"
+                />
+              ) : null}
+
+              {/* Urban Building Footprints */}
+              {!cleanLayer ? (
+                <g className="fill-[#E7E3D9] stroke-[#DCD7CC] dark:fill-[#17263D] dark:stroke-[#1E314E]" strokeWidth="0.6">
+                  {URBAN_BLOCKS.map(([x, y, w, h], i) => (
+                    <rect key={i} x={x} y={y} width={w} height={h} rx="2.5" />
+                  ))}
+                </g>
+              ) : null}
+
+              {/* Fine Local Streets */}
+              <g className="stroke-white/95 dark:stroke-[#1C2E4A]" strokeWidth="4">
+                {cityProfile.localStreets.map(([x1, y1, x2, y2], i) => (
+                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />
+                ))}
+              </g>
+
+              {/* Secondary Collector Roads */}
+              <g fill="none" strokeLinecap="round">
+                <g className="stroke-[#E2DFD6] dark:stroke-[#233757]" strokeWidth="7.5">
+                  {cityProfile.arterials.map((d, i) => (
+                    <path key={i} d={d} />
+                  ))}
+                </g>
+                <g className="stroke-white dark:stroke-[#2A4166]" strokeWidth="5.5">
+                  {cityProfile.arterials.map((d, i) => (
+                    <path key={i} d={d} />
+                  ))}
+                </g>
+              </g>
+
+              {/* Primary Arterial Highways */}
+              <g fill="none" strokeLinecap="round">
+                <g className="stroke-[#E3C66E] dark:stroke-[#415675]" strokeWidth="10.5">
+                  {cityProfile.highways.map((d, i) => (
+                    <path key={i} d={d} />
+                  ))}
+                </g>
+                <g className="stroke-[#FDE89F] dark:stroke-[#2F4668]" strokeWidth="7.5">
+                  {cityProfile.highways.map((d, i) => (
+                    <path key={i} d={d} />
+                  ))}
+                </g>
+              </g>
+
+              {/* Traffic Roundabouts */}
+              {cityProfile.roundabouts.map(([cx, cy, r], i) => (
+                <g key={i}>
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={r}
+                    className="fill-[#F3F0E8] stroke-[#E3C66E] dark:fill-[#0F192B] dark:stroke-[#415675]"
+                    strokeWidth="2.5"
+                  />
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={r * 0.45}
+                    className="fill-[#D4EAD2] dark:fill-[#133528]"
+                  />
+                </g>
+              ))}
+
+              {/* Metro / Transit Hub Badges */}
+              {cityProfile.metros.map((m, i) => (
+                <g key={i}>
+                  <circle cx={m.x} cy={m.y} r="4.5" fill="#059669" stroke="#FFFFFF" strokeWidth="1.5" />
+                  <text
+                    x={m.x + 8}
+                    y={m.y + 3.5}
+                    className="fill-[#065F46] text-[10px] font-bold dark:fill-[#6EE7B7]"
+                  >
+                    {m.label}
+                  </text>
+                </g>
+              ))}
+
+              {/* Street & Water Labels */}
+              {cityProfile.roadLabels.map((lbl, i) => (
+                <text
+                  key={i}
+                  x={lbl.x}
+                  y={lbl.y}
+                  transform={lbl.rotate ? `rotate(${lbl.rotate} ${lbl.x} ${lbl.y})` : undefined}
+                  className="fill-[#475569] text-[10px] font-semibold dark:fill-[#94A3B8]"
+                >
+                  {lbl.text}
+                </text>
+              ))}
+              {cityProfile.waterLabel ? (
+                <text
+                  x={cityProfile.waterLabel.x}
+                  y={cityProfile.waterLabel.y}
+                  className="fill-[#2563EB]/75 text-[11px] font-semibold italic dark:fill-[#60A5FA]/80"
+                >
+                  {cityProfile.waterLabel.text}
+                </text>
+              ) : null}
+
+              {/* Live Geographic Radar Circle */}
+              {radarSvgRadius > 0 ? (
+                <circle
+                  cx="440"
+                  cy="252"
+                  r={radarSvgRadius}
+                  className="fill-emerald-500/8 stroke-emerald-600/50 transition-all duration-200 dark:fill-emerald-400/10 dark:stroke-emerald-400/45"
+                  strokeWidth="1.8"
+                  strokeDasharray="6 5"
+                />
+              ) : null}
+
+              {/* Center Location Pulse */}
+              <circle cx="440" cy="252" r="5.5" fill="#4F46E5" stroke="#FFFFFF" strokeWidth="2" />
+            </svg>
           </div>
 
-          {/* Top-Left Floating Map Place Card (Google-Maps-style overlay) */}
+          {/* Top-Left Floating Map Place Card */}
           {activePin ? (
             <div className="relative z-30 m-3 max-w-[270px] rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-3.5 shadow-[var(--shadow-float)] backdrop-blur-md">
               <div className="flex items-start justify-between gap-2">
@@ -394,11 +629,9 @@ export function GeoRadarCard({
             </div>
           ) : null}
 
-          {/* Exact Geographic Lat/Lon Map Pins */}
+          {/* Zoom+Pan Projected Fixed Tutor Pins (Never jump when radiusKm changes) */}
           {mapPins.map((pin) => {
-            const [wx, wy] = latLonToWorldPx(pin.tutor.coords[0], pin.tutor.coords[1], zoom);
-            const screenX = wx - topLeftX;
-            const screenY = wy - topLeftY;
+            const { leftPct, topPct } = projectPoint(pin.svgX, pin.svgY);
             const localizedName = resolveTutorName(pin.tutor, locale);
             const isSelected = activePin?.tutor.id === pin.tutor.id;
 
@@ -408,7 +641,7 @@ export function GeoRadarCard({
                 type="button"
                 onClick={() => setSelectedId(pin.tutor.id)}
                 aria-label={`${localizedName} (${pin.dist.toFixed(1)} ${copy.tutorCard.km})`}
-                style={{ left: `${screenX}px`, top: `${screenY}px` }}
+                style={{ left: `${leftPct}%`, top: `${topPct}%` }}
                 className={`group absolute z-10 -translate-x-1/2 -translate-y-full cursor-pointer transition-opacity duration-150 ${
                   pin.within ? 'opacity-100' : 'opacity-40'
                 } ${isSelected ? 'z-20' : ''}`}
@@ -429,7 +662,7 @@ export function GeoRadarCard({
                     className={
                       isSelected
                         ? 'text-[#EA4335] drop-shadow-md'
-                        : 'text-[#0F172A] opacity-90 drop-shadow-sm'
+                        : 'text-[#0F172A] opacity-90 drop-shadow-sm dark:text-[#C8F542]'
                     }
                   />
                 </div>
@@ -437,18 +670,18 @@ export function GeoRadarCard({
             );
           })}
 
-          {/* Bottom Attribution + Real Zoom (+ / -), Layer Switch & Center Controls */}
+          {/* Bottom Attribution + Real Zoom (+ / -), Layer Switch & Reset Center Controls */}
           <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex items-end justify-between">
             <span className="rounded-md bg-[var(--surface)]/88 px-2 py-0.5 text-[10px] font-medium text-[var(--muted)] backdrop-blur-xs">
-              {mc.mapAttribution} · z{zoom}
+              {mc.mapAttribution} · {Math.round(zoom * 100)}%
             </span>
 
             <div className="pointer-events-auto flex flex-col gap-1.5">
               <div className="flex flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm">
                 <button
                   type="button"
-                  onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 1))}
-                  disabled={zoom >= MAX_ZOOM}
+                  onClick={() => setZoom((z) => Math.min(2.2, Number((z + 0.2).toFixed(2))))}
+                  disabled={zoom >= 2.2}
                   aria-label={mc.zoomInLabel}
                   title={mc.zoomInLabel}
                   className="grid h-8 w-8 cursor-pointer place-items-center border-b border-[var(--border)] text-[var(--ink)] transition-colors hover:bg-[var(--surface-subtle)] disabled:opacity-40"
@@ -457,8 +690,8 @@ export function GeoRadarCard({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 1))}
-                  disabled={zoom <= MIN_ZOOM}
+                  onClick={() => setZoom((z) => Math.max(0.85, Number((z - 0.2).toFixed(2))))}
+                  disabled={zoom <= 0.85}
                   aria-label={mc.zoomOutLabel}
                   title={mc.zoomOutLabel}
                   className="grid h-8 w-8 cursor-pointer place-items-center text-[var(--ink)] transition-colors hover:bg-[var(--surface-subtle)] disabled:opacity-40"
@@ -469,7 +702,7 @@ export function GeoRadarCard({
 
               <button
                 type="button"
-                onClick={() => setOsmStandardLayer((prev) => !prev)}
+                onClick={() => setCleanLayer((prev) => !prev)}
                 aria-label={mc.switchLayerLabel}
                 title={mc.switchLayerLabel}
                 className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] shadow-sm transition-colors hover:border-[var(--ink)]"
@@ -479,8 +712,8 @@ export function GeoRadarCard({
               <button
                 type="button"
                 onClick={() => {
-                  setPanOffset({ dx: 0, dy: 0 });
-                  setZoom(12);
+                  setPan({ x: 0, y: 0 });
+                  setZoom(1.08);
                   onLocateMe();
                 }}
                 aria-label={copy.radar.locateMe}
@@ -510,8 +743,8 @@ export function GeoRadarCard({
               <button
                 type="button"
                 onClick={() => {
-                  setPanOffset({ dx: 0, dy: 0 });
-                  setZoom(12);
+                  setPan({ x: 0, y: 0 });
+                  setZoom(1.08);
                   onLocateMe();
                 }}
                 className="inline-flex min-h-[34px] shrink-0 cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--ink)]"
@@ -532,8 +765,8 @@ export function GeoRadarCard({
                     aria-pressed={active}
                     onClick={() => {
                       setSelectedId(null);
-                      setPanOffset({ dx: 0, dy: 0 });
-                      setZoom(12);
+                      setPan({ x: 0, y: 0 });
+                      setZoom(1.08);
                       onSelectCity(city);
                     }}
                     className={`min-h-[32px] cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 ${
@@ -593,8 +826,7 @@ export function GeoRadarCard({
                         type="button"
                         onClick={() => {
                           setSelectedId(pin.tutor.id);
-                          setPanOffset({ dx: 0, dy: 0 });
-                          setZoom(13);
+                          setZoom(1.32);
                         }}
                         className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-2xl border p-2.5 text-left transition-all duration-150 ${
                           isSelected
