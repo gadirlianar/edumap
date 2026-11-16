@@ -16,7 +16,6 @@ import {
   Star,
   TerminalWindow,
   Translate,
-  Trophy,
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { SUBJECTS } from '@/data/catalog';
@@ -67,15 +66,15 @@ const HERO_COPY: Record<
     titleStart: string;
     titleAccent: string;
     titleEnd: string;
-    subtitle: string;
+    subtitleLead: string;
+    subtitlePrice: string;
     intentTutor: string;
     intentMap: string;
     intentQuiz: string;
     allSubjects: string;
     allGrades: string;
     showResultsCta: string;
-    dimBadge: string;
-    trialFloat: string;
+    dimLabel: string;
     spotlightLive: string;
     viewDossier: string;
     bookTrialShort: string;
@@ -90,15 +89,15 @@ const HERO_COPY: Record<
     titleStart: 'Выбирайте репетитора по',
     titleAccent: 'реальным баллам',
     titleEnd: '',
-    subtitle: 'Проверенные баллы. Живой рост учеников. Пробный урок — 0 ₼.',
+    subtitleLead: 'Проверенные баллы DİM · Первый урок',
+    subtitlePrice: '— 0 ₼',
     intentTutor: 'Найти репетитора',
     intentMap: 'Посмотреть на карте',
     intentQuiz: 'Пройти тест уровня',
     allSubjects: 'Все предметы',
     allGrades: 'Любой',
     showResultsCta: 'Показать репетиторов',
-    dimBadge: 'DİM',
-    trialFloat: '0 ₼ пробный',
+    dimLabel: 'DİM балл',
     spotlightLive: 'Топ-ментор',
     viewDossier: 'Досье',
     bookTrialShort: 'Пробный · 0 ₼',
@@ -116,15 +115,15 @@ const HERO_COPY: Record<
     titleStart: 'Müəllimi qəbul balı',
     titleAccent: 'və nəticəyə',
     titleEnd: 'görə seçin',
-    subtitle: 'Təsdiqli ballar. Real şagird artımı. İlk sınaq — 0 ₼.',
+    subtitleLead: 'Təsdiqli DİM balları · İlk sınaq dərsi',
+    subtitlePrice: '— 0 ₼',
     intentTutor: 'Müəllim tapmaq',
     intentMap: 'Xəritədə baxmaq',
     intentQuiz: 'Səviyyə testi',
     allSubjects: 'Bütün fənlər',
     allGrades: 'Hamısı',
     showResultsCta: 'Müəllimləri göstər',
-    dimBadge: 'DİM',
-    trialFloat: '0 ₼ sınaq',
+    dimLabel: 'DİM balı',
     spotlightLive: 'Top mentor',
     viewDossier: 'Dosye',
     bookTrialShort: 'Sınaq · 0 ₼',
@@ -142,15 +141,15 @@ const HERO_COPY: Record<
     titleStart: 'Choose a tutor by',
     titleAccent: 'verified scores',
     titleEnd: '',
-    subtitle: 'Audited entrance scores. Real student gains. First class 0 ₼.',
+    subtitleLead: 'Audited scores & proven gains · First trial',
+    subtitlePrice: '— 0 ₼',
     intentTutor: 'Find a tutor',
     intentMap: 'Map',
     intentQuiz: 'Level quiz',
     allSubjects: 'All subjects',
     allGrades: 'Any',
     showResultsCta: 'Show tutors',
-    dimBadge: 'DİM',
-    trialFloat: '0 ₼ trial',
+    dimLabel: 'DİM score',
     spotlightLive: 'Top mentor',
     viewDossier: 'Dossier',
     bookTrialShort: 'Trial · 0 ₼',
@@ -167,46 +166,81 @@ const HERO_COPY: Record<
 
 const QUICK_GRADES: GradeId[] = ['9 класс', '11 класс', '1 курс'];
 
-export function HeroOpening({
-  locale,
-  selectedSubject,
-  selectedGrade,
-  resultCount,
-  spotlightTutors,
-  onSubjectChange,
-  onGradeChange,
-  onQuickApply,
-  onOpenMap,
-  onOpenQuiz,
-  onOpenTour,
-  onSwitchToTeacher,
-  onOpenCompare,
-  onOpenProfile,
-  onSendRequest,
-}: HeroOpeningProps) {
+/** Bespoke 3D Isometric Score Bars SVG representing Before -> Mid -> After trajectory */
+function IsometricScorePrism({
+  before,
+  after,
+  delta,
+}: {
+  before: string;
+  after: string;
+  delta: string;
+}) {
   return (
-    <HeroStageInner
-      locale={locale}
-      selectedSubject={selectedSubject}
-      selectedGrade={selectedGrade}
-      resultCount={resultCount}
-      spotlightTutors={spotlightTutors}
-      onSubjectChange={onSubjectChange}
-      onGradeChange={onGradeChange}
-      onQuickApply={onQuickApply}
-      onOpenMap={onOpenMap}
-      onOpenQuiz={onOpenQuiz}
-      onOpenTour={onOpenTour}
-      onSwitchToTeacher={onSwitchToTeacher}
-      onOpenCompare={onOpenCompare}
-      onOpenProfile={onOpenProfile}
-      onSendRequest={onSendRequest}
-    />
+    <div className="relative flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-gradient-to-br from-[#F0F9FF] via-white to-[#ECFDF5] p-3.5 dark:border-slate-700/70 dark:from-[#14233A] dark:via-[#111C2E] dark:to-[#0F2420]">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono-num text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+          DİM Growth
+        </span>
+        <span className="font-mono-num rounded-full bg-[var(--lime)] px-2 py-0.5 text-[10px] font-extrabold text-[#0F172A] shadow-2xs">
+          {delta}
+        </span>
+      </div>
+
+      {/* Isometric 3D Extruded Bar Columns */}
+      <svg
+        viewBox="0 0 180 112"
+        className="my-1.5 h-24 w-full overflow-visible"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="isoTopLime" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#D9F99D" />
+            <stop offset="100%" stopColor="#C8F542" />
+          </linearGradient>
+          <linearGradient id="isoFrontEmerald" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10B981" />
+            <stop offset="100%" stopColor="#047857" />
+          </linearGradient>
+        </defs>
+
+        {/* Subtle isometric platform shadow */}
+        <ellipse cx="92" cy="102" rx="74" ry="7" fill="rgba(15, 23, 42, 0.08)" />
+
+        {/* Bar 1 (Before) */}
+        <g>
+          <polygon points="26,64 42,56 58,64 42,72" fill="#CBD5E1" />
+          <polygon points="26,64 42,72 42,98 26,90" fill="#94A3B8" />
+          <polygon points="42,72 58,64 58,90 42,98" fill="#64748B" />
+        </g>
+
+        {/* Bar 2 (Mid Progress) */}
+        <g>
+          <polygon points="72,44 88,36 104,44 88,52" fill="#6EE7B7" />
+          <polygon points="72,44 88,52 88,98 72,90" fill="#34D399" />
+          <polygon points="88,52 104,44 104,90 88,98" fill="#059669" />
+        </g>
+
+        {/* Bar 3 (Target Peak — Emerald + Electric Lime Cap) */}
+        <g>
+          <polygon points="118,20 134,12 150,20 134,28" fill="url(#isoTopLime)" />
+          <polygon points="118,20 134,28 134,98 118,90" fill="url(#isoFrontEmerald)" />
+          <polygon points="134,28 150,20 150,90 134,98" fill="#065F46" />
+          {/* Floating Peak Sparkle Ring */}
+          <circle cx="134" cy="12" r="4" fill="#C8F542" />
+          <circle cx="134" cy="12" r="8" fill="#C8F542" opacity="0.28" />
+        </g>
+      </svg>
+
+      <div className="flex items-center justify-between font-mono-num text-[11px] font-bold text-[var(--ink)]">
+        <span className="text-[var(--muted)]">{before}</span>
+        <span className="text-[var(--accent-ink)]">→ {after}</span>
+      </div>
+    </div>
   );
 }
 
-// Re-export exact full HeroOpening keeping optional callbacks wired cleanly
-function HeroStageInner({
+export function HeroOpening({
   locale,
   selectedSubject,
   selectedGrade,
@@ -223,7 +257,6 @@ function HeroStageInner({
   const hc = HERO_COPY[locale];
   const [intent, setIntent] = useState<HeroIntent>('tutor');
   const [spotlightCursor, setSpotlightCursor] = useState(0);
-  const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 2, ry: -4 });
 
   const pool =
     spotlightTutors && spotlightTutors.length > 0 ? spotlightTutors : INITIAL_TUTORS;
@@ -251,41 +284,24 @@ function HeroStageInner({
     }
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({
-      rx: Number((-py * 10).toFixed(2)),
-      ry: Number((px * 12).toFixed(2)),
-    });
-  };
-
-  const handlePointerLeave = () => {
-    setTilt({ rx: 2, ry: -4 });
-  };
-
   return (
     <section
       aria-label="EduMatch showcase"
-      className="mx-auto mb-6 w-full max-w-7xl pt-2 pb-1 sm:pt-5"
+      className="mx-auto mb-5 w-full max-w-7xl pt-2 pb-1 sm:pt-5"
     >
-      <div className="grid grid-cols-1 items-center gap-7 md:grid-cols-12 md:gap-8 lg:gap-12">
-        {/* LEFT COLUMN: Minimal Commercial Typography + Clean Controls (70% Less Text) */}
+      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-8 lg:gap-12">
+        {/* LEFT COLUMN: Clean Minimal Editorial Copy + Single Unified Subject Dock */}
         <div className="text-center md:col-span-6 md:text-left">
-          {/* 1 Tiny Eyebrow Pill */}
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-bold text-[var(--accent-ink)]">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
             <span>{hc.eyebrow}</span>
           </span>
 
-          {/* Crisp Display Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.34, ease: EASE_EDITORIAL }}
-            className="mx-auto mt-3.5 max-w-lg break-words text-[2rem] font-bold leading-[1.06] tracking-[-0.04em] text-[var(--ink)] sm:text-[2.75rem] lg:text-[3.35rem] md:mx-0"
+            transition={{ duration: 0.3, ease: EASE_EDITORIAL }}
+            className="mx-auto mt-3.5 max-w-xl break-words text-[2rem] font-bold leading-[1.06] tracking-[-0.04em] text-[var(--ink)] sm:text-[2.65rem] lg:text-[3.25rem] md:mx-0"
           >
             {hc.titleStart}{' '}
             <em className="relative inline-block font-serif-editorial font-normal italic text-[var(--accent-ink)]">
@@ -298,13 +314,16 @@ function HeroStageInner({
             {hc.titleEnd}
           </motion.h1>
 
-          {/* 1 Concise Line Subheadline */}
-          <p className="mx-auto mt-3 max-w-md text-sm font-medium text-[var(--ink-2)] sm:text-base md:mx-0">
-            {hc.subtitle}
+          <p className="mx-auto mt-3 max-w-lg text-sm font-medium text-[var(--ink-2)] sm:text-base md:mx-0">
+            {hc.subtitleLead}{' '}
+            <strong className="whitespace-nowrap font-mono-num font-bold text-[var(--ink)]">
+              {hc.subtitlePrice}
+            </strong>
+            .
           </p>
 
-          {/* Single Unified Primary Action Bar */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+          {/* Clean Command Bar (Primary CTA + Subtle Mode Switcher) */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5 md:justify-start">
             <motion.button
               type="button"
               onClick={onQuickApply}
@@ -323,7 +342,7 @@ function HeroStageInner({
               </span>
             </motion.button>
 
-            <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)]/85 p-1 shadow-xs backdrop-blur-md">
+            <div className="inline-flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface)]/90 p-1 shadow-xs backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => handleIntentClick('tutor')}
@@ -361,184 +380,147 @@ function HeroStageInner({
             </div>
           </div>
 
-          {/* Single Clean Subject Filter Strip */}
-          <div
-            className="mt-4 flex flex-wrap items-center justify-center gap-1.5 md:justify-start"
-            role="group"
-            aria-label="Subject switcher"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setSpotlightCursor(0);
-                onSubjectChange('');
-              }}
-              aria-pressed={selectedSubject === ''}
-              className={`min-h-[32px] cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                selectedSubject === ''
-                  ? 'bg-[var(--ink)] text-[var(--bg)] shadow-xs'
-                  : 'bg-[var(--surface)]/80 text-[var(--ink-2)] ring-1 ring-[var(--border)] hover:bg-[var(--surface)]'
-              }`}
+          {/* Unified Subject Track (Clean Neutral Glass Track — No Rainbow Pill Clutter) */}
+          <div className="mt-4 inline-flex w-full flex-col gap-2.5 rounded-3xl border border-[var(--border)] bg-[var(--surface)]/85 p-3 text-left shadow-[var(--shadow-card)] backdrop-blur-xl">
+            <div
+              className="flex flex-wrap items-center gap-1"
+              role="group"
+              aria-label="Subject switcher"
             >
-              {hc.allSubjects}
-            </button>
-
-            {SUBJECTS.map((subj) => {
-              const active = selectedSubject === subj;
-              const theme = getSubjectTheme(subj);
-              const SubjIcon = SUBJECT_ICONS[subj];
-              return (
-                <button
-                  key={subj}
-                  type="button"
-                  onClick={() => {
-                    setSpotlightCursor(0);
-                    onSubjectChange(subj);
-                  }}
-                  aria-pressed={active}
-                  className={`inline-flex min-h-[32px] cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                    active
-                      ? 'bg-[var(--ink)] text-[var(--bg)] shadow-xs'
-                      : `border hover:-translate-y-0.5 ${theme.pillClass}`
-                  }`}
-                >
-                  <SubjIcon
-                    size={13}
-                    weight={active ? 'fill' : 'bold'}
-                    aria-hidden="true"
-                    className={active ? 'text-[var(--lime)]' : ''}
-                  />
-                  <span>{SUBJECT_LABELS[subj][locale]}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Compact Grade Pills + Numeric Metrics in One Clean Footer Line */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-[var(--border)]/70 pt-3.5 text-xs md:justify-start">
-            <div className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)]/75 p-0.5 ring-1 ring-[var(--border)]">
               <button
                 type="button"
-                onClick={() => onGradeChange('')}
-                aria-pressed={selectedGrade === ''}
-                className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
-                  selectedGrade === ''
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                onClick={() => {
+                  setSpotlightCursor(0);
+                  onSubjectChange('');
+                }}
+                aria-pressed={selectedSubject === ''}
+                className={`min-h-[30px] cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                  selectedSubject === ''
+                    ? 'bg-[var(--ink)] text-[var(--bg)] shadow-2xs'
+                    : 'text-[var(--ink-2)] hover:bg-[var(--surface-subtle)] hover:text-[var(--ink)]'
                 }`}
               >
-                {hc.allGrades}
+                {hc.allSubjects}
               </button>
-              {QUICK_GRADES.map((g) => {
-                const active = selectedGrade === g;
+
+              {SUBJECTS.map((subj) => {
+                const active = selectedSubject === subj;
+                const theme = getSubjectTheme(subj);
+                const SubjIcon = SUBJECT_ICONS[subj];
                 return (
                   <button
-                    key={g}
+                    key={subj}
                     type="button"
-                    onClick={() => onGradeChange(g)}
+                    onClick={() => {
+                      setSpotlightCursor(0);
+                      onSubjectChange(subj);
+                    }}
                     aria-pressed={active}
-                    className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                    className={`inline-flex min-h-[30px] cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
                       active
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                        ? 'bg-[var(--ink)] text-[var(--bg)] shadow-2xs'
+                        : 'text-[var(--ink-2)] hover:bg-[var(--surface-subtle)] hover:text-[var(--ink)]'
                     }`}
                   >
-                    {GRADE_LABELS[g][locale]}
+                    <span
+                      aria-hidden="true"
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        active ? 'bg-[var(--lime)]' : theme.dotColorClass
+                      }`}
+                    />
+                    <SubjIcon
+                      size={12}
+                      weight={active ? 'fill' : 'bold'}
+                      aria-hidden="true"
+                      className={active ? 'text-[var(--lime)]' : 'text-[var(--muted)]'}
+                    />
+                    <span>{SUBJECT_LABELS[subj][locale]}</span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3.5 text-[11px] text-[var(--muted)]">
-              {hc.metrics.map((m) => (
-                <span key={m.label} className="inline-flex items-baseline gap-1">
-                  <strong className="font-mono-num text-xs font-bold text-[var(--ink)]">
-                    {m.value}
-                  </strong>
-                  <span>{m.label}</span>
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)]/70 pt-2">
+              <div className="flex flex-wrap items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => onGradeChange('')}
+                  aria-pressed={selectedGrade === ''}
+                  className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                    selectedGrade === ''
+                      ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'
+                      : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                  }`}
+                >
+                  {hc.allGrades}
+                </button>
+                {QUICK_GRADES.map((g) => {
+                  const active = selectedGrade === g;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => onGradeChange(g)}
+                      aria-pressed={active}
+                      className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                        active
+                          ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'
+                          : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      {GRADE_LABELS[g][locale]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center gap-3 text-[11px] text-[var(--muted)]">
+                {hc.metrics.map((m) => (
+                  <span key={m.label} className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                    <strong className="font-mono-num text-xs font-bold text-[var(--ink)]">
+                      {m.value}
+                    </strong>
+                    <span>{m.label}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: True Interactive 3D Perspective Product Stage */}
-        <div
-          className="md:col-span-6"
-          style={{ perspective: '1200px' }}
-          onPointerMove={handlePointerMove}
-          onPointerLeave={handlePointerLeave}
-        >
+        {/* RIGHT COLUMN: Harmonious Frosted Glass 3D Isometric Product Showcase */}
+        <div className="md:col-span-6">
           <motion.div
-            animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
-            transition={{ type: 'spring', stiffness: 180, damping: 20, mass: 0.7 }}
-            style={{ transformStyle: 'preserve-3d' }}
-            className="relative mx-auto w-full max-w-[490px] py-3 md:max-w-none"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: EASE_EDITORIAL }}
+            className="relative mx-auto w-full max-w-[520px] md:max-w-none"
           >
-            {/* 3D Backplate 1 (Z = -34px, angled Emerald Glass) */}
+            {/* Ambient Soft Aura Halo */}
             <div
               aria-hidden="true"
-              style={{ transform: 'translateZ(-34px) rotate(-3.5deg)' }}
-              className="pointer-events-none absolute inset-x-3 inset-y-4 hidden rounded-[32px] border border-emerald-400/25 bg-gradient-to-br from-emerald-500/20 via-sky-500/15 to-transparent backdrop-blur-md sm:block"
+              className={`pointer-events-none absolute -inset-2 rounded-[36px] bg-gradient-to-br ${subjectTheme.barGradientClass} opacity-20 blur-2xl transition-colors duration-300`}
             />
 
-            {/* 3D Backplate 2 (Z = -18px, angled Lime Prism) */}
-            <div
-              aria-hidden="true"
-              style={{ transform: 'translateZ(-18px) rotate(3deg)' }}
-              className="pointer-events-none absolute inset-x-2 inset-y-4 hidden rounded-[32px] border border-[#C8F542]/30 bg-gradient-to-tr from-[#0F172A]/85 via-[#0F4C5C]/70 to-[#C8F542]/20 sm:block"
-            />
-
-            {/* Floating 3D DİM Crystal Badge (Z = +46px) */}
-            <div
-              style={{ transform: 'translateZ(46px)' }}
-              className="absolute -top-1 right-2 z-30 flex items-center gap-2 rounded-2xl border border-[#C8F542]/50 bg-[#0F172A]/95 px-3.5 py-2 text-white shadow-[0_20px_40px_rgba(15,23,42,0.5)] backdrop-blur-xl sm:-right-2"
-            >
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-[#C8F542] to-emerald-400 text-[#0F172A] shadow-sm">
-                <Trophy size={16} weight="fill" aria-hidden="true" />
-              </span>
-              <div className="leading-tight">
-                <div className="font-mono-num text-base font-black text-[#C8F542]">
-                  {activeTutor.education.admissionScore}
-                  <span className="text-[11px] font-semibold text-slate-400">
-                    /{activeTutor.education.maxScore}
-                  </span>
-                </div>
-                <div className="text-[9px] font-bold uppercase tracking-widest text-emerald-300">
-                  {hc.dimBadge}
-                </div>
-              </div>
-            </div>
-
-            {/* Floating 3D Trial Pill (Z = +38px) */}
-            <div
-              style={{ transform: 'translateZ(38px)' }}
-              className="absolute -bottom-1 left-2 z-30 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-[#0F172A]/95 px-3 py-1.5 text-xs font-bold text-white shadow-2xl backdrop-blur-xl sm:-left-2"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#C8F542] animate-pulse" aria-hidden="true" />
-              <span>{hc.trialFloat}</span>
-            </div>
-
-            {/* Primary 3D Obsidian Card Plane (Z = +12px) */}
-            <div
-              style={{ transform: 'translateZ(12px)' }}
-              className="relative z-10 overflow-hidden rounded-[30px] border border-slate-700/80 bg-[#0F172A] p-5 text-white shadow-[0_32px_70px_-18px_rgba(15,23,42,0.7)] sm:p-6"
-            >
-              {/* Subject-Reactive Glowing Aura */}
+            {/* Crisp Un-Skewed Solaris Frosted Glass Showcase Card */}
+            <div className="relative overflow-hidden rounded-[30px] border border-white/90 bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-float)] backdrop-blur-2xl dark:border-slate-700/80 dark:bg-[#121D30]/95 sm:p-5">
+              {/* Top Gradient Accent Bar */}
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute -top-20 -right-16 h-60 w-60 rounded-full bg-gradient-to-br ${subjectTheme.barGradientClass} opacity-35 blur-3xl transition-colors duration-300`}
+                className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${subjectTheme.topStripClass}`}
               />
 
-              {/* Clean Top Row (Padded clear of 3D Crystal Badge) */}
-              <div className="relative z-10 flex items-center justify-between gap-2 pr-28 sm:pr-32">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#C8F542]" />
+              {/* Top Bar: Interactive Mentor Switcher + Counter */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent-ink)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span>{hc.spotlightLive}</span>
                   </span>
                   {activePrimarySubject ? (
-                    <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-slate-200 sm:inline-flex">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${subjectTheme.pillClass}`}
+                    >
                       {SUBJECT_LABELS[activePrimarySubject][locale]}
                     </span>
                   ) : null}
@@ -552,18 +534,18 @@ function HeroStageInner({
                         setSpotlightCursor((c) => (c - 1 + activePool.length) % activePool.length)
                       }
                       aria-label={hc.prevSpotlight}
-                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/8 text-slate-200 transition-colors hover:bg-white/20"
+                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
                     >
                       <ArrowLeft size={12} weight="bold" />
                     </button>
-                    <span className="font-mono-num min-w-[30px] text-center text-[11px] font-semibold text-slate-300">
+                    <span className="font-mono-num min-w-[30px] text-center text-[11px] font-semibold text-[var(--muted)]">
                       {safeIdx + 1}/{activePool.length}
                     </span>
                     <button
                       type="button"
                       onClick={() => setSpotlightCursor((c) => (c + 1) % activePool.length)}
                       aria-label={hc.nextSpotlight}
-                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/8 text-slate-200 transition-colors hover:bg-white/20"
+                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
                     >
                       <ArrowRight size={12} weight="bold" />
                     </button>
@@ -571,16 +553,16 @@ function HeroStageInner({
                 ) : null}
               </div>
 
-              {/* Active Mentor Identity + Minimal Badges */}
+              {/* Main 2-Part Showcase Body: Mentor Identity (Left) + 3D Isometric Score Prism (Right) */}
               <motion.div
                 key={activeTutor.id}
-                initial={{ opacity: 0.55, y: 5 }}
+                initial={{ opacity: 0.6, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.18, ease: EASE_EDITORIAL }}
-                className="relative z-10 mt-5 space-y-4 text-left"
+                className="mt-4 grid grid-cols-1 items-stretch gap-3.5 lg:grid-cols-12"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="shrink-0 rounded-full ring-2 ring-[#C8F542]/80 ring-offset-2 ring-offset-[#0F172A]">
+                <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)]/55 p-3.5 lg:col-span-7">
+                  <div className="flex items-center gap-3">
                     <Avatar
                       id={activeTutor.id}
                       name={activeTutorName}
@@ -588,93 +570,69 @@ function HeroStageInner({
                       size="xl"
                       verified={activeTutor.education.verified}
                     />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h2 className="truncate text-lg font-bold tracking-tight text-white sm:text-xl">
-                        {activeTutorName}
-                      </h2>
-                      {activeTutor.education.verified ? (
-                        <SealCheck
-                          size={16}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1">
+                        <h2 className="truncate text-base font-bold tracking-tight text-[var(--ink)] sm:text-lg">
+                          {activeTutorName}
+                        </h2>
+                        {activeTutor.education.verified ? (
+                          <SealCheck
+                            size={15}
+                            weight="fill"
+                            className="shrink-0 text-[var(--accent)]"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                      </div>
+
+                      <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                        <GraduationCap
+                          size={13}
                           weight="fill"
-                          className="shrink-0 text-[#C8F542]"
+                          className="shrink-0 text-[var(--accent-ink)]"
                           aria-hidden="true"
                         />
-                      ) : null}
-                    </div>
-
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-                      <span className="inline-flex items-center gap-1">
-                        <GraduationCap size={13} weight="fill" className="text-emerald-400" aria-hidden="true" />
-                        <span className="font-semibold text-white">
+                        <span className="truncate font-semibold text-[var(--ink-2)]">
                           {activeTutor.education.universityShort}
                         </span>
-                      </span>
-                      <span className="text-slate-600">•</span>
-                      <span className="inline-flex items-center gap-1 font-semibold text-white">
-                        <Star size={12} weight="fill" className="text-amber-400" aria-hidden="true" />
-                        {activeTutor.rating.toFixed(1)}
-                      </span>
-                      <span className="text-slate-600">•</span>
-                      <span className="font-mono-num font-bold text-[#C8F542]">
-                        {activeTutor.price} ₼
-                      </span>
+                      </div>
+
+                      <div className="mt-1 flex items-center gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1 font-bold text-[var(--ink)]">
+                          <Star size={12} weight="fill" className="text-amber-500" aria-hidden="true" />
+                          {activeTutor.rating.toFixed(1)}
+                        </span>
+                        <span className="text-[var(--border-strong)]">•</span>
+                        <span className="font-mono-num font-bold text-[var(--ink)]">
+                          {activeTutor.price} ₼
+                        </span>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Clean Verified DİM Score + Superpower Summary */}
+                  <div className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
+                    <span className="truncate text-xs font-semibold text-[var(--accent-ink)]">
+                      {resolveLocalized(activeVisual.superpowerTag, locale)}
+                    </span>
+                    <span className="shrink-0 rounded-lg bg-[var(--ink)] px-2 py-0.5 font-mono-num text-xs font-extrabold text-[var(--lime)]">
+                      {activeTutor.education.admissionScore}
+                    </span>
                   </div>
                 </div>
 
-                {/* Visual Hero Centerpiece: 3D Glowing Score Growth Spline Curve */}
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-emerald-300">
-                      {resolveLocalized(activeVisual.superpowerTag, locale)}
-                    </span>
-                    <span className="font-mono-num rounded-full bg-[#C8F542]/15 px-2.5 py-0.5 text-[11px] font-extrabold text-[#C8F542]">
-                      {activeVisual.trajectory.before} → {activeVisual.trajectory.after} ({activeVisual.trajectory.delta})
-                    </span>
-                  </div>
-
-                  {/* Glowing Bespoke SVG Growth Curve */}
-                  <div className="mt-2.5 h-16 w-full">
-                    <svg
-                      viewBox="0 0 320 64"
-                      className="h-full w-full overflow-visible"
-                      aria-hidden="true"
-                    >
-                      <defs>
-                        <linearGradient id={`hero-curve-${activeTutor.id}`} x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#10B981" />
-                          <stop offset="100%" stopColor="#C8F542" />
-                        </linearGradient>
-                        <linearGradient id={`hero-area-${activeTutor.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
-                          <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
-                      <line x1="0" y1="54" x2="320" y2="54" stroke="rgba(255,255,255,0.08)" strokeDasharray="3 4" />
-                      <line x1="0" y1="28" x2="320" y2="28" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 4" />
-                      <path
-                        d="M 10 52 C 85 50, 145 38, 205 26 C 245 18, 280 12, 308 10 L 308 62 L 10 62 Z"
-                        fill={`url(#hero-area-${activeTutor.id})`}
-                      />
-                      <path
-                        d="M 10 52 C 85 50, 145 38, 205 26 C 245 18, 280 12, 308 10"
-                        fill="none"
-                        stroke={`url(#hero-curve-${activeTutor.id})`}
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                      />
-                      <circle cx="10" cy="52" r="4" fill="#10B981" />
-                      <circle cx="308" cy="10" r="6" fill="#C8F542" />
-                      <circle cx="308" cy="10" r="11" fill="#C8F542" opacity="0.24" />
-                    </svg>
-                  </div>
+                {/* Real 3D Isometric Extruded Score Graph */}
+                <div className="lg:col-span-5">
+                  <IsometricScorePrism
+                    before={activeVisual.trajectory.before}
+                    after={activeVisual.trajectory.after}
+                    delta={activeVisual.trajectory.delta}
+                  />
                 </div>
               </motion.div>
 
-              {/* Bottom Dock: Mini-Avatar Switcher + Primary Lime CTA */}
-              <div className="relative z-10 mt-4 flex flex-wrap items-center justify-between gap-3 pt-1">
+              {/* Bottom Switcher + Clean Action Dock */}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)]/70 pt-3.5">
                 {quickSwitchPool.length > 1 ? (
                   <div
                     className="flex items-center gap-1.5"
@@ -694,8 +652,8 @@ function HeroStageInner({
                           title={cName}
                           className={`cursor-pointer rounded-full transition-all ${
                             isCurrent
-                              ? 'scale-110 ring-2 ring-[#C8F542] ring-offset-2 ring-offset-[#0F172A]'
-                              : 'opacity-65 hover:opacity-100'
+                              ? 'scale-105 ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--surface)]'
+                              : 'opacity-70 hover:opacity-100'
                           }`}
                         >
                           <Avatar id={candidate.id} name={cName} index={idx} size="sm" />
@@ -713,7 +671,7 @@ function HeroStageInner({
                     onClick={() =>
                       onOpenProfile ? onOpenProfile(activeTutor.id) : onQuickApply()
                     }
-                    className="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/8 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-white/15"
+                    className="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--ink)]"
                   >
                     {hc.viewDossier}
                   </button>
@@ -724,12 +682,12 @@ function HeroStageInner({
                       onSendRequest ? onSendRequest(activeTutor.id, true) : onQuickApply()
                     }
                     whileTap={{ scale: 0.98 }}
-                    className="group/spot inline-flex min-h-[38px] cursor-pointer items-center gap-2 rounded-full bg-[var(--lime)] py-1 pl-4 pr-1 text-xs font-bold text-[#0F172A] shadow-md transition-colors hover:bg-[#d8fa6b]"
+                    className="group/spot inline-flex min-h-[38px] cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-[var(--primary-btn)] py-1 pl-4 pr-1 text-xs font-semibold text-[var(--primary-btn-ink)] transition-colors hover:bg-[var(--primary-btn-hover)]"
                   >
                     <span>{hc.bookTrialShort}</span>
                     <span
                       aria-hidden="true"
-                      className="grid h-7 w-7 place-items-center rounded-full bg-[#0F172A] text-[#C8F542] transition-transform duration-200 group-hover/spot:translate-x-0.5"
+                      className="grid h-7 w-7 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover/spot:translate-x-0.5"
                     >
                       <ArrowRight size={13} weight="bold" />
                     </span>

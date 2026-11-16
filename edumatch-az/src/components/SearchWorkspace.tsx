@@ -10,7 +10,6 @@ import {
   MapPin,
   PaperPlaneTilt,
   Scales,
-  SealCheck,
   SlidersHorizontal,
   Sparkle,
   Star,
@@ -204,99 +203,6 @@ export function SearchWorkspace({
   const extraFilterCount =
     (filters.lang ? 1 : 0) + (filters.sty ? 1 : 0) + (filters.price < 60 ? 1 : 0);
 
-  const bentoCards: {
-    id: string;
-    icon: typeof SealCheck;
-    value: string;
-    title: string;
-    sub: string;
-    iconClass: string;
-    borderHover: string;
-    action?: 'compare' | 'catalog';
-  }[] = [
-    {
-      id: 'bento-dim',
-      icon: SealCheck,
-      value: '650+',
-      title:
-        locale === 'az'
-          ? 'DİM & Diplom'
-          : locale === 'en'
-            ? 'Verified DİM'
-            : 'DİM и дипломы',
-      sub:
-        locale === 'az'
-          ? '100% təsdiqlənmiş nəticə'
-          : locale === 'en'
-            ? '100% verified entrance scores'
-            : '100% проверка документов',
-      iconClass:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300',
-      borderHover: 'hover:border-emerald-300/80 dark:hover:border-emerald-700/80',
-    },
-    {
-      id: 'bento-vs',
-      icon: Scales,
-      value: '1v1 VS',
-      title:
-        locale === 'az'
-          ? 'Müəllim müqayisəsi'
-          : locale === 'en'
-            ? 'Side-by-Side VS'
-            : 'Сравнение 1-на-1',
-      sub:
-        locale === 'az'
-          ? 'Balları yan-yana tutuşdur'
-          : locale === 'en'
-            ? 'Compare scores & outcomes'
-            : 'Сравните баллы и методику',
-      iconClass: 'bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300',
-      borderHover: 'hover:border-sky-300/80 dark:hover:border-sky-700/80',
-      action: 'compare',
-    },
-    {
-      id: 'bento-growth',
-      icon: TrendUp,
-      value: '+145',
-      title:
-        locale === 'az'
-          ? 'Orta bal sıçrayışı'
-          : locale === 'en'
-            ? 'Avg. score gain'
-            : 'Средний рост DİM',
-      sub:
-        locale === 'az'
-          ? 'Real sınaq artımı qrafiki'
-          : locale === 'en'
-            ? 'Measured mock exam track'
-            : 'Подтверждённая динамика',
-      iconClass:
-        'bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-300',
-      borderHover: 'hover:border-violet-300/80 dark:hover:border-violet-700/80',
-    },
-    {
-      id: 'bento-trial',
-      icon: Sparkle,
-      value: '0 ₼',
-      title:
-        locale === 'az'
-          ? 'İlk sınaq dərsi'
-          : locale === 'en'
-            ? 'Free trial class'
-            : 'Пробный урок',
-      sub:
-        locale === 'az'
-          ? 'Ödənişsiz ilk tanışlıq'
-          : locale === 'en'
-            ? 'Risk-free starter session'
-            : 'Бесплатное знакомство',
-      iconClass:
-        'bg-[#ECFCCB] text-[#3F6212] dark:bg-[#C8F542]/20 dark:text-[#C8F542]',
-      borderHover: 'hover:border-lime-400/80 dark:hover:border-lime-500/70',
-      action: 'catalog',
-    },
-  ];
-
   const stackedPreviewTutors = (
     filteredTutors.length > 0 ? filteredTutors : tutors
   ).slice(0, 4);
@@ -322,85 +228,14 @@ export function SearchWorkspace({
         onSendRequest={onSendRequest}
       />
 
-      {/* High-Contrast Visual Proof Bento Strip */}
-      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {bentoCards.map((card, idx) => {
-          const IconComp = card.icon;
-          const isDuel = idx === 1;
-          const isTrial = idx === 3;
-          const tileTheme = isDuel
-            ? 'bg-[#0F172A] text-white border-slate-800 shadow-[var(--shadow-float)] hover:border-[#C8F542]/60'
-            : isTrial
-              ? 'bg-gradient-to-br from-[#ECFCCB]/85 to-emerald-50/90 border-lime-300/80 dark:from-[#1A2E14] dark:to-[#10261F] dark:border-lime-700/40'
-              : idx === 0
-                ? 'bg-gradient-to-br from-emerald-50/95 to-white border-emerald-200/80 dark:from-[#122620] dark:to-[#121D30] dark:border-emerald-800/40'
-                : 'bg-gradient-to-br from-sky-50/95 to-violet-50/75 border-sky-200/80 dark:from-[#162438] dark:to-[#1C1B33] dark:border-sky-800/40';
-
-          const inner = (
-            <>
-              <span
-                aria-hidden="true"
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${
-                  isDuel ? 'bg-[var(--lime)] text-[#0F172A]' : card.iconClass
-                }`}
-              >
-                <IconComp size={19} weight="fill" />
-              </span>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-baseline gap-1.5">
-                  <span
-                    className={`font-mono-num text-sm font-extrabold sm:text-base ${
-                      isDuel ? 'text-[#C8F542]' : 'text-[var(--ink)]'
-                    }`}
-                  >
-                    {card.value}
-                  </span>
-                  <span
-                    className={`text-xs font-semibold ${
-                      isDuel ? 'text-white' : 'text-[var(--ink)]'
-                    }`}
-                  >
-                    {card.title}
-                  </span>
-                </div>
-              </div>
-            </>
-          );
-
-          if (card.action) {
-            const handleBentoAction =
-              card.action === 'compare' ? handleOpenCompareNow : openCatalog;
-            return (
-              <button
-                key={card.id}
-                type="button"
-                onClick={handleBentoAction}
-                className={`flex cursor-pointer items-start gap-3 rounded-[22px] border p-3.5 text-left transition-all duration-150 hover:-translate-y-0.5 sm:p-4 ${tileTheme} ${card.borderHover}`}
-              >
-                {inner}
-              </button>
-            );
-          }
-
-          return (
-            <div
-              key={card.id}
-              className={`flex items-start gap-3 rounded-[22px] border p-3.5 text-left shadow-[var(--shadow-card)] transition-all duration-150 sm:p-4 ${tileTheme} ${card.borderHover}`}
-            >
-              {inner}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Tutors Catalog: Compact Stacked-Avatar Bar by Default, Full Interactive Feed on Demand */}
+      {/* Unified Sleek Catalog & 1v1 VS Dock (No Redundant 4-Box Bento Clutter Above It) */}
       {!tutorsOpen ? (
         <div
           id="tutor-catalog-toggle"
-          className="em-card flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:px-6 sm:py-5"
+          className="em-card flex flex-wrap items-center justify-between gap-4 rounded-[26px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:px-6 sm:py-4"
         >
-          <div className="flex min-w-0 items-center gap-3.5 sm:gap-4">
-            {/* Stacked Real Mentor Portraits (Clickable Quick Dossier) */}
+          <div className="flex min-w-0 items-center gap-3.5">
+            {/* Clickable Stacked Studio Portraits */}
             <div className="hidden -space-x-2 hover:space-x-1 transition-all duration-200 sm:flex">
               {stackedPreviewTutors.map((t, i) => {
                 const previewName = resolveTutorName(t, locale);
@@ -438,27 +273,38 @@ export function SearchWorkspace({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={openCatalog}
-            aria-expanded={false}
-            className="group inline-flex min-h-[42px] shrink-0 cursor-pointer items-center gap-2.5 rounded-full bg-[var(--primary-btn)] py-1.5 pl-4 pr-1.5 text-xs font-semibold text-[var(--primary-btn-ink)] transition-colors hover:bg-[var(--primary-btn-hover)] sm:text-sm"
-          >
-            <ChalkboardTeacher size={16} weight="bold" aria-hidden="true" />
-            <span>
-              {locale === 'az'
-                ? `Müəllimləri göstər (${filteredTutors.length})`
-                : locale === 'en'
-                  ? `Show tutors (${filteredTutors.length})`
-                  : `Показать репетиторов (${filteredTutors.length})`}
-            </span>
-            <span
-              aria-hidden="true"
-              className="grid h-7 w-7 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover:translate-x-0.5"
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleOpenCompareNow}
+              className="inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-4 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-ink)]"
             >
-              <ArrowRight size={14} weight="bold" />
-            </span>
-          </button>
+              <Scales size={14} weight="bold" className="text-[var(--accent-ink)]" aria-hidden="true" />
+              <span>1v1 VS</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={openCatalog}
+              aria-expanded={false}
+              className="group inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-2.5 rounded-full bg-[var(--primary-btn)] py-1.5 pl-4 pr-1.5 text-xs font-semibold text-[var(--primary-btn-ink)] transition-colors hover:bg-[var(--primary-btn-hover)] sm:text-sm"
+            >
+              <ChalkboardTeacher size={16} weight="bold" aria-hidden="true" />
+              <span>
+                {locale === 'az'
+                  ? `Müəllimləri göstər (${filteredTutors.length})`
+                  : locale === 'en'
+                    ? `Show tutors (${filteredTutors.length})`
+                    : `Показать репетиторов (${filteredTutors.length})`}
+              </span>
+              <span
+                aria-hidden="true"
+                className="grid h-7 w-7 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover:translate-x-0.5"
+              >
+                <ArrowRight size={14} weight="bold" />
+              </span>
+            </button>
+          </div>
         </div>
       ) : (
         <motion.div
