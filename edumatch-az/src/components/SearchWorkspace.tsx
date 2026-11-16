@@ -1,24 +1,23 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowCounterClockwise,
   ArrowRight,
-  Atom,
+  ArrowsDownUp,
   BookOpenText,
-  Calculator,
+  CaretDown,
   ChalkboardTeacher,
-  Flask,
+  CurrencyCircleDollar,
   GraduationCap,
   Heart,
+  Laptop,
   MapPin,
   PaperPlaneTilt,
   Scales,
   SlidersHorizontal,
   Sparkle,
   Star,
-  TerminalWindow,
-  Translate,
   TrendUp,
   X,
 } from '@phosphor-icons/react';
@@ -40,7 +39,7 @@ import {
   SUBJECT_LABELS,
 } from '@/data/i18n';
 import { resolveLocalized, resolveTutorName } from '@/data/tutors';
-import { COMPARE_COPY, getSubjectTheme } from '@/data/tutorVisuals';
+import { COMPARE_COPY } from '@/data/tutorVisuals';
 import { GeoRadarCard } from '@/components/GeoRadarCard';
 import { HeroOpening } from '@/components/HeroOpening';
 import { TutorCard } from '@/components/TutorCard';
@@ -59,7 +58,6 @@ import type {
   LocationState,
   SearchFilters,
   StudentState,
-  SubjectId,
   TutorProfile,
 } from '@/types/edumatch';
 
@@ -91,18 +89,6 @@ interface SearchWorkspaceProps {
   tutorsOpen: boolean;
   onTutorsOpenChange: (open: boolean) => void;
 }
-
-const SUBJECT_ICONS: Record<
-  SubjectId,
-  React.ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'fill'; className?: string }>
-> = {
-  Математика: Calculator,
-  Физика: Atom,
-  Химия: Flask,
-  'Английский язык': Translate,
-  'Азербайджанский язык': BookOpenText,
-  Информатика: TerminalWindow,
-};
 
 export function SearchWorkspace({
   locale,
@@ -136,7 +122,31 @@ export function SearchWorkspace({
   const cmp = COMPARE_COPY[locale];
   const catalogRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const filterBarRef = useRef<HTMLDivElement>(null);
   const [extraFiltersOpen, setExtraFiltersOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<
+    'fmt' | 'cat' | 'price' | 'sort' | null
+  >(null);
+
+  useEffect(() => {
+    if (!activeDropdown) return;
+    const handlePointerDown = (e: PointerEvent) => {
+      if (filterBarRef.current && !filterBarRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeDropdown]);
 
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
@@ -384,21 +394,28 @@ export function SearchWorkspace({
           </div>
         ) : null}
 
-        {/* Pill-First Anti-Boxy Filter Studio */}
-        <div className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:p-6">
+        {/* Clean Monochrome Catalog Header + 1-Click Subject Tabs + Dropdown Pills */}
+        <div
+          ref={filterBarRef}
+          className="relative z-20 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:px-6 sm:py-5"
+        >
+          {/* Top Header: Find your tutor (N) + Reset on left | [Feed | Swipe], [Saved · N], [Compare], [Map], [Hide] on right */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)] sm:text-xl">
-                {copy.search.title}
+              <h2 className="text-lg font-bold tracking-tight text-[var(--ink)] sm:text-xl">
+                {copy.search.title}{' '}
+                <span className="font-mono-num text-sm font-semibold text-[var(--muted)]">
+                  ({filteredTutors.length})
+                </span>
               </h2>
-              <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono-num text-xs font-semibold text-[var(--accent-ink)]">
-                {filteredTutors.length}
-              </span>
               {totalActiveFilterCount > 0 ? (
                 <button
                   type="button"
-                  onClick={resetAllFilters}
-                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/50 dark:text-rose-300"
+                  onClick={() => {
+                    resetAllFilters();
+                    setActiveDropdown(null);
+                  }}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--ink-2)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
                 >
                   <ArrowCounterClockwise size={11} weight="bold" aria-hidden="true" />
                   <span>
@@ -412,28 +429,7 @@ export function SearchWorkspace({
               ) : null}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={scrollToMap}
-                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full bg-[var(--surface-subtle)] px-3.5 text-xs font-semibold text-[var(--ink-2)] transition-all duration-150 hover:bg-[var(--accent-soft)]/60 hover:text-[var(--ink)] active:scale-[0.97]"
-              >
-                <MapPin size={13} weight="bold" aria-hidden="true" />
-                <span>{locale === 'az' ? 'Xəritə' : locale === 'en' ? 'Map' : 'На карте'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleOpenCompareNow}
-                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full bg-[var(--surface-subtle)] px-3.5 text-xs font-semibold text-[var(--ink)] transition-all duration-150 hover:bg-[var(--accent-soft)]/60 active:scale-[0.97]"
-              >
-                <Scales size={14} weight="bold" aria-hidden="true" />
-                <span>
-                  {cmp.vsButtonShort}
-                  {compareIds.length > 0 ? ` (${compareIds.length})` : ''}
-                </span>
-              </button>
-
+            <div className="flex flex-wrap items-center gap-1.5">
               <div
                 className="flex rounded-full bg-[var(--surface-subtle)] p-0.5"
                 role="group"
@@ -443,7 +439,7 @@ export function SearchWorkspace({
                   type="button"
                   aria-pressed={filters.mode === 'feed'}
                   onClick={() => onFiltersChange({ mode: 'feed' })}
-                  className={`min-h-[30px] cursor-pointer rounded-full px-3.5 text-xs font-semibold transition-all duration-150 ${
+                  className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
                     filters.mode === 'feed'
                       ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
                       : 'text-[var(--muted)] hover:text-[var(--ink)]'
@@ -455,7 +451,7 @@ export function SearchWorkspace({
                   type="button"
                   aria-pressed={filters.mode === 'swipe'}
                   onClick={() => onFiltersChange({ mode: 'swipe' })}
-                  className={`min-h-[30px] cursor-pointer rounded-full px-3.5 text-xs font-semibold transition-all duration-150 ${
+                  className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
                     filters.mode === 'swipe'
                       ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
                       : 'text-[var(--muted)] hover:text-[var(--ink)]'
@@ -469,10 +465,10 @@ export function SearchWorkspace({
                 type="button"
                 aria-pressed={filters.fav}
                 onClick={() => onFiltersChange({ fav: !filters.fav })}
-                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-colors ${
                   filters.fav
-                    ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)] ring-1 ring-[var(--accent)]/40'
-                    : 'bg-[var(--surface-subtle)] text-[var(--ink)] hover:bg-[var(--accent-soft)]/50'
+                    ? 'border-[var(--ink)] bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                    : 'border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink)] hover:border-[var(--border-strong)]'
                 }`}
               >
                 <Heart
@@ -487,19 +483,23 @@ export function SearchWorkspace({
 
               <button
                 type="button"
-                aria-expanded={extraFiltersOpen}
-                onClick={() => setExtraFiltersOpen((v) => !v)}
-                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
-                  extraFiltersOpen || extraFilterCount > 0
-                    ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
-                    : 'bg-[var(--surface-subtle)] text-[var(--ink)] hover:bg-[var(--accent-soft)]/50'
-                }`}
+                onClick={handleOpenCompareNow}
+                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--border-strong)]"
               >
-                <SlidersHorizontal size={13} weight="bold" aria-hidden="true" />
+                <Scales size={13} weight="bold" aria-hidden="true" />
                 <span>
-                  {copy.search.filtersBtn}
-                  {extraFilterCount > 0 ? ` (${extraFilterCount})` : ''}
+                  {cmp.vsButtonShort}
+                  {compareIds.length > 0 ? ` (${compareIds.length})` : ''}
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={scrollToMap}
+                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--border-strong)]"
+              >
+                <MapPin size={13} weight="bold" aria-hidden="true" />
+                <span>{locale === 'az' ? 'Xəritə' : locale === 'en' ? 'Map' : 'На карте'}</span>
               </button>
 
               <button
@@ -507,7 +507,11 @@ export function SearchWorkspace({
                 onClick={() => onTutorsOpenChange(false)}
                 aria-expanded={true}
                 aria-label={
-                  locale === 'az' ? 'Müəllimləri gizlət' : locale === 'en' ? 'Hide tutors' : 'Свернуть репетиторов'
+                  locale === 'az'
+                    ? 'Müəllimləri gizlət'
+                    : locale === 'en'
+                      ? 'Hide tutors'
+                      : 'Свернуть репетиторов'
                 }
                 className="inline-flex min-h-[34px] cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-semibold text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
               >
@@ -519,179 +523,364 @@ export function SearchWorkspace({
             </div>
           </div>
 
-          {/* Instant 1-Click Visual Filter Grid */}
-          <div className="mt-4 space-y-3 border-t border-[var(--border)]/70 pt-3.5">
-            {/* Subject Row with Icons & Subject Accent Themes */}
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={copy.search.subject}>
-              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                {copy.search.subject}
-              </span>
+          {/* 1-Click Subject Tabs Row (Restrained Monochrome / Ink Active Styling) */}
+          <div
+            role="group"
+            aria-label={copy.search.subject}
+            className="mt-3.5 flex flex-wrap items-center gap-1.5 border-t border-[var(--border)]/75 pt-3.5"
+          >
+            <button
+              type="button"
+              aria-pressed={filters.subj === ''}
+              onClick={() => onFiltersChange({ subj: '' })}
+              className={`min-h-[32px] cursor-pointer rounded-full px-3.5 text-xs font-semibold transition-colors ${
+                filters.subj === ''
+                  ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                  : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:text-[var(--ink)]'
+              }`}
+            >
+              {copy.search.any}
+            </button>
+            {SUBJECTS.map((s) => {
+              const active = filters.subj === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => onFiltersChange({ subj: active ? '' : s })}
+                  className={`min-h-[32px] cursor-pointer rounded-full px-3.5 text-xs font-semibold transition-colors ${
+                    active
+                      ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                      : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:text-[var(--ink)]'
+                  }`}
+                >
+                  {SUBJECT_LABELS[s][locale]}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Dropdown Pill Row (Format · Grade · Price · Sort · Filters) */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--border)]/60 pt-3">
+            {/* 1. Format Dropdown Pill */}
+            <div className="relative">
               <button
                 type="button"
-                aria-pressed={filters.subj === ''}
-                onClick={() => onFiltersChange({ subj: '' })}
-                className={`min-h-[32px] cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
-                  filters.subj === ''
-                    ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
-                    : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55 hover:text-[var(--ink)]'
+                aria-label={`Dropdown: ${copy.search.format}`}
+                aria-expanded={activeDropdown === 'fmt'}
+                onClick={() =>
+                  setActiveDropdown((curr) => (curr === 'fmt' ? null : 'fmt'))
+                }
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-colors ${
+                  filters.fmt || activeDropdown === 'fmt'
+                    ? 'border-[var(--ink)] bg-[var(--surface-subtle)] text-[var(--ink)]'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
                 }`}
               >
-                {copy.search.any}
+                <Laptop size={13} weight="bold" aria-hidden="true" />
+                <span>
+                  {copy.search.format}:{' '}
+                  <strong className="font-bold text-[var(--ink)]">
+                    {filters.fmt ? FORMAT_LABELS[filters.fmt][locale] : copy.search.any}
+                  </strong>
+                </span>
+                <CaretDown
+                  size={12}
+                  weight="bold"
+                  className={`transition-transform duration-150 ${
+                    activeDropdown === 'fmt' ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
               </button>
-              {SUBJECTS.map((s) => {
-                const active = filters.subj === s;
-                const theme = getSubjectTheme(s);
-                const SubjIcon = SUBJECT_ICONS[s];
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => onFiltersChange({ subj: active ? '' : s })}
-                    className={`inline-flex min-h-[32px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
-                      active
-                        ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs ring-2 ring-[var(--accent)]/35'
-                        : `border hover:-translate-y-0.5 ${theme.pillClass}`
-                    }`}
-                  >
-                    <SubjIcon
-                      size={13}
-                      weight={active ? 'fill' : 'bold'}
-                      aria-hidden="true"
-                      className={active ? 'text-[var(--lime)]' : ''}
-                    />
-                    <span>{SUBJECT_LABELS[s][locale]}</span>
-                  </button>
-                );
-              })}
-            </div>
 
-            {/* Clean 3-Pod Format + Grade + Sort Studio */}
-            <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
-              {/* Format Pod */}
-              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-3">
-                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.format}
-                </div>
-                <div
-                  role="group"
-                  aria-label={copy.search.format}
-                  className="flex flex-wrap items-center gap-1"
+              <div
+                role="group"
+                aria-label={copy.search.format}
+                className={
+                  activeDropdown === 'fmt'
+                    ? 'absolute top-full left-0 z-30 mt-2 flex w-[230px] flex-wrap items-center gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 opacity-100 shadow-[var(--shadow-float)]'
+                    : 'pointer-events-none absolute top-full left-0 -z-10 flex max-h-0 w-0 flex-wrap overflow-hidden border-0 p-0 opacity-0'
+                }
+              >
+                <button
+                  type="button"
+                  aria-pressed={filters.fmt === ''}
+                  onClick={() => {
+                    onFiltersChange({ fmt: '' });
+                    setActiveDropdown(null);
+                  }}
+                  className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all ${
+                    filters.fmt === ''
+                      ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                      : 'bg-[var(--surface-subtle)] text-[var(--muted)] hover:text-[var(--ink)]'
+                  }`}
                 >
-                  <button
-                    type="button"
-                    aria-pressed={filters.fmt === ''}
-                    onClick={() => onFiltersChange({ fmt: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
-                      filters.fmt === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                  >
-                    {copy.search.any}
-                  </button>
-                  {FORMATS.map((f) => {
-                    const active = filters.fmt === f;
-                    return (
-                      <button
-                        key={f}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ fmt: active ? '' : f })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {FORMAT_LABELS[f][locale]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Grade Pod */}
-              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-5">
-                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.grade}
-                </div>
-                <div
-                  role="group"
-                  aria-label={copy.search.grade}
-                  className="flex flex-wrap items-center gap-1"
-                >
-                  <button
-                    type="button"
-                    aria-pressed={filters.cat === ''}
-                    onClick={() => onFiltersChange({ cat: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
-                      filters.cat === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
-                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                    }`}
-                  >
-                    {copy.search.any}
-                  </button>
-                  {GRADES.map((g) => {
-                    const active = filters.cat === g;
-                    return (
-                      <button
-                        key={g}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ cat: active ? '' : g })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {GRADE_LABELS[g][locale]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Sort Pod */}
-              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-4">
-                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
-                  {copy.search.sort}
-                </div>
-                <div
-                  role="group"
-                  aria-label={copy.search.sort}
-                  className="flex flex-wrap items-center gap-1"
-                >
-                  {(
-                    [
-                      ['match', copy.search.sortMatch],
-                      ['dist', copy.search.sortDist],
-                      ['rating', copy.search.sortRating],
-                      ['price', copy.search.sortPrice],
-                    ] as Array<[SearchFilters['sort'], string]>
-                  ).map(([val, label]) => {
-                    const active = filters.sort === val;
-                    return (
-                      <button
-                        key={val}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onFiltersChange({ sort: val })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
-                          active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
+                  {copy.search.any}
+                </button>
+                {FORMATS.map((f) => {
+                  const active = filters.fmt === f;
+                  return (
+                    <button
+                      key={f}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        onFiltersChange({ fmt: active ? '' : f });
+                        setActiveDropdown(null);
+                      }}
+                      className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all ${
+                        active
+                          ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                          : 'bg-[var(--surface-subtle)] text-[var(--muted)] hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      {FORMAT_LABELS[f][locale]}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+
+            {/* 2. Grade / Class Dropdown Pill */}
+            <div className="relative">
+              <button
+                type="button"
+                aria-label={`Dropdown: ${copy.search.grade}`}
+                aria-expanded={activeDropdown === 'cat'}
+                onClick={() =>
+                  setActiveDropdown((curr) => (curr === 'cat' ? null : 'cat'))
+                }
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-colors ${
+                  filters.cat || activeDropdown === 'cat'
+                    ? 'border-[var(--ink)] bg-[var(--surface-subtle)] text-[var(--ink)]'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
+                }`}
+              >
+                <BookOpenText size={13} weight="bold" aria-hidden="true" />
+                <span>
+                  {copy.search.grade}:{' '}
+                  <strong className="font-bold text-[var(--ink)]">
+                    {filters.cat ? GRADE_LABELS[filters.cat][locale] : copy.search.any}
+                  </strong>
+                </span>
+                <CaretDown
+                  size={12}
+                  weight="bold"
+                  className={`transition-transform duration-150 ${
+                    activeDropdown === 'cat' ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <div
+                role="group"
+                aria-label={copy.search.grade}
+                className={
+                  activeDropdown === 'cat'
+                    ? 'absolute top-full left-0 z-30 mt-2 flex w-[280px] flex-wrap items-center gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 opacity-100 shadow-[var(--shadow-float)] sm:w-[320px]'
+                    : 'pointer-events-none absolute top-full left-0 -z-10 flex max-h-0 w-0 flex-wrap overflow-hidden border-0 p-0 opacity-0'
+                }
+              >
+                <button
+                  type="button"
+                  aria-pressed={filters.cat === ''}
+                  onClick={() => {
+                    onFiltersChange({ cat: '' });
+                    setActiveDropdown(null);
+                  }}
+                  className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all ${
+                    filters.cat === ''
+                      ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                      : 'bg-[var(--surface-subtle)] text-[var(--muted)] hover:text-[var(--ink)]'
+                  }`}
+                >
+                  {copy.search.any}
+                </button>
+                {GRADES.map((g) => {
+                  const active = filters.cat === g;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        onFiltersChange({ cat: active ? '' : g });
+                        setActiveDropdown(null);
+                      }}
+                      className={`min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all ${
+                        active
+                          ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                          : 'bg-[var(--surface-subtle)] text-[var(--muted)] hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      {GRADE_LABELS[g][locale]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Price Range Dropdown Pill */}
+            <div className="relative">
+              <button
+                type="button"
+                aria-label={`Dropdown: ${copy.search.maxPrice}`}
+                aria-expanded={activeDropdown === 'price'}
+                onClick={() =>
+                  setActiveDropdown((curr) => (curr === 'price' ? null : 'price'))
+                }
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-colors ${
+                  filters.price < 60 || activeDropdown === 'price'
+                    ? 'border-[var(--ink)] bg-[var(--surface-subtle)] text-[var(--ink)]'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
+                }`}
+              >
+                <CurrencyCircleDollar size={13} weight="bold" aria-hidden="true" />
+                <span className="font-mono-num">
+                  {locale === 'az'
+                    ? `Qiymət: ≤ ${filters.price} ₼`
+                    : locale === 'en'
+                      ? `Price: ≤ ${filters.price} ₼`
+                      : `Цена: ≤ ${filters.price} ₼`}
+                </span>
+                <CaretDown
+                  size={12}
+                  weight="bold"
+                  className={`transition-transform duration-150 ${
+                    activeDropdown === 'price' ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <div
+                className={
+                  activeDropdown === 'price'
+                    ? 'absolute top-full left-0 z-30 mt-2 flex w-[250px] flex-wrap items-center gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 opacity-100 shadow-[var(--shadow-float)]'
+                    : 'pointer-events-none absolute top-full left-0 -z-10 flex max-h-0 w-0 flex-wrap overflow-hidden border-0 p-0 opacity-0'
+                }
+              >
+                {[20, 30, 45, 60].map((cap) => {
+                  const active = filters.price === cap;
+                  return (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => {
+                        onFiltersChange({ price: cap });
+                        setActiveDropdown(null);
+                      }}
+                      className={`font-mono-num min-h-[30px] cursor-pointer rounded-full px-3 text-xs font-bold transition-all ${
+                        active
+                          ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                          : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      ≤ {cap} ₼
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Sort Dropdown Pill */}
+            <div className="relative">
+              <button
+                type="button"
+                aria-label={`Dropdown: ${copy.search.sort}`}
+                aria-expanded={activeDropdown === 'sort'}
+                onClick={() =>
+                  setActiveDropdown((curr) => (curr === 'sort' ? null : 'sort'))
+                }
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-colors ${
+                  activeDropdown === 'sort'
+                    ? 'border-[var(--ink)] bg-[var(--surface-subtle)] text-[var(--ink)]'
+                    : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
+                }`}
+              >
+                <ArrowsDownUp size={13} weight="bold" aria-hidden="true" />
+                <span>
+                  {filters.sort === 'dist'
+                    ? copy.search.sortDist
+                    : filters.sort === 'rating'
+                      ? copy.search.sortRating
+                      : filters.sort === 'price'
+                        ? copy.search.sortPrice
+                        : copy.search.sortMatch}
+                </span>
+                <CaretDown
+                  size={12}
+                  weight="bold"
+                  className={`transition-transform duration-150 ${
+                    activeDropdown === 'sort' ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <div
+                role="group"
+                aria-label={copy.search.sort}
+                className={
+                  activeDropdown === 'sort'
+                    ? 'absolute top-full left-0 z-30 mt-2 flex w-[230px] flex-col gap-1 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2.5 opacity-100 shadow-[var(--shadow-float)]'
+                    : 'pointer-events-none absolute top-full left-0 -z-10 flex max-h-0 w-0 flex-col overflow-hidden border-0 p-0 opacity-0'
+                }
+              >
+                {(
+                  [
+                    ['match', copy.search.sortMatch],
+                    ['dist', copy.search.sortDist],
+                    ['rating', copy.search.sortRating],
+                    ['price', copy.search.sortPrice],
+                  ] as Array<[SearchFilters['sort'], string]>
+                ).map(([val, label]) => {
+                  const active = filters.sort === val;
+                  return (
+                    <button
+                      key={val}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        onFiltersChange({ sort: val });
+                        setActiveDropdown(null);
+                      }}
+                      className={`min-h-[30px] cursor-pointer rounded-xl px-3 py-1.5 text-left text-xs font-semibold transition-all ${
+                        active
+                          ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                          : 'text-[var(--ink-2)] hover:bg-[var(--surface-subtle)] hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. Filters Toggle (Language & Teaching Style) */}
+            <button
+              type="button"
+              aria-expanded={extraFiltersOpen}
+              onClick={() => {
+                setExtraFiltersOpen((v) => !v);
+                setActiveDropdown(null);
+              }}
+              className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-colors ${
+                extraFiltersOpen || extraFilterCount > 0
+                  ? 'border-[var(--ink)] bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
+              }`}
+            >
+              <SlidersHorizontal size={13} weight="bold" aria-hidden="true" />
+              <span>
+                {copy.search.filtersBtn}
+                {extraFilterCount > 0 ? ` (${extraFilterCount})` : ''}
+              </span>
+            </button>
           </div>
 
           {/* Progressive Extra Filters Drawer (Language, Max Price, Teaching Style) */}
