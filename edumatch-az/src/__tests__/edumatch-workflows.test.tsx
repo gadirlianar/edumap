@@ -23,17 +23,17 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     expect(screen.queryByText(/Онлайн-кот|Тетрадный кот/i)).not.toBeInTheDocument();
   });
 
-  it('supports progressive Hero intent/category selection and expandable catalog Filters drawer', async () => {
+  it('supports catalog subject/grade selection and expandable catalog Filters drawer', async () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
 
-    // Progressive Hero: pick Математика + 9 класс, then click "Показать репетиторов" -> reveals catalog with Damir + regional math mentors
-    await user.click(within(showcase).getByRole('button', { name: 'Математика' }));
-    await user.click(within(showcase).getByRole('button', { name: '9 класс' }));
+    // Open catalog from Hero CTA, then pick Математика + 9 класс inside catalog filters -> shows Damir
     await user.click(within(showcase).getByRole('button', { name: /Показать репетиторов/i }));
     const catalog = document.getElementById('tutor-catalog')!;
+    await user.click(within(catalog).getByRole('button', { name: 'Математика' }));
+    await user.click(within(catalog).getByRole('button', { name: '9 класс' }));
     expect(within(catalog).getByText('Дамир Абдуллаев')).toBeInTheDocument();
 
     // Extra filters (Style, Language, Max price) stay collapsed until "Фильтры" is toggled
@@ -254,17 +254,17 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     ).toBeInTheDocument();
     await user.click(within(azDialog).getByRole('button', { name: 'Bağla' }));
 
-    // Interactive subject pill switches active catalog subject without <select> inside hero
-    await user.click(within(showcase).getByRole('button', { name: 'Kimya' }));
+    // Interactive subject pill inside catalog switches active subject without Cyrillic leakage
+    await user.click(within(catalog).getByRole('button', { name: 'Kimya' }));
     expect(within(catalog).getAllByText('Aygün Hüseynova').length).toBeGreaterThan(0);
     expect(within(catalog).queryByText('Айгюн Гусейнова')).not.toBeInTheDocument();
   });
 
-  it('supports Hero Subject switcher, Superpower tags, real tutor portraits, and Side-by-Side VS Tutor Comparison modal', async () => {
+  it('supports Hero CTA reveal, catalog Subject switcher, Superpower tags, real tutor portraits, and Side-by-Side VS Tutor Comparison modal', async () => {
     const user = userEvent.setup();
     const { container } = render(<EduMatchApp />);
 
-    // Open catalog from progressive Hero
+    // Open catalog from clean Hero CTA
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
     await user.click(within(showcase).getByRole('button', { name: /Показать репетиторов/i }));
 
@@ -277,13 +277,13 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
       screen.getAllByText(/Карта ловушек DİM за 10 сек/i).length,
     ).toBeGreaterThan(0);
 
-    // Switch subject to Информатика in Hero showcase -> filters catalog to Эльнур Гасанов
-    await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
+    // Switch subject to Информатика in catalog -> filters catalog to Эльнур Гасанов
     const catalog = document.getElementById('tutor-catalog')!;
+    await user.click(within(catalog).getByRole('button', { name: 'Информатика' }));
     expect(within(catalog).getAllByText('Эльнур Гасанов').length).toBeGreaterThan(0);
 
     // Switch back to Математика so multiple tutors are in catalog
-    await user.click(within(showcase).getByRole('button', { name: 'Математика' }));
+    await user.click(within(catalog).getByRole('button', { name: 'Математика' }));
 
     // Click "Сравнить" on first tutor card -> Floating VS Compare Dock appears
     const compareBtns = within(catalog).getAllByRole('button', {
@@ -321,7 +321,7 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     });
   });
 
-  it('updates live Hero Spotlight tutor card by subject and carousel while keeping catalog collapsed initially', async () => {
+  it('switches Hero 3D outcome simulator tiers while keeping catalog collapsed and opens 1v1 VS compare modal', async () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
@@ -330,21 +330,10 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     expect(document.getElementById('tutor-catalog-toggle')).toBeInTheDocument();
 
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
+    await user.click(within(showcase).getByRole('button', { name: '540 → 690+' }));
+    expect(within(showcase).getByText('692')).toBeInTheDocument();
 
-    // Switch subject in Hero selector -> right-hand live spotlight card updates immediately
-    await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
-    expect(
-      within(showcase).getByRole('heading', { level: 2, name: 'Эльнур Гасанов' }),
-    ).toBeInTheDocument();
-
-    // Switch back to all subjects and step to next spotlight tutor via carousel control
-    await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
-    const firstSpotlightName = within(showcase).getByRole('heading', { level: 2 }).textContent;
-    await user.click(within(showcase).getByRole('button', { name: 'Следующий ментор' }));
-    const nextSpotlightName = within(showcase).getByRole('heading', { level: 2 }).textContent;
-    expect(nextSpotlightName).not.toBe(firstSpotlightName);
-
-    // Clickable VS Bento card opens Compare modal directly
+    // Clickable VS button opens Compare modal directly
     await user.click(screen.getByRole('button', { name: /1v1 VS/i }));
     expect(
       within(screen.getByRole('dialog')).getByRole('heading', {
@@ -354,27 +343,15 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Закрыть' }));
   });
 
-  it('supports 3D Hero showcase switching via subject pills & mini-avatars, collapsed toggle portraits, and compact 2-tier Footer', async () => {
+  it('supports collapsed toggle portraits and compact 2-tier Footer without duplicating catalog filters in Hero', async () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
-    // 1. Selecting Informatics in Hero updates 3D showcase mentor while keeping catalog collapsed
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-    await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
-    expect(
-      within(showcase).getByRole('heading', { level: 2, name: 'Эльнур Гасанов' }),
-    ).toBeInTheDocument();
+    expect(within(showcase).queryByRole('button', { name: 'Информатика' })).not.toBeInTheDocument();
     expect(document.getElementById('tutor-catalog')).toBeNull();
 
-    // 2. Quick-switch mini-avatar group switches active mentor in 3D Hero showcase
-    await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
-    const switcher = within(showcase).getByRole('group', { name: /Выбор ментора/i });
-    const avatarButtons = within(switcher).getAllByRole('button');
-    expect(avatarButtons.length).toBeGreaterThanOrEqual(2);
-    await user.click(avatarButtons[1]);
-    expect(avatarButtons[1]).toHaveAttribute('aria-pressed', 'true');
-
-    // 3. Collapsed catalog toggle contains clickable preview mentor avatar buttons that open dossier
+    // Collapsed catalog toggle contains clickable preview mentor avatar buttons that open dossier
     const toggleBar = document.getElementById('tutor-catalog-toggle')!;
     const previewAvatars = within(toggleBar).getAllByRole('button', { name: /\/700\)/i });
     expect(previewAvatars.length).toBeGreaterThanOrEqual(2);
@@ -382,7 +359,7 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Закрыть' }));
 
-    // 4. Compact 2-tier Footer preserves privacy & teacher switch actions
+    // Compact 2-tier Footer preserves privacy action
     const footer = screen.getByRole('contentinfo');
     expect(within(footer).getByText(/Аудит дипломов и баллов DİM/i)).toBeInTheDocument();
     await user.click(within(footer).getByRole('button', { name: /Политика конфиденциальности/i }));

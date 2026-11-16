@@ -17,22 +17,20 @@ describe('EduMatch Tier-1 UI Integration', () => {
       }),
     ).toBeInTheDocument();
 
-    // Progressive Hero 01/02 + visible City Street Map + collapsed tutors catalog + no signature badge
+    // Clean 3D Hero Showcase + visible City Street Map + collapsed tutors catalog + no signature badge
     const heroRegion = screen.getByRole('region', { name: /EduMatch showcase/i });
-    expect(within(heroRegion).getByRole('button', { name: /Найти репетитора/i })).toBeInTheDocument();
-    expect(within(heroRegion).getByRole('button', { name: /Посмотреть на карте/i })).toBeInTheDocument();
+    expect(within(heroRegion).getByRole('button', { name: /Показать репетиторов/i })).toBeInTheDocument();
     expect(within(heroRegion).getByRole('button', { name: /Пройти тест уровня/i })).toBeInTheDocument();
-    expect(within(heroRegion).getByRole('button', { name: 'Физика' })).toBeInTheDocument();
     expect(document.getElementById('tutor-catalog')).toBeNull();
     expect(document.getElementById('tutor-catalog-toggle')).toBeInTheDocument();
     expect(document.getElementById('tutor-map')).toBeInTheDocument();
     expect(screen.queryByText('by M')).not.toBeInTheDocument();
 
-    // Selecting Физика in Hero narrows count, then clicking "Показать репетиторов" reveals #tutor-catalog cleanly (t1, t7, t9, t11)
-    await user.click(within(heroRegion).getByRole('button', { name: 'Физика' }));
+    // Clicking "Показать репетиторов" reveals #tutor-catalog cleanly, then Физика filter narrows inside catalog (t1, t7, t9, t11)
     await user.click(within(heroRegion).getByRole('button', { name: /Показать репетиторов/i }));
     const catalog = document.getElementById('tutor-catalog')!;
     expect(catalog).toBeInTheDocument();
+    await user.click(within(catalog).getByRole('button', { name: 'Физика' }));
     expect(within(catalog).getAllByText('Лейла Мамедова').length).toBeGreaterThan(0);
     expect(within(catalog).getAllByText('Гюнель Расулова').length).toBeGreaterThan(0);
     expect(within(catalog).getAllByRole('article')).toHaveLength(4);
