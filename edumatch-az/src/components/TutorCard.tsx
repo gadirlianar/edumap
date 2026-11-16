@@ -10,13 +10,14 @@ import {
   MapPin,
   Scales,
   SealCheck,
+  Sparkle,
   Star,
   Trophy,
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { COPY, FORMAT_LABELS, SUBJECT_LABELS } from '@/data/i18n';
 import { resolveLocalized, resolveTutorName } from '@/data/tutors';
-import { COMPARE_COPY, getSubjectTheme, getTutorVisual } from '@/data/tutorVisuals';
+import { COMPARE_COPY, getSmartMatchTag, getSubjectTheme, getTutorVisual } from '@/data/tutorVisuals';
 import { Avatar } from '@/components/ui/Avatar';
 import { ScoreGauge } from '@/components/ui/ScoreGauge';
 import { ScoreTrajectoryBar } from '@/components/ui/ScoreTrajectoryBar';
@@ -66,6 +67,7 @@ export function TutorCard({
   const secondaryAchievement = tutor.achievements[1];
   const primarySubject = tutor.subj[0];
   const subjectTheme = getSubjectTheme(primarySubject);
+  const smartTag = getSmartMatchTag(tutor, locale, matchScore, index);
 
   return (
     <motion.article
@@ -142,6 +144,12 @@ export function TutorCard({
                     {SUBJECT_LABELS[primarySubject][locale]}
                   </span>
                 ) : null}
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${smartTag.toneClass}`}
+                >
+                  <Sparkle size={10} weight="fill" aria-hidden="true" />
+                  <span>{smartTag.text}</span>
+                </span>
               </div>
             </div>
           </div>

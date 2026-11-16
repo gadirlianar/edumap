@@ -142,19 +142,23 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Signature Solaris Sky-Blue & Pastel Mint Wash */
+/* Signature Solaris Sky-Blue, Architectural Dot Grid & Pastel Mint Wash */
 .em-solaris-canvas {
   background-color: var(--bg);
   background-image:
-    radial-gradient(960px 440px at 50% 0%, rgba(167, 243, 208, 0.36), transparent 68%),
+    radial-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+    radial-gradient(960px 440px at 50% 0%, rgba(167, 243, 208, 0.42), transparent 68%),
     linear-gradient(180deg, #C7E6FF 0%, #DEF3FB 260px, #EDF8F5 540px, var(--bg) 840px);
+  background-size: 28px 28px, 100% 100%, 100% 100%;
 }
 
 [data-theme="dark"] .em-solaris-canvas {
   background-color: var(--bg);
   background-image:
-    radial-gradient(900px 420px at 50% 0%, rgba(16, 185, 129, 0.16), transparent 70%),
+    radial-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+    radial-gradient(900px 420px at 50% 0%, rgba(16, 185, 129, 0.18), transparent 70%),
     linear-gradient(180deg, #0F2038 0%, #0D1729 460px, var(--bg) 820px);
+  background-size: 28px 28px, 100% 100%, 100% 100%;
 }
 
 /* Airy Frosted Glass & Card Primitives */

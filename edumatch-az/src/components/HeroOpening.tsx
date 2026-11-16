@@ -4,22 +4,34 @@ import React, { useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
+  Atom,
+  BookOpenText,
+  Calculator,
   ChalkboardTeacher,
+  Flask,
   GraduationCap,
+  Lightbulb,
   MapPin,
   Scales,
   SealCheck,
   Sparkle,
   Star,
+  TerminalWindow,
+  Translate,
+  TrendUp,
 } from '@phosphor-icons/react';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import { SUBJECTS } from '@/data/catalog';
 import { COPY, GRADE_LABELS, SUBJECT_LABELS } from '@/data/i18n';
 import { INITIAL_TUTORS, resolveLocalized, resolveTutorName } from '@/data/tutors';
-import { COMPARE_COPY, getSubjectTheme, getTutorVisual } from '@/data/tutorVisuals';
+import {
+  COMPARE_COPY,
+  HERO_GOAL_PRESETS,
+  getSubjectTheme,
+  getTutorVisual,
+} from '@/data/tutorVisuals';
 import { WOW_COPY } from '@/lib/wowCopy';
 import { Avatar } from '@/components/ui/Avatar';
-import { ScoreTrajectoryBar } from '@/components/ui/ScoreTrajectoryBar';
 import type { GradeId, Locale, SubjectId, TutorProfile } from '@/types/edumatch';
 
 interface HeroOpeningProps {
@@ -44,14 +56,25 @@ type HeroIntent = 'tutor' | 'map' | 'quiz';
 
 const EASE_EDITORIAL = [0.22, 1, 0.36, 1] as const;
 
+const SUBJECT_ICONS: Record<
+  SubjectId,
+  React.ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'fill'; className?: string }>
+> = {
+  Математика: Calculator,
+  Физика: Atom,
+  Химия: Flask,
+  'Английский язык': Translate,
+  'Азербайджанский язык': BookOpenText,
+  Информатика: TerminalWindow,
+};
+
 const HERO_STEP_COPY: Record<
   Locale,
   {
-    step1Prompt: string;
     intentTutor: string;
     intentMap: string;
     intentQuiz: string;
-    step2SubjectLabel: string;
+    goalsLabel: string;
     allSubjects: string;
     step2GradeLabel: string;
     allGrades: string;
@@ -60,68 +83,81 @@ const HERO_STEP_COPY: Record<
     dimVerifiedBadge: string;
     trialPillBadge: string;
     spotlightLive: string;
+    smartPickPrefix: string;
     viewDossier: string;
     bookTrialShort: string;
     prevSpotlight: string;
     nextSpotlight: string;
+    quickSwitchLabel: string;
+    dimLabel: string;
+    rateUnit: string;
   }
 > = {
   ru: {
-    step1Prompt: 'Что вам нужно сейчас?',
     intentTutor: 'Найти репетитора',
     intentMap: 'Посмотреть на карте',
     intentQuiz: 'Пройти тест уровня',
-    step2SubjectLabel: 'Выберите предмет',
+    goalsLabel: 'Быстрая цель',
     allSubjects: 'Все предметы',
-    step2GradeLabel: 'Класс или цель',
+    step2GradeLabel: 'Класс',
     allGrades: 'Любой класс',
     showResultsCta: 'Показать репетиторов',
-    tutorsUnit: 'репетиторов',
-    dimVerifiedBadge: 'Балл DİM проверен',
-    trialPillBadge: 'Первый пробный — 0 ₼',
+    tutorsUnit: 'менторов',
+    dimVerifiedBadge: 'DİM проверен',
+    trialPillBadge: 'Первый пробный бесплатно',
     spotlightLive: 'Топ-ментор · онлайн',
+    smartPickPrefix: 'Умный выбор',
     viewDossier: 'Смотреть досье',
     bookTrialShort: 'Пробный · 0 ₼',
     prevSpotlight: 'Предыдущий ментор',
     nextSpotlight: 'Следующий ментор',
+    quickSwitchLabel: 'Быстрый выбор ментора',
+    dimLabel: 'Балл DİM',
+    rateUnit: '/ урок',
   },
   az: {
-    step1Prompt: 'İndi nə axtarırsınız?',
     intentTutor: 'Müəllim tapmaq',
     intentMap: 'Xəritədə baxmaq',
     intentQuiz: 'Səviyyə testi keçmək',
-    step2SubjectLabel: 'Fənn seçin',
+    goalsLabel: 'Hədəf seçimi',
     allSubjects: 'Bütün fənlər',
-    step2GradeLabel: 'Sinif və ya məqsəd',
+    step2GradeLabel: 'Sinif',
     allGrades: 'Bütün siniflər',
     showResultsCta: 'Müəllimləri göstər',
     tutorsUnit: 'müəllim',
-    dimVerifiedBadge: 'Təsdiqlənmiş DİM balı',
+    dimVerifiedBadge: 'Təsdiqlənmiş DİM',
     trialPillBadge: 'İlk sınaq dərsi pulsuz',
     spotlightLive: 'Top mentor · aktiv',
+    smartPickPrefix: 'Ağıllı tövsiyə',
     viewDossier: 'Dosyeyə bax',
     bookTrialShort: 'Sınaq · 0 ₼',
     prevSpotlight: 'Əvvəlki müəllim',
     nextSpotlight: 'Növbəti müəllim',
+    quickSwitchLabel: 'Müəllimlər arasında keçid',
+    dimLabel: 'DİM Balı',
+    rateUnit: '/ dərs',
   },
   en: {
-    step1Prompt: 'What are you looking for?',
     intentTutor: 'Find a tutor',
     intentMap: 'Browse on map',
     intentQuiz: 'Take level quiz',
-    step2SubjectLabel: 'Choose subject',
+    goalsLabel: 'Quick goal',
     allSubjects: 'All subjects',
-    step2GradeLabel: 'Grade or target',
+    step2GradeLabel: 'Grade',
     allGrades: 'All grades',
     showResultsCta: 'Show matching tutors',
-    tutorsUnit: 'tutors',
-    dimVerifiedBadge: 'Verified DİM score',
+    tutorsUnit: 'mentors',
+    dimVerifiedBadge: 'Verified DİM',
     trialPillBadge: 'First trial lesson free',
     spotlightLive: 'Top mentor · active',
+    smartPickPrefix: 'Smart match',
     viewDossier: 'View dossier',
     bookTrialShort: 'Book trial · 0 ₼',
     prevSpotlight: 'Previous mentor',
     nextSpotlight: 'Next mentor',
+    quickSwitchLabel: 'Quick mentor switcher',
+    dimLabel: 'DİM Score',
+    rateUnit: '/ lesson',
   },
 };
 
@@ -149,7 +185,7 @@ export function HeroOpening({
   const cmp = COMPARE_COPY[locale];
   const stepCopy = HERO_STEP_COPY[locale];
   const [intent, setIntent] = useState<HeroIntent>('tutor');
-  const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
   const [spotlightCursor, setSpotlightCursor] = useState(0);
 
   const pool =
@@ -169,54 +205,80 @@ export function HeroOpening({
   const activeTutorName = resolveTutorName(activeTutor, locale);
   const activeUniversity = resolveLocalized(activeTutor.education.university, locale);
   const activeAchievement = activeTutor.achievements[0];
+  const quickSwitchPool = activePool.slice(0, 4);
 
   const handleIntentClick = (next: HeroIntent) => {
     setIntent(next);
-    if (next === 'tutor') {
-      setCategoriesOpen(true);
-    } else if (next === 'map') {
+    if (next === 'map') {
       onOpenMap();
-    } else {
+    } else if (next === 'quiz') {
       onOpenQuiz();
     }
+  };
+
+  const handleSelectPreset = (presetId: string, subj: SubjectId) => {
+    setActiveGoalId(presetId);
+    setSpotlightCursor(0);
+    onSubjectChange(subj);
   };
 
   return (
     <section
       aria-label="EduMatch showcase"
-      className="mx-auto mb-8 w-full max-w-7xl pt-4 pb-2 sm:pt-8"
+      className="mx-auto mb-8 w-full max-w-7xl pt-3 pb-2 sm:pt-7"
     >
       <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-10">
-        {/* Left Column: Brand Proof + Headline + Progressive Selector */}
-        <div className="text-center lg:col-span-7 lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: EASE_EDITORIAL }}
-            className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)]/92 p-1 pr-3 text-[11px] font-medium text-[var(--ink-2)] shadow-2xs sm:text-xs"
-          >
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent-ink)]">
+        {/* LEFT COLUMN: Open-Air Editorial Canvas (No Heavy Form Card) */}
+        <div className="text-center lg:col-span-6 lg:text-left">
+          {/* Eyebrow Status & Segmented Action Mode Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-bold text-[var(--accent-ink)]">
               <SealCheck size={13} weight="fill" aria-hidden="true" />
-              <span>
-                {locale === 'az'
-                  ? 'Təsdiqlənmiş müəllimlər'
-                  : locale === 'en'
-                    ? 'Verified mentors'
-                    : 'Проверенные менторы'}
-              </span>
+              <span>{wow.hero.liveOnlineLabel}</span>
             </span>
-            <span className="min-w-0 truncate">{wow.hero.liveOnlineLabel}</span>
-          </motion.div>
 
+            {HERO_GOAL_PRESETS.slice(0, 3).map((preset) => {
+              const isGoalActive =
+                activeGoalId === preset.id && selectedSubject === preset.subject;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  aria-pressed={isGoalActive}
+                  onClick={() => handleSelectPreset(preset.id, preset.subject)}
+                  className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                    isGoalActive
+                      ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--bg)] shadow-xs'
+                      : 'border-[var(--border)] bg-[var(--surface)]/80 text-[var(--ink-2)] backdrop-blur-md hover:border-[var(--accent-border)] hover:text-[var(--ink)]'
+                  }`}
+                >
+                  <span>{preset.label[locale]}</span>
+                  <span
+                    className={`font-mono-num text-[10px] font-bold ${
+                      isGoalActive ? 'text-[var(--lime)]' : 'text-[var(--accent-ink)]'
+                    }`}
+                  >
+                    {preset.badge}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Display Editorial Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.04, ease: EASE_EDITORIAL }}
-            className="mx-auto mt-4 max-w-2xl break-words text-[1.75rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[var(--ink)] sm:text-[2.65rem] lg:mx-0 lg:text-[3rem]"
+            transition={{ duration: 0.34, ease: EASE_EDITORIAL }}
+            className="mx-auto mt-4 max-w-2xl break-words text-[1.85rem] font-bold leading-[1.08] tracking-[-0.035em] text-[var(--ink)] sm:text-[2.65rem] lg:mx-0 lg:text-[3.05rem]"
           >
             {copy.hero.titleStart}{' '}
-            <em className="font-serif-editorial font-normal italic text-[var(--accent-ink)]">
+            <em className="relative inline-block font-serif-editorial font-normal italic text-[var(--accent-ink)]">
               {copy.hero.titleAccent}
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-1 -z-10 h-2.5 rounded-full bg-[var(--lime)]/55 dark:bg-emerald-500/30"
+              />
             </em>
             {copy.hero.titleEnd}
           </motion.h1>
@@ -224,197 +286,197 @@ export function HeroOpening({
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, delay: 0.08, ease: EASE_EDITORIAL }}
+            transition={{ duration: 0.34, delay: 0.05, ease: EASE_EDITORIAL }}
             className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[var(--ink-2)] sm:text-[15px] lg:mx-0"
           >
             {copy.hero.subtitle}
           </motion.p>
 
-          {/* Progressive Guided Selector (Step 01 Intent -> Step 02 Subject / Grade) */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.12, ease: EASE_EDITORIAL }}
-            className="mt-6 w-full rounded-[26px] border border-[var(--glass-border)] bg-[var(--surface)]/92 p-4 text-left shadow-[var(--shadow-float)] backdrop-blur-xl sm:p-5"
-          >
-            {/* Step 1: Primary Goal / Intent */}
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                01 · {stepCopy.step1Prompt}
+          {/* Floating Command Action Dock (Replaces Old Boxy Form!) */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
+            <motion.button
+              type="button"
+              onClick={onQuickApply}
+              whileTap={{ scale: 0.98 }}
+              className="group inline-flex min-h-[46px] cursor-pointer items-center gap-3 rounded-full bg-[var(--primary-btn)] py-1.5 pl-5 pr-1.5 text-sm font-semibold text-[var(--primary-btn-ink)] shadow-[var(--shadow-float)] transition-colors hover:bg-[var(--primary-btn-hover)]"
+            >
+              <ChalkboardTeacher size={17} weight="bold" aria-hidden="true" />
+              <span>
+                {stepCopy.showResultsCta} ({resultCount})
               </span>
-
-              <div
-                className="flex flex-wrap items-center gap-1.5"
-                role="group"
-                aria-label={stepCopy.step1Prompt}
+              <span
+                aria-hidden="true"
+                className="grid h-8 w-8 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover:translate-x-0.5"
               >
-                <button
-                  type="button"
-                  onClick={() => handleIntentClick('tutor')}
-                  aria-pressed={intent === 'tutor'}
-                  className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold transition-colors ${
-                    intent === 'tutor'
-                      ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
-                      : 'border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:text-[var(--ink)]'
-                  }`}
-                >
-                  <ChalkboardTeacher size={14} weight="bold" aria-hidden="true" />
-                  <span>{stepCopy.intentTutor}</span>
-                </button>
+                <ArrowRight size={15} weight="bold" />
+              </span>
+            </motion.button>
 
-                <button
-                  type="button"
-                  onClick={() => handleIntentClick('map')}
-                  aria-pressed={intent === 'map'}
-                  className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold transition-colors ${
-                    intent === 'map'
-                      ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)]'
-                      : 'border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:text-[var(--ink)]'
-                  }`}
-                >
-                  <MapPin size={14} weight="bold" aria-hidden="true" />
-                  <span>{stepCopy.intentMap}</span>
-                </button>
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)]/85 p-1 shadow-xs backdrop-blur-md">
+              <button
+                type="button"
+                onClick={() => handleIntentClick('tutor')}
+                aria-pressed={intent === 'tutor'}
+                className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                  intent === 'tutor'
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'
+                    : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
+                }`}
+              >
+                <span>{stepCopy.intentTutor}</span>
+              </button>
 
+              <button
+                type="button"
+                onClick={() => handleIntentClick('map')}
+                aria-pressed={intent === 'map'}
+                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[var(--ink-2)] transition-colors hover:bg-[var(--surface-subtle)] hover:text-[var(--ink)]"
+              >
+                <MapPin size={13} weight="bold" aria-hidden="true" />
+                <span>{stepCopy.intentMap}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleIntentClick('quiz')}
+                aria-pressed={intent === 'quiz'}
+                className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[var(--ink-2)] transition-colors hover:bg-[var(--surface-subtle)] hover:text-[var(--accent-ink)]"
+              >
+                <Sparkle size={13} weight="fill" className="text-[var(--accent)]" aria-hidden="true" />
+                <span>{stepCopy.intentQuiz}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Open-Air Colorful Subject Tiles (No Monotone Bordered Box) */}
+          <div className="mt-5">
+            <div
+              className="flex flex-wrap items-center justify-center gap-1.5 lg:justify-start"
+              role="group"
+              aria-label={wow.hero.subjectQuickLabel}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveGoalId(null);
+                  setSpotlightCursor(0);
+                  onSubjectChange('');
+                }}
+                aria-pressed={selectedSubject === ''}
+                className={`min-h-[34px] cursor-pointer rounded-2xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                  selectedSubject === ''
+                    ? 'bg-[var(--ink)] text-[var(--bg)] shadow-sm'
+                    : 'bg-[var(--surface)]/75 text-[var(--ink-2)] ring-1 ring-[var(--border)] backdrop-blur-sm hover:bg-[var(--surface)] hover:text-[var(--ink)]'
+                }`}
+              >
+                {stepCopy.allSubjects}
+              </button>
+
+              {SUBJECTS.map((subj) => {
+                const active = selectedSubject === subj;
+                const theme = getSubjectTheme(subj);
+                const SubjIcon = SUBJECT_ICONS[subj];
+                return (
+                  <button
+                    key={subj}
+                    type="button"
+                    onClick={() => {
+                      setActiveGoalId(null);
+                      setSpotlightCursor(0);
+                      onSubjectChange(subj);
+                    }}
+                    aria-pressed={active}
+                    className={`inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-2xl px-3 py-1.5 text-xs font-semibold transition-all ${
+                      active
+                        ? 'bg-[var(--ink)] text-[var(--bg)] shadow-sm ring-2 ring-[var(--accent)]/40'
+                        : `border backdrop-blur-sm hover:-translate-y-0.5 ${theme.pillClass}`
+                    }`}
+                  >
+                    <SubjIcon
+                      size={13}
+                      weight={active ? 'fill' : 'bold'}
+                      aria-hidden="true"
+                      className={active ? 'text-[var(--lime)]' : ''}
+                    />
+                    <span>{SUBJECT_LABELS[subj][locale]}</span>
+                  </button>
+                );
+              })}
+
+              {/* Goal Preset #4 for IELTS/ADA cleanly tucked inline */}
+              {HERO_GOAL_PRESETS[3] ? (
                 <button
                   type="button"
-                  onClick={() => handleIntentClick('quiz')}
-                  aria-pressed={intent === 'quiz'}
-                  className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3.5 py-1 text-xs font-semibold text-[var(--ink-2)] transition-colors hover:border-[var(--accent-border)] hover:text-[var(--accent-ink)]"
+                  aria-pressed={
+                    activeGoalId === HERO_GOAL_PRESETS[3].id &&
+                    selectedSubject === HERO_GOAL_PRESETS[3].subject
+                  }
+                  onClick={() =>
+                    handleSelectPreset(HERO_GOAL_PRESETS[3].id, HERO_GOAL_PRESETS[3].subject)
+                  }
+                  className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-3 py-1.5 text-xs font-semibold text-amber-800 transition-all hover:-translate-y-0.5 dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-200"
                 >
-                  <Sparkle size={14} weight="fill" className="text-[var(--accent)]" aria-hidden="true" />
-                  <span>{stepCopy.intentQuiz}</span>
+                  <span>{HERO_GOAL_PRESETS[3].label[locale]}</span>
+                  <span className="font-mono-num text-[10px] font-bold">
+                    {HERO_GOAL_PRESETS[3].badge}
+                  </span>
                 </button>
-              </div>
+              ) : null}
             </div>
 
-            {/* Step 2: Quick Subject + Target Grade + CTA */}
-            <AnimatePresence initial={false}>
-              {categoriesOpen ? (
-                <motion.div
-                  key="hero-categories"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.22, ease: EASE_EDITORIAL }}
-                  className="mt-4 space-y-3.5 border-t border-[var(--border)] pt-4"
+            {/* Compact Grade Row + 1-Line Live Advisor Hint */}
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs lg:justify-start">
+              <div className="inline-flex items-center gap-1 rounded-full bg-[var(--surface)]/75 p-1 ring-1 ring-[var(--border)] backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => onGradeChange('')}
+                  aria-pressed={selectedGrade === ''}
+                  className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                    selectedGrade === ''
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                  }`}
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                        02 · {stepCopy.step2SubjectLabel}
-                      </span>
-                      <span className="font-mono-num text-[11px] font-semibold text-[var(--accent-ink)]">
-                        {resultCount} {stepCopy.tutorsUnit}
-                      </span>
-                    </div>
-
-                    <div
-                      className="flex flex-wrap gap-1.5"
-                      role="group"
-                      aria-label={wow.hero.subjectQuickLabel}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSpotlightCursor(0);
-                          onSubjectChange('');
-                        }}
-                        aria-pressed={selectedSubject === ''}
-                        className={`min-h-[34px] cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold transition-colors ${
-                          selectedSubject === ''
-                            ? 'bg-[var(--ink)] text-[var(--bg)]'
-                            : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {stepCopy.allSubjects}
-                      </button>
-
-                      {SUBJECTS.map((subj) => {
-                        const active = selectedSubject === subj;
-                        return (
-                          <button
-                            key={subj}
-                            type="button"
-                            onClick={() => {
-                              setSpotlightCursor(0);
-                              onSubjectChange(subj);
-                            }}
-                            aria-pressed={active}
-                            className={`min-h-[34px] cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold transition-colors ${
-                              active
-                                ? 'bg-[var(--ink)] text-[var(--bg)]'
-                                : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[var(--border-strong)] hover:text-[var(--ink)]'
-                            }`}
-                          >
-                            {SUBJECT_LABELS[subj][locale]}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 border-t border-[var(--border)]/70 pt-3.5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="mr-1 text-[11px] font-medium text-[var(--muted)]">
-                        {stepCopy.step2GradeLabel}:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onGradeChange('')}
-                        aria-pressed={selectedGrade === ''}
-                        className={`min-h-[30px] cursor-pointer rounded-full px-3 py-0.5 text-[11px] font-semibold transition-colors ${
-                          selectedGrade === ''
-                            ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)] ring-1 ring-[var(--accent-border)]'
-                            : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {stepCopy.allGrades}
-                      </button>
-                      {QUICK_GRADES.map((g) => {
-                        const active = selectedGrade === g;
-                        return (
-                          <button
-                            key={g}
-                            type="button"
-                            onClick={() => onGradeChange(g)}
-                            aria-pressed={active}
-                            className={`min-h-[30px] cursor-pointer rounded-full px-3 py-0.5 text-[11px] font-semibold transition-colors ${
-                              active
-                                ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)] ring-1 ring-[var(--accent-border)]'
-                                : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--ink)]'
-                            }`}
-                          >
-                            {GRADE_LABELS[g][locale]}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <motion.button
+                  {stepCopy.allGrades}
+                </button>
+                {QUICK_GRADES.map((g) => {
+                  const active = selectedGrade === g;
+                  return (
+                    <button
+                      key={g}
                       type="button"
-                      onClick={onQuickApply}
-                      whileTap={{ scale: 0.98 }}
-                      className="group inline-flex min-h-[40px] w-full shrink-0 cursor-pointer items-center justify-center gap-2.5 rounded-full bg-[var(--primary-btn)] py-1.5 pl-4 pr-1.5 text-xs font-semibold text-[var(--primary-btn-ink)] transition-colors hover:bg-[var(--primary-btn-hover)] sm:w-auto"
+                      onClick={() => onGradeChange(g)}
+                      aria-pressed={active}
+                      className={`cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                        active
+                          ? 'bg-[var(--accent)] text-white'
+                          : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                      }`}
                     >
-                      <span>
-                        {stepCopy.showResultsCta} ({resultCount})
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="grid h-7 w-7 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover:translate-x-0.5"
-                      >
-                        <ArrowRight size={14} weight="bold" />
-                      </span>
-                    </motion.button>
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </motion.div>
+                      {GRADE_LABELS[g][locale]}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Compact Proof Numbers & Secondary Links */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[var(--muted)] lg:justify-start">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)]/70 bg-[var(--surface)]/80 px-3 py-1 text-[11px] text-[var(--ink-2)] backdrop-blur-sm">
+                <Lightbulb size={13} weight="fill" className="text-[var(--accent-ink)]" aria-hidden="true" />
+                <span>{stepCopy.smartPickPrefix}:</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onOpenProfile ? onOpenProfile(activeTutor.id) : onQuickApply()
+                  }
+                  className="cursor-pointer font-bold text-[var(--accent-ink)] underline underline-offset-2"
+                >
+                  {activeTutorName}
+                </button>
+              </span>
+            </div>
+          </div>
+
+          {/* Clean Proof Stats & Secondary Shortcuts */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-[var(--border)]/70 pt-4 text-xs text-[var(--muted)] lg:justify-start">
             {copy.hero.metrics.map((m) => (
               <span key={m.label} className="inline-flex items-baseline gap-1.5">
                 <strong className="font-mono-num text-sm font-bold text-[var(--ink)]">
@@ -455,216 +517,267 @@ export function HeroOpening({
           </div>
         </div>
 
-        {/* Right Column: Live Interactive Top-Mentor Visual Showcase */}
-        <div className="lg:col-span-5">
+        {/* RIGHT COLUMN: High-Contrast #0F172A Obsidian Live Mentor Telemetry Stage */}
+        <div className="lg:col-span-6">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.44, delay: 0.14, ease: EASE_EDITORIAL }}
-            className="relative mx-auto w-full max-w-[430px] px-2 py-3 sm:px-3 lg:max-w-none"
+            transition={{ duration: 0.46, delay: 0.12, ease: EASE_EDITORIAL }}
+            className="relative mx-auto w-full max-w-[520px] lg:max-w-none"
           >
-            {/* Soft Ambient Backdrop Halo */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-2 rounded-[36px] bg-gradient-to-br from-sky-400/20 via-emerald-400/20 to-[#C8F542]/25 blur-2xl"
-            />
+            {/* Obsidian Dark Contrast Card */}
+            <div className="relative overflow-hidden rounded-[32px] border border-slate-800/90 bg-[#0F172A] p-5 text-white shadow-[0_30px_70px_-20px_rgba(15,23,42,0.55)] dark:border-emerald-500/25 dark:bg-[#0D1729] sm:p-6">
+              {/* Subject-Reactive Ambient Glow inside Dark Stage */}
+              <div
+                aria-hidden="true"
+                className={`pointer-events-none absolute -top-24 -right-20 h-64 w-64 rounded-full bg-gradient-to-br ${subjectTheme.barGradientClass} opacity-30 blur-3xl transition-colors duration-300`}
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-24 -left-16 h-52 w-52 rounded-full bg-emerald-500/15 blur-3xl"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-10 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#C8F542]/80 to-transparent"
+              />
 
-            {/* Floating Verified DİM Score Badge (Top-Right) */}
-            <div className="absolute right-3 -top-1 z-20 flex items-center gap-2 rounded-2xl border border-emerald-200/90 bg-[var(--surface)]/95 px-3 py-2 shadow-xl backdrop-blur-md dark:border-emerald-700/60 sm:right-0">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--accent)] font-mono-num text-[11px] font-black text-white shadow-sm">
-                DİM
-              </span>
-              <div className="leading-tight">
-                <div className="font-mono-num text-xs font-extrabold text-[var(--ink)] sm:text-sm">
-                  {activeTutor.education.admissionScore} / {activeTutor.education.maxScore}
-                </div>
-                <div className="text-[10px] font-medium text-[var(--muted)]">
-                  {stepCopy.dimVerifiedBadge}
-                </div>
-              </div>
-            </div>
+              {/* Top Stage Bar: Live Status + Subject Tag + Pager Controls */}
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#C8F542] animate-pulse" />
+                    <span>{stepCopy.spotlightLive}</span>
+                  </span>
 
-            {/* Frosted Gradient Border Showcase Card */}
-            <div className="relative rounded-[30px] bg-gradient-to-br from-[#0F172A] via-[#0F4C5C] to-[#10B981] p-[1.5px] shadow-[var(--shadow-float)] dark:from-emerald-400/50 dark:via-sky-400/40 dark:to-[#C8F542]/50">
-              <div className="rounded-[28.5px] bg-[var(--surface)]/96 p-4 pb-6 backdrop-blur-xl sm:p-5 sm:pb-6">
-                {/* Live Indicator + Colored Subject Span + Carousel Controls */}
-                <div className="flex items-center justify-between gap-2 pt-2 sm:pt-0">
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="truncate">{stepCopy.spotlightLive}</span>
-                    </span>
-                    {activePrimarySubject ? (
+                  {activePrimarySubject ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
                       <span
-                        className={`hidden rounded-full border px-2.5 py-0.5 text-[11px] font-semibold sm:inline-flex ${subjectTheme.pillClass}`}
-                      >
-                        {SUBJECT_LABELS[activePrimarySubject][locale]}
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${subjectTheme.dotColorClass}`}
+                      />
+                      {SUBJECT_LABELS[activePrimarySubject][locale]}
+                    </span>
+                  ) : null}
+                </div>
+
+                {activePool.length > 1 ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSpotlightCursor((c) => (c - 1 + activePool.length) % activePool.length)
+                      }
+                      aria-label={stepCopy.prevSpotlight}
+                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/8 text-slate-200 transition-colors hover:border-white/35 hover:bg-white/15"
+                    >
+                      <ArrowLeft size={12} weight="bold" />
+                    </button>
+                    <span className="font-mono-num min-w-[34px] text-center text-[11px] font-semibold text-slate-300">
+                      {safeIdx + 1}/{activePool.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSpotlightCursor((c) => (c + 1) % activePool.length)}
+                      aria-label={stepCopy.nextSpotlight}
+                      className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/8 text-slate-200 transition-colors hover:border-white/35 hover:bg-white/15"
+                    >
+                      <ArrowRight size={12} weight="bold" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Animated Active Mentor Identity + Hero Score Telemetry Block */}
+              <motion.div
+                key={activeTutor.id}
+                initial={{ opacity: 0.55, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: EASE_EDITORIAL }}
+                className="relative z-10 mt-5 space-y-4 text-left"
+              >
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 items-center gap-3.5">
+                    <div className="shrink-0 rounded-full ring-2 ring-[#C8F542]/80 ring-offset-2 ring-offset-[#0F172A]">
+                      <Avatar
+                        id={activeTutor.id}
+                        name={activeTutorName}
+                        index={safeIdx}
+                        size="xl"
+                        verified={activeTutor.education.verified}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h2 className="truncate text-lg font-bold tracking-tight text-white sm:text-xl">
+                          {activeTutorName}
+                        </h2>
+                        {activeTutor.education.verified ? (
+                          <SealCheck
+                            size={16}
+                            weight="fill"
+                            className="shrink-0 text-[#C8F542]"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                      </div>
+
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-300">
+                        <GraduationCap
+                          size={14}
+                          weight="fill"
+                          className="shrink-0 text-emerald-400"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">{activeUniversity}</span>
+                      </div>
+
+                      <div className="mt-1.5 flex items-center gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1 font-semibold text-white">
+                          <Star
+                            size={12}
+                            weight="fill"
+                            className="text-amber-400"
+                            aria-hidden="true"
+                          />
+                          {activeTutor.rating.toFixed(1)}
+                          <span className="font-normal text-slate-400">
+                            ({activeTutor.n})
+                          </span>
+                        </span>
+                        <span aria-hidden="true" className="text-slate-600">
+                          •
+                        </span>
+                        <span className="font-mono-num font-bold text-[#C8F542]">
+                          {activeTutor.price} ₼{' '}
+                          <span className="font-normal text-slate-400">{stepCopy.rateUnit}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hero DİM Telemetry Card */}
+                  <div className="flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-emerald-400/25 bg-white/6 px-4 py-2.5 backdrop-blur-md sm:block sm:text-right">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                      {stepCopy.dimVerifiedBadge}
+                    </div>
+                    <div className="font-mono-num mt-0.5 flex items-baseline gap-1 sm:justify-end">
+                      <span className="text-2xl font-black tracking-tight text-[#C8F542]">
+                        {activeTutor.education.admissionScore}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-400">
+                        / {activeTutor.education.maxScore}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dark-Glass Outcome + Animated Score Growth Visualizer */}
+                <div className="rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur-md">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-emerald-300 sm:text-sm">
+                      {resolveLocalized(activeVisual.superpowerTag, locale)}
+                    </span>
+                    {activeAchievement ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 font-mono-num text-[11px] font-bold text-white">
+                        {activeAchievement.metric}{' '}
+                        <span className="font-normal text-slate-300">
+                          {resolveLocalized(activeAchievement.label, locale)}
+                        </span>
                       </span>
                     ) : null}
                   </div>
 
-                  {activePool.length > 1 ? (
-                    <div className="flex shrink-0 items-center gap-1 pr-24 sm:pr-28">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSpotlightCursor((c) => (c - 1 + activePool.length) % activePool.length)
-                        }
-                        aria-label={stepCopy.prevSpotlight}
-                        className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
-                      >
-                        <ArrowLeft size={12} weight="bold" />
-                      </button>
-                      <span className="font-mono-num text-[11px] font-semibold text-[var(--muted)]">
-                        {safeIdx + 1}/{activePool.length}
+                  {/* Glowing Progress Trajectory inside Dark Stage */}
+                  <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="inline-flex items-center gap-1.5 font-medium text-slate-300">
+                        <TrendUp size={14} weight="bold" className="text-[#C8F542]" aria-hidden="true" />
+                        <span>{resolveLocalized(activeVisual.trajectory.label, locale)}</span>
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setSpotlightCursor((c) => (c + 1) % activePool.length)}
-                        aria-label={stepCopy.nextSpotlight}
-                        className="grid h-7 w-7 cursor-pointer place-items-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] text-[var(--ink-2)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--ink)]"
-                      >
-                        <ArrowRight size={12} weight="bold" />
-                      </button>
+                      <span className="font-mono-num rounded-full bg-[#C8F542]/15 px-2.5 py-0.5 text-[11px] font-bold text-[#C8F542]">
+                        {activeVisual.trajectory.before} → {activeVisual.trajectory.after} ({activeVisual.trajectory.delta})
+                      </span>
                     </div>
-                  ) : null}
+
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: `${Math.min(100, Math.max(18, activeVisual.trajectory.bar1Pct))}%`,
+                        }}
+                        transition={{ duration: 0.5, ease: EASE_EDITORIAL }}
+                        className="h-full rounded-full bg-gradient-to-r from-[#10B981] via-emerald-400 to-[#C8F542]"
+                      />
+                    </div>
+                  </div>
                 </div>
+              </motion.div>
 
-                {/* Animated Tutor Identity & Growth Content */}
-                <motion.div
-                  key={activeTutor.id}
-                  initial={{ opacity: 0.5, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.18, ease: EASE_EDITORIAL }}
-                  className="mt-4 space-y-3.5 text-left"
+              {/* Clickable Mentor Portrait Switcher Strip (Stationary Outside Animated Block) */}
+              {quickSwitchPool.length > 1 ? (
+                <div
+                  className="relative z-10 mt-4 flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2"
+                  role="group"
+                  aria-label={stepCopy.quickSwitchLabel}
                 >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <Avatar
-                          id={activeTutor.id}
-                          name={activeTutorName}
-                          index={safeIdx}
-                          size="xl"
-                          verified={activeTutor.education.verified}
-                        />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <h2 className="truncate text-base font-bold tracking-tight text-[var(--ink)] sm:text-lg">
-                              {activeTutorName}
-                            </h2>
-                            {activeTutor.education.verified ? (
-                              <SealCheck
-                                size={15}
-                                weight="fill"
-                                className="shrink-0 text-[var(--accent)]"
-                                aria-hidden="true"
-                              />
-                            ) : null}
-                          </div>
-
-                          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                            <GraduationCap
-                              size={14}
-                              weight="fill"
-                              className="shrink-0 text-[var(--accent-ink)]"
-                              aria-hidden="true"
-                            />
-                            <span className="truncate">{activeUniversity}</span>
-                          </div>
-
-                          <div className="mt-1 flex items-center gap-2 text-xs">
-                            <span className="inline-flex items-center gap-1 font-semibold text-[var(--ink)]">
-                              <Star
-                                size={12}
-                                weight="fill"
-                                className="text-amber-500"
-                                aria-hidden="true"
-                              />
-                              {activeTutor.rating.toFixed(1)}
-                              <span className="font-normal text-[var(--muted)]">
-                                ({activeTutor.n})
-                              </span>
-                            </span>
-                            <span aria-hidden="true" className="text-[var(--border-strong)]">
-                              •
-                            </span>
-                            <span className="font-mono-num font-bold text-[var(--ink)]">
-                              {activeTutor.price} ₼
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Subject Superpower Tag + Top Student Proof */}
-                    <div
-                      className={`rounded-2xl border px-3.5 py-2.5 ${subjectTheme.softBoxClass}`}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-[var(--accent-ink)]">
-                          {resolveLocalized(activeVisual.superpowerTag, locale)}
-                        </span>
-                        {activeAchievement ? (
-                          <span className="rounded-full bg-[var(--surface)]/90 px-2.5 py-0.5 font-mono-num text-[11px] font-bold text-[var(--ink)] shadow-2xs">
-                            {activeAchievement.metric}{' '}
-                            <span className="font-normal text-[var(--muted)]">
-                              {resolveLocalized(activeAchievement.label, locale)}
-                            </span>
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {/* Visual Before -> After DİM Score Growth Bar */}
-                    <ScoreTrajectoryBar
-                      before={activeVisual.trajectory.before}
-                      after={activeVisual.trajectory.after}
-                      delta={activeVisual.trajectory.delta}
-                      label={resolveLocalized(activeVisual.trajectory.label, locale)}
-                      progressPct={activeVisual.trajectory.bar1Pct}
-                      subject={activePrimarySubject}
-                      compact
-                    />
-
-                    {/* Showcase Quick Actions */}
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onOpenProfile ? onOpenProfile(activeTutor.id) : onQuickApply()
-                        }
-                        className="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-4 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--ink)]"
-                      >
-                        {stepCopy.viewDossier}
-                      </button>
-
-                      <motion.button
-                        type="button"
-                        onClick={() =>
-                          onSendRequest ? onSendRequest(activeTutor.id, true) : onQuickApply()
-                        }
-                        whileTap={{ scale: 0.98 }}
-                        className="group/spot inline-flex min-h-[38px] flex-1 cursor-pointer items-center justify-between gap-2 rounded-full bg-[var(--primary-btn)] py-1 pl-4 pr-1 text-xs font-semibold text-[var(--primary-btn-ink)] transition-colors hover:bg-[var(--primary-btn-hover)]"
-                      >
-                        <span className="truncate">{stepCopy.bookTrialShort}</span>
-                        <span
-                          aria-hidden="true"
-                          className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--lime)] text-[#0F172A] transition-transform duration-200 group-hover/spot:translate-x-0.5"
+                  <span className="text-[11px] font-medium text-slate-300">
+                    {stepCopy.quickSwitchLabel}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {quickSwitchPool.map((candidate, idx) => {
+                      const cName = resolveTutorName(candidate, locale);
+                      const isCurrent = candidate.id === activeTutor.id;
+                      return (
+                        <button
+                          key={candidate.id}
+                          type="button"
+                          onClick={() => setSpotlightCursor(idx)}
+                          aria-label={cName}
+                          aria-pressed={isCurrent}
+                          title={cName}
+                          className={`cursor-pointer rounded-full transition-all ${
+                            isCurrent
+                              ? 'scale-110 ring-2 ring-[#C8F542] ring-offset-2 ring-offset-[#0F172A]'
+                              : 'opacity-65 hover:opacity-100'
+                          }`}
                         >
-                          <ArrowRight size={13} weight="bold" />
-                        </span>
-                      </motion.button>
-                    </div>
-                  </motion.div>
-              </div>
-            </div>
+                          <Avatar id={candidate.id} name={cName} index={idx} size="sm" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
 
-            {/* Floating Bottom-Left Free Trial Pill */}
-            <div className="absolute left-3 -bottom-1 z-20 inline-flex items-center gap-2 rounded-2xl bg-[#0F172A] px-3.5 py-2 text-xs font-bold text-white shadow-xl ring-1 ring-white/15 sm:left-0">
-              <span className="rounded-lg bg-[var(--lime)] px-2 py-0.5 font-mono-num text-[11px] font-black text-[#0F172A]">
-                0 ₼
-              </span>
-              <span>{stepCopy.trialPillBadge}</span>
+              {/* Dark Stage Action Footer */}
+              <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onOpenProfile ? onOpenProfile(activeTutor.id) : onQuickApply()
+                  }
+                  className="inline-flex min-h-[42px] cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 text-xs font-semibold text-white transition-colors hover:bg-white/20"
+                >
+                  {stepCopy.viewDossier}
+                </button>
+
+                <motion.button
+                  type="button"
+                  onClick={() =>
+                    onSendRequest ? onSendRequest(activeTutor.id, true) : onQuickApply()
+                  }
+                  whileTap={{ scale: 0.98 }}
+                  className="group/spot inline-flex min-h-[42px] flex-1 cursor-pointer items-center justify-between gap-2 rounded-full bg-[var(--lime)] py-1 pl-4 pr-1 text-xs font-bold text-[#0F172A] shadow-md transition-colors hover:bg-[#d8fa6b]"
+                >
+                  <span className="truncate">{stepCopy.bookTrialShort}</span>
+                  <span
+                    aria-hidden="true"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0F172A] text-[#C8F542] transition-transform duration-200 group-hover/spot:translate-x-0.5"
+                  >
+                    <ArrowRight size={14} weight="bold" />
+                  </span>
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </div>

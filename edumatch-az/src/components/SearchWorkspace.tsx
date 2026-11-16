@@ -322,28 +322,52 @@ export function SearchWorkspace({
         onSendRequest={onSendRequest}
       />
 
-      {/* 4-Card Visual Bento Strip (Colorful Scannable Platform Proof) */}
+      {/* High-Contrast Visual Proof Bento Strip */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {bentoCards.map((card) => {
+        {bentoCards.map((card, idx) => {
           const IconComp = card.icon;
+          const isDuel = idx === 1;
+          const isTrial = idx === 3;
+          const tileTheme = isDuel
+            ? 'bg-[#0F172A] text-white border-slate-800 shadow-[var(--shadow-float)] hover:border-[#C8F542]/60'
+            : isTrial
+              ? 'bg-gradient-to-br from-[#ECFCCB]/85 to-emerald-50/90 border-lime-300/80 dark:from-[#1A2E14] dark:to-[#10261F] dark:border-lime-700/40'
+              : idx === 0
+                ? 'bg-gradient-to-br from-emerald-50/95 to-white border-emerald-200/80 dark:from-[#122620] dark:to-[#121D30] dark:border-emerald-800/40'
+                : 'bg-gradient-to-br from-sky-50/95 to-violet-50/75 border-sky-200/80 dark:from-[#162438] dark:to-[#1C1B33] dark:border-sky-800/40';
+
           const inner = (
             <>
               <span
                 aria-hidden="true"
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${card.iconClass}`}
+                className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${
+                  isDuel ? 'bg-[var(--lime)] text-[#0F172A]' : card.iconClass
+                }`}
               >
                 <IconComp size={19} weight="fill" />
               </span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-baseline gap-1.5">
-                  <span className="font-mono-num text-sm font-extrabold text-[var(--ink)] sm:text-base">
+                  <span
+                    className={`font-mono-num text-sm font-extrabold sm:text-base ${
+                      isDuel ? 'text-[#C8F542]' : 'text-[var(--ink)]'
+                    }`}
+                  >
                     {card.value}
                   </span>
-                  <span className="text-xs font-semibold text-[var(--ink)]">
+                  <span
+                    className={`text-xs font-semibold ${
+                      isDuel ? 'text-white' : 'text-[var(--ink)]'
+                    }`}
+                  >
                     {card.title}
                   </span>
                 </div>
-                <p className="mt-0.5 line-clamp-1 text-[11px] text-[var(--muted)]">
+                <p
+                  className={`mt-0.5 line-clamp-1 text-[11px] ${
+                    isDuel ? 'text-slate-300' : 'text-[var(--muted)]'
+                  }`}
+                >
                   {card.sub}
                 </p>
               </div>
@@ -358,7 +382,7 @@ export function SearchWorkspace({
                 key={card.id}
                 type="button"
                 onClick={handleBentoAction}
-                className={`em-card flex cursor-pointer items-start gap-3 rounded-[22px] p-3.5 text-left sm:p-4 ${card.borderHover}`}
+                className={`flex cursor-pointer items-start gap-3 rounded-[22px] border p-3.5 text-left transition-all duration-150 hover:-translate-y-0.5 sm:p-4 ${tileTheme} ${card.borderHover}`}
               >
                 {inner}
               </button>
@@ -368,7 +392,7 @@ export function SearchWorkspace({
           return (
             <div
               key={card.id}
-              className={`em-card flex items-start gap-3 rounded-[22px] p-3.5 text-left sm:p-4 ${card.borderHover}`}
+              className={`flex items-start gap-3 rounded-[22px] border p-3.5 text-left shadow-[var(--shadow-card)] transition-all duration-150 sm:p-4 ${tileTheme} ${card.borderHover}`}
             >
               {inner}
             </div>
@@ -383,21 +407,29 @@ export function SearchWorkspace({
           className="em-card flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:px-6 sm:py-5"
         >
           <div className="flex min-w-0 items-center gap-3.5 sm:gap-4">
-            {/* Stacked Real Mentor Portraits */}
-            <div className="hidden -space-x-2.5 sm:flex" aria-hidden="true">
-              {stackedPreviewTutors.map((t, i) => (
-                <div
-                  key={t.id}
-                  className="rounded-full ring-2 ring-[var(--surface)]"
-                >
-                  <Avatar
-                    id={t.id}
-                    name={resolveTutorName(t, locale)}
-                    index={i}
-                    size="sm"
-                  />
-                </div>
-              ))}
+            {/* Stacked Real Mentor Portraits (Clickable Quick Dossier) */}
+            <div className="hidden -space-x-2 hover:space-x-1 transition-all duration-200 sm:flex">
+              {stackedPreviewTutors.map((t, i) => {
+                const previewName = resolveTutorName(t, locale);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => onOpenProfile(t.id)}
+                    aria-label={`${previewName} (${t.education.admissionScore}/${t.education.maxScore})`}
+                    title={`${previewName} · ${t.education.admissionScore}/${t.education.maxScore} DİM`}
+                    className="cursor-pointer rounded-full ring-2 ring-[var(--surface)] transition-transform duration-150 hover:z-10 hover:-translate-y-0.5 hover:scale-105"
+                  >
+                    <Avatar
+                      id={t.id}
+                      name={previewName}
+                      index={i}
+                      size="sm"
+                      verified={t.education.verified}
+                    />
+                  </button>
+                );
+              })}
             </div>
 
             <div className="min-w-0 space-y-1">

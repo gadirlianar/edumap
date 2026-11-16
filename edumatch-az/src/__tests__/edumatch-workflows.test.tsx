@@ -333,7 +333,9 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
 
     // Switch subject in Hero selector -> right-hand live spotlight card updates immediately
     await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
-    expect(within(showcase).getByText('Эльнур Гасанов')).toBeInTheDocument();
+    expect(
+      within(showcase).getByRole('heading', { level: 2, name: 'Эльнур Гасанов' }),
+    ).toBeInTheDocument();
 
     // Switch back to all subjects and step to next spotlight tutor via carousel control
     await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
@@ -349,5 +351,41 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
         name: /Сравнение досье: 1-на-1 \(VS\)/i,
       }),
     ).toBeInTheDocument();
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Закрыть' }));
+  });
+
+  it('supports Hero Goal Presets, clickable showcase mini-avatars, collapsed toggle portraits, and compact 2-tier Footer', async () => {
+    const user = userEvent.setup();
+    render(<EduMatchApp />);
+
+    // 1. Clicking a Hero Goal Preset updates subject & spotlight mentor while keeping catalog collapsed
+    const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
+    await user.click(within(showcase).getByRole('button', { name: /Олимпиада & IT/i }));
+    expect(
+      within(showcase).getByRole('heading', { level: 2, name: 'Эльнур Гасанов' }),
+    ).toBeInTheDocument();
+    expect(document.getElementById('tutor-catalog')).toBeNull();
+
+    // 2. Quick-switch mini-avatar group switches active mentor in Hero spotlight
+    await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
+    const switcher = within(showcase).getByRole('group', { name: /Быстрый выбор ментора/i });
+    const avatarButtons = within(switcher).getAllByRole('button');
+    expect(avatarButtons.length).toBeGreaterThanOrEqual(2);
+    await user.click(avatarButtons[1]);
+    expect(avatarButtons[1]).toHaveAttribute('aria-pressed', 'true');
+
+    // 3. Collapsed catalog toggle contains clickable preview mentor avatar buttons that open dossier
+    const toggleBar = document.getElementById('tutor-catalog-toggle')!;
+    const previewAvatars = within(toggleBar).getAllByRole('button', { name: /\/700\)/i });
+    expect(previewAvatars.length).toBeGreaterThanOrEqual(2);
+    await user.click(previewAvatars[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Закрыть' }));
+
+    // 4. Compact 2-tier Footer preserves privacy & teacher switch actions
+    const footer = screen.getByRole('contentinfo');
+    expect(within(footer).getByText(/Аудит дипломов и баллов DİM/i)).toBeInTheDocument();
+    await user.click(within(footer).getByRole('button', { name: /Политика конфиденциальности/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

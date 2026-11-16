@@ -1,4 +1,4 @@
-import type { Locale, LocalizedText, SubjectId } from '@/types/edumatch';
+import type { Locale, LocalizedText, SubjectId, TutorProfile } from '@/types/edumatch';
 
 export interface TutorVisualMeta {
   id: string;
@@ -605,3 +605,56 @@ export const COMPARE_COPY: Record<Locale, CompareCopy> = {
     openDossierBtn: 'Full Dossier',
   },
 };
+
+export interface SmartMatchTag {
+  text: string;
+  toneClass: string;
+}
+
+export function getSmartMatchTag(
+  tutor: TutorProfile,
+  locale: Locale,
+  matchScore: number,
+  index = 0,
+): SmartMatchTag {
+  const visual = getTutorVisual(tutor.id, index);
+  const score = tutor.education.admissionScore;
+  const max = tutor.education.maxScore;
+
+  if (score >= 685) {
+    return {
+      text:
+        locale === 'az'
+          ? `DİM Lideri · ${score}/${max}`
+          : locale === 'en'
+            ? `DİM Leader · ${score}/${max}`
+            : `Лидер DİM · ${score}/${max}`,
+      toneClass:
+        'border-emerald-200/80 bg-emerald-50/90 text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-950/60 dark:text-emerald-300',
+    };
+  }
+
+  if (visual.trajectory.delta.includes('15') || visual.trajectory.delta.includes('16')) {
+    return {
+      text:
+        locale === 'az'
+          ? `Sürətli artım · ${visual.trajectory.delta}`
+          : locale === 'en'
+            ? `Top gain · ${visual.trajectory.delta}`
+            : `Макс. рост · ${visual.trajectory.delta}`,
+      toneClass:
+        'border-sky-200/80 bg-sky-50/90 text-sky-700 dark:border-sky-800/70 dark:bg-sky-950/60 dark:text-sky-300',
+    };
+  }
+
+  return {
+    text:
+      locale === 'az'
+        ? `Ağıllı seçim · ${matchScore}%`
+        : locale === 'en'
+          ? `Smart match · ${matchScore}%`
+          : `Умный подбор · ${matchScore}%`,
+    toneClass:
+      'border-violet-200/80 bg-violet-50/90 text-violet-700 dark:border-violet-800/70 dark:bg-violet-950/60 dark:text-violet-300',
+  };
+}
