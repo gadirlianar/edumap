@@ -85,9 +85,9 @@ export function Footer({
         className="pointer-events-none absolute inset-x-8 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#C8F542]/75 to-transparent"
       />
 
-      {/* Tier 1: Compact Identity + Quick Navigation & Teacher CTA */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
+      {/* Tier 1: Compact Identity + Quick Navigation & Teacher CTA (single row on desktop) */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
           <div className="flex items-center gap-2.5">
             <span
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--lime)] text-[#0F172A] shadow-xs transition-transform duration-200 group-hover/footer:scale-105"
@@ -105,46 +105,46 @@ export function Footer({
             </div>
           </div>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-medium text-slate-200">
+          <span className="hidden items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[11px] font-medium text-slate-200 xl:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] animate-pulse" aria-hidden="true" />
             <MapPin size={12} weight="fill" className="text-[#C8F542]" aria-hidden="true" />
             <span>{f.citiesLine}</span>
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 lg:flex-nowrap">
           <button
             type="button"
             onClick={onNavigateSearch}
-            className="cursor-pointer rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
+            className="cursor-pointer whitespace-nowrap rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
           >
             {copy.nav.search}
           </button>
           <button
             type="button"
             onClick={onNavigateTest}
-            className="cursor-pointer rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
+            className="cursor-pointer whitespace-nowrap rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
           >
             {copy.nav.test}
           </button>
           <button
             type="button"
             onClick={onNavigateLessons}
-            className="cursor-pointer rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
+            className="cursor-pointer whitespace-nowrap rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
           >
             {copy.nav.lessons}
           </button>
           <button
             type="button"
             onClick={onOpenTour}
-            className="cursor-pointer rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
+            className="cursor-pointer whitespace-nowrap rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:border-white/25 hover:bg-white/12 hover:text-white"
           >
             {f.howItWorks}
           </button>
           <button
             type="button"
             onClick={onSwitchToTeacher}
-            className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--lime)] px-3.5 py-1.5 text-xs font-bold text-[#0F172A] shadow-sm transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]"
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--lime)] px-3.5 py-1.5 text-xs font-bold text-[#0F172A] shadow-sm transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]"
           >
             <span>{f.becomeTutor}</span>
             <ArrowUpRight size={13} weight="bold" aria-hidden="true" />

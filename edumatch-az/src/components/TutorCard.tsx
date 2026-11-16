@@ -71,10 +71,10 @@ export function TutorCard({
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.14, ease: EASE_CARD }}
+      whileHover={{ y: -5, scale: 1.008 }}
+      transition={{ duration: 0.18, ease: EASE_CARD }}
       className={`group flex w-full min-w-0 flex-col justify-between overflow-hidden rounded-[28px] border bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-150 ${
         isCompared
           ? 'border-[var(--accent)] ring-1 ring-[var(--accent-border)]'

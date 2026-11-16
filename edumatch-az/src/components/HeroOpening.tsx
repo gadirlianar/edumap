@@ -4,11 +4,12 @@ import React, { useState } from 'react';
 import {
   ArrowRight,
   ChalkboardTeacher,
-  GraduationCap,
-  SealCheck,
+  Crown,
+  CurrencyCircleDollar,
+  FilmSlate,
+  RocketLaunch,
+  ShieldCheck,
   Sparkle,
-  TrendUp,
-  Trophy,
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import type { GradeId, Locale, SubjectId, TutorProfile } from '@/types/edumatch';
@@ -31,51 +32,7 @@ interface HeroOpeningProps {
   onSendRequest?: (tutorId: string, trial: boolean) => void;
 }
 
-interface SimulatorStageTier {
-  id: 'tier1' | 'tier2' | 'tier3';
-  tabLabel: string;
-  startScore: number;
-  endScore: number;
-  delta: string;
-  months: Record<Locale, string>;
-  universities: string[];
-  heights: [number, number, number];
-}
-
 const EASE_EDITORIAL = [0.22, 1, 0.36, 1] as const;
-
-const SIMULATOR_TIERS: SimulatorStageTier[] = [
-  {
-    id: 'tier1',
-    tabLabel: '450 → 600+',
-    startScore: 450,
-    endScore: 605,
-    delta: '+155 DİM',
-    months: { ru: '3 мес.', az: '3 ay', en: '3 mo' },
-    universities: ['BDU', 'ADNSU', 'UNEC'],
-    heights: [42, 74, 108],
-  },
-  {
-    id: 'tier2',
-    tabLabel: '500 → 650+',
-    startScore: 500,
-    endScore: 658,
-    delta: '+158 DİM',
-    months: { ru: '4 мес.', az: '4 ay', en: '4 mo' },
-    universities: ['ADA', 'UFAZ', 'BDU'],
-    heights: [52, 92, 132],
-  },
-  {
-    id: 'tier3',
-    tabLabel: '540 → 690+',
-    startScore: 540,
-    endScore: 692,
-    delta: '+152 DİM',
-    months: { ru: '5 мес.', az: '5 ay', en: '5 mo' },
-    universities: ['BANM', 'ADA', 'UFAZ'],
-    heights: [62, 104, 148],
-  },
-];
 
 const HERO_COPY: Record<
   Locale,
@@ -88,143 +45,143 @@ const HERO_COPY: Record<
     subtitlePrice: string;
     primaryCta: string;
     quizCta: string;
-    stageLabel: string;
-    stageTitle: string;
-    baselineLabel: string;
-    targetLabel: string;
     metrics: { value: string; label: string }[];
+    orbCenterTop: string;
+    orbCenterSub: string;
+    cardTrialLabel: string;
+    cardTrialValue: string;
+    cardTrialSub: string;
+    cardEscrowLabel: string;
+    cardEscrowValue: string;
+    cardEscrowSub: string;
+    cardSaasLabel: string;
+    cardSaasValue: string;
+    cardSaasSub: string;
+    cardStudioLabel: string;
+    cardStudioValue: string;
   }
 > = {
   ru: {
-    eyebrow: 'Баку · Онлайн · Аудит 650+ DİM',
+    eyebrow: 'EdTech Маркетплейс · 0 ₼ старт · Видеокурсы и PRO',
     titleStart: 'Выбирайте репетитора по',
     titleAccent: 'реальным баллам',
     titleEnd: '',
-    subtitleLead: 'Проверенные дипломы и измеримый рост. Первый пробный',
+    subtitleLead: 'Единая платформа уроков, курсов и проверенных менторов. Первый пробный',
     subtitlePrice: '— 0 ₼',
     primaryCta: 'Показать репетиторов',
     quizCta: 'Пройти тест уровня',
-    stageLabel: '3D-траектория результата',
-    stageTitle: 'Прогноз роста DİM',
-    baselineLabel: 'Старт',
-    targetLabel: 'Цель',
     metrics: [
       { value: '+145', label: 'рост DİM' },
-      { value: '94%', label: 'в вуз мечты' },
-      { value: '100%', label: 'аудит баллов' },
+      { value: '12%', label: 'безопасная сделка' },
+      { value: '19 ₼', label: 'PRO для репетиторов' },
     ],
+    orbCenterTop: 'EDUMATCH',
+    orbCenterSub: 'LIVE ENGINE',
+    cardTrialLabel: 'Вход ученика',
+    cardTrialValue: '0 ₼ → 25 ₼',
+    cardTrialSub: 'Пробный → регулярные уроки',
+    cardEscrowLabel: 'Модель дохода',
+    cardEscrowValue: '12% Escrow',
+    cardEscrowSub: 'Комиссия с каждого урока',
+    cardSaasLabel: 'SaaS-подписка',
+    cardSaasValue: 'PRO · 19 ₼/мес',
+    cardSaasSub: 'Повторяемый MRR доход',
+    cardStudioLabel: 'Видео и курсы',
+    cardStudioValue: '39–69 ₼',
   },
   az: {
-    eyebrow: 'Bakı · Onlayn · 650+ DİM Auditi',
+    eyebrow: 'EdTech Platforma · Dərs, Kurs və PRO Abunə',
     titleStart: 'Müəllimi qəbul balı',
     titleAccent: 'və nəticəyə',
     titleEnd: 'görə seçin',
-    subtitleLead: 'Təsdiqli diplomlar və real bal artımı. İlk sınaq',
+    subtitleLead: 'Yoxlanılmış müəllimlər, video-kurslar və canlı dərslər. İlk sınaq',
     subtitlePrice: '— 0 ₼',
     primaryCta: 'Müəllimləri göstər',
     quizCta: 'Səviyyə testi keç',
-    stageLabel: '3D Nəticə Modeli',
-    stageTitle: 'DİM Bal Artımı',
-    baselineLabel: 'Başlanğıc',
-    targetLabel: 'Hədəf',
     metrics: [
       { value: '+145', label: 'DİM artımı' },
-      { value: '94%', label: 'hədəf VUZ' },
-      { value: '100%', label: 'bal auditi' },
+      { value: '12%', label: 'platforma komissiyası' },
+      { value: '19 ₼', label: 'müəllim PRO' },
     ],
+    orbCenterTop: 'EDUMATCH',
+    orbCenterSub: 'LIVE ENGINE',
+    cardTrialLabel: 'Şagird axını',
+    cardTrialValue: '0 ₼ → 25 ₼',
+    cardTrialSub: 'Pulsuz sınaqdan daimi dərsə',
+    cardEscrowLabel: 'Gəlir modeli',
+    cardEscrowValue: '12% Escrow',
+    cardEscrowSub: 'Hər ödənişli dərsdən komissiya',
+    cardSaasLabel: 'SaaS Gəlir',
+    cardSaasValue: 'PRO · 19 ₼/ay',
+    cardSaasSub: 'Müəllim abunəliyi (MRR)',
+    cardStudioLabel: 'Kurs satışı',
+    cardStudioValue: '39–69 ₼',
   },
   en: {
-    eyebrow: 'Baku · Online · Audited 650+ DİM',
+    eyebrow: 'EdTech Marketplace · Lessons, Courses & PRO SaaS',
     titleStart: 'Choose a tutor by',
     titleAccent: 'verified scores',
     titleEnd: '',
-    subtitleLead: 'Audited university scores & measurable gains. First trial',
+    subtitleLead: 'Live tutoring, video courses & verified mentors in one place. First trial',
     subtitlePrice: '— 0 ₼',
     primaryCta: 'Show tutors',
     quizCta: 'Take level quiz',
-    stageLabel: '3D Outcome Engine',
-    stageTitle: 'DİM Score Projection',
-    baselineLabel: 'Baseline',
-    targetLabel: 'Target',
     metrics: [
-      { value: '+145', label: 'DİM gain' },
-      { value: '94%', label: 'target uni' },
-      { value: '100%', label: 'verified' },
+      { value: '+145', label: 'avg DİM gain' },
+      { value: '12%', label: 'escrow take-rate' },
+      { value: '19 ₼', label: 'tutor PRO MRR' },
     ],
+    orbCenterTop: 'EDUMATCH',
+    orbCenterSub: 'LIVE ENGINE',
+    cardTrialLabel: 'Student Funnel',
+    cardTrialValue: '0 ₼ → 25 ₼',
+    cardTrialSub: 'Free trial to recurring lessons',
+    cardEscrowLabel: 'Take-Rate Engine',
+    cardEscrowValue: '12% Escrow',
+    cardEscrowSub: 'Protected per-lesson fee',
+    cardSaasLabel: 'Recurring SaaS',
+    cardSaasValue: 'PRO · 19 ₼/mo',
+    cardSaasSub: 'Tutor boost & studio plan',
+    cardStudioLabel: 'Digital Courses',
+    cardStudioValue: '39–69 ₼',
   },
 };
-
-function IsometricBar({
-  x,
-  height,
-  palette,
-}: {
-  x: number;
-  height: number;
-  palette: 'slate' | 'emerald' | 'lime';
-}) {
-  const baseY = 178;
-  const topY = baseY - height;
-  const halfW = 24;
-  const depth = 13;
-
-  const colors =
-    palette === 'slate'
-      ? { top: '#CBD5E1', left: '#94A3B8', right: '#64748B' }
-      : palette === 'emerald'
-        ? { top: '#6EE7B7', left: '#10B981', right: '#047857' }
-        : { top: '#D9F99D', left: '#10B981', right: '#065F46' };
-
-  return (
-    <g>
-      <motion.polygon
-        initial={false}
-        animate={{
-          points: `${x - halfW},${topY} ${x},${topY - depth} ${x + halfW},${topY} ${x},${topY + depth}`,
-        }}
-        transition={{ duration: 0.45, ease: EASE_EDITORIAL }}
-        fill={colors.top}
-      />
-      <motion.polygon
-        initial={false}
-        animate={{
-          points: `${x - halfW},${topY} ${x},${topY + depth} ${x},${baseY} ${x - halfW},${baseY - depth}`,
-        }}
-        transition={{ duration: 0.45, ease: EASE_EDITORIAL }}
-        fill={colors.left}
-      />
-      <motion.polygon
-        initial={false}
-        animate={{
-          points: `${x},${topY + depth} ${x + halfW},${topY} ${x + halfW},${baseY - depth} ${x},${baseY}`,
-        }}
-        transition={{ duration: 0.45, ease: EASE_EDITORIAL }}
-        fill={colors.right}
-      />
-    </g>
-  );
-}
 
 export function HeroOpening({
   locale,
   resultCount,
   onQuickApply,
   onOpenQuiz,
+  onSwitchToTeacher,
 }: HeroOpeningProps) {
   const hc = HERO_COPY[locale];
-  const [tierIdx, setTierIdx] = useState(1);
-  const activeTier = SIMULATOR_TIERS[tierIdx] ?? SIMULATOR_TIERS[1];
+  const [tilt, setTilt] = useState<{ rx: number; ry: number }>({ rx: 4, ry: -6 });
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({
+      rx: Number((-py * 16).toFixed(2)),
+      ry: Number((px * 20).toFixed(2)),
+    });
+  };
+
+  const handlePointerLeave = () => {
+    setTilt({ rx: 4, ry: -6 });
+  };
 
   return (
     <section
       aria-label="EduMatch showcase"
       className="mx-auto mb-6 w-full max-w-7xl pt-4 pb-2 sm:pt-8"
     >
-      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-10 lg:gap-14">
-        {/* LEFT COLUMN: Clean Flagship Copy & Two Primary Actions (Zero Redundant Filters) */}
+      <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 md:gap-8 lg:gap-12">
+        {/* LEFT COLUMN: Clean Commercial Positioning & Two Action Buttons */}
         <div className="text-center md:col-span-6 md:text-left">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-bold text-[var(--accent-ink)]">
-            <SealCheck size={13} weight="fill" aria-hidden="true" />
+            <RocketLaunch size={13} weight="fill" aria-hidden="true" />
             <span>{hc.eyebrow}</span>
           </span>
 
@@ -232,7 +189,7 @@ export function HeroOpening({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.34, ease: EASE_EDITORIAL }}
-            className="mx-auto mt-4 max-w-xl break-words text-[2.15rem] font-bold leading-[1.06] tracking-[-0.04em] text-[var(--ink)] sm:text-[2.85rem] lg:text-[3.45rem] md:mx-0"
+            className="mx-auto mt-4 max-w-xl break-words text-[2.1rem] font-bold leading-[1.06] tracking-[-0.04em] text-[var(--ink)] sm:text-[2.8rem] lg:text-[3.4rem] md:mx-0"
           >
             {hc.titleStart}{' '}
             <em className="relative inline-block font-serif-editorial font-normal italic text-[var(--accent-ink)]">
@@ -253,7 +210,7 @@ export function HeroOpening({
             .
           </p>
 
-          {/* Two Bold Clean Action Buttons */}
+          {/* Clean Two-Button CTA Pair */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:justify-start">
             <motion.button
               type="button"
@@ -276,14 +233,14 @@ export function HeroOpening({
             <button
               type="button"
               onClick={onOpenQuiz}
-              className="inline-flex min-h-[48px] cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/90 px-5 text-sm font-semibold text-[var(--ink)] shadow-xs backdrop-blur-md transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-ink)]"
+              className="inline-flex min-h-[48px] cursor-pointer items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/92 px-5 text-sm font-semibold text-[var(--ink)] shadow-xs backdrop-blur-md transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-ink)]"
             >
               <Sparkle size={16} weight="fill" className="text-[var(--accent)]" aria-hidden="true" />
               <span>{hc.quizCta}</span>
             </button>
           </div>
 
-          {/* Minimalist 3-Metric Proof Line */}
+          {/* Startup Business & Performance Strip */}
           <div className="mt-7 flex flex-wrap items-center justify-center gap-x-7 gap-y-2 border-t border-[var(--border)]/70 pt-5 text-xs text-[var(--muted)] md:justify-start">
             {hc.metrics.map((m) => (
               <div key={m.label} className="flex items-baseline gap-1.5">
@@ -296,166 +253,196 @@ export function HeroOpening({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Pure Interactive 3D Isometric Outcome Engine (No Duplicate Tutor List) */}
-        <div className="md:col-span-6">
+        {/* RIGHT COLUMN: Continuous 3D Interactive Monetization & Ecosystem Orbit Stage */}
+        <div
+          className="md:col-span-6"
+          style={{ perspective: '1100px' }}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+        >
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.42, delay: 0.1, ease: EASE_EDITORIAL }}
-            className="relative mx-auto w-full max-w-[500px] md:max-w-none"
+            animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
+            transition={{ type: 'spring', stiffness: 150, damping: 18, mass: 0.8 }}
+            style={{ transformStyle: 'preserve-3d' }}
+            className="relative mx-auto flex h-[390px] w-full max-w-[520px] items-center justify-center select-none sm:h-[430px] md:max-w-none"
           >
-            {/* Ambient Emerald & Sky Halo */}
+            {/* Ambient Radial Emerald-Cyan Backdrop Glow */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-3 rounded-[40px] bg-gradient-to-br from-emerald-400/20 via-sky-400/20 to-[#C8F542]/25 blur-2xl"
+              style={{ transform: 'translateZ(-40px)' }}
+              className="pointer-events-none absolute inset-6 rounded-full bg-gradient-to-tr from-emerald-400/25 via-sky-400/20 to-[#C8F542]/30 blur-3xl"
             />
 
-            {/* Architectural Frosted Glass 3D Stage */}
-            <div className="relative overflow-hidden rounded-[32px] border border-white/95 bg-[var(--surface)]/92 p-5 shadow-[var(--shadow-float)] backdrop-blur-2xl dark:border-slate-700/80 dark:bg-[#121D30]/95 sm:p-6">
-              {/* Header + Interactive Tier Switcher */}
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[11px] font-bold text-[var(--accent-ink)]">
-                  <TrendUp size={13} weight="bold" aria-hidden="true" />
-                  <span>{hc.stageLabel}</span>
-                </span>
-
-                <div
-                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-subtle)] p-1"
-                  role="group"
-                  aria-label={hc.stageTitle}
-                >
-                  {SIMULATOR_TIERS.map((tier, idx) => {
-                    const active = tierIdx === idx;
-                    return (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => setTierIdx(idx)}
-                        aria-pressed={active}
-                        className={`cursor-pointer rounded-full px-2.5 py-1 font-mono-num text-[11px] font-bold transition-all ${
-                          active
-                            ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-2xs'
-                            : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                        }`}
-                      >
-                        {tier.tabLabel}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3D Isometric Extruded Pillar Visualization Canvas */}
-              <div className="relative mt-4 overflow-hidden rounded-[24px] border border-[var(--border)] bg-gradient-to-br from-[#F0F9FF] via-white to-[#ECFDF5] p-4 dark:from-[#16273E] dark:via-[#121E33] dark:to-[#102822]">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                      {hc.stageTitle}
-                    </div>
-                    <div className="mt-1 flex items-baseline gap-2">
-                      <span className="font-mono-num text-3xl font-black tracking-tight text-[var(--ink)]">
-                        {activeTier.endScore}
-                      </span>
-                      <span className="font-mono-num text-xs font-semibold text-[var(--muted)]">
-                        / 700
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 rounded-2xl bg-[#0F172A] px-3 py-2 text-white shadow-md">
-                    <Trophy size={15} weight="fill" className="text-[#C8F542]" aria-hidden="true" />
-                    <span className="font-mono-num text-xs font-extrabold text-[#C8F542]">
-                      {activeTier.delta}
-                    </span>
-                    <span className="text-[10px] font-medium text-slate-300">
-                      · {activeTier.months[locale]}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Large Tactile 3D Isometric Steps SVG */}
-                <svg
-                  viewBox="0 0 320 198"
-                  className="mx-auto mt-1 h-44 w-full max-w-[340px] overflow-visible"
-                  aria-hidden="true"
-                >
-                  {/* Isometric Ground Platform */}
-                  <ellipse cx="160" cy="182" rx="135" ry="12" fill="rgba(15, 23, 42, 0.07)" />
-                  <ellipse cx="160" cy="182" rx="95" ry="7" fill="rgba(16, 185, 129, 0.08)" />
-
-                  {/* 3 Rising Isometric 3D Pillars */}
-                  <IsometricBar x={82} height={activeTier.heights[0]} palette="slate" />
-                  <IsometricBar x={160} height={activeTier.heights[1]} palette="emerald" />
-                  <IsometricBar x={238} height={activeTier.heights[2]} palette="lime" />
-
-                  {/* Floating Translucent Score Nodes */}
-                  <g>
-                    <rect
-                      x="54"
-                      y={178 - activeTier.heights[0] - 42}
-                      width="56"
-                      height="22"
-                      rx="11"
-                      className="fill-white/95 stroke-slate-200 dark:fill-slate-800 dark:stroke-slate-600"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="82"
-                      y={178 - activeTier.heights[0] - 27}
-                      textAnchor="middle"
-                      className="fill-slate-600 font-mono text-[10px] font-bold dark:fill-slate-200"
-                    >
-                      {activeTier.startScore}
-                    </text>
-                  </g>
-
-                  <g>
-                    <circle
-                      cx="238"
-                      cy={178 - activeTier.heights[2] - 26}
-                      r="5"
-                      fill="#C8F542"
-                    />
-                    <circle
-                      cx="238"
-                      cy={178 - activeTier.heights[2] - 26}
-                      r="11"
-                      fill="#C8F542"
-                      opacity="0.25"
-                    />
-                  </g>
-                </svg>
-
-                {/* Baseline -> Target Readout */}
-                <div className="mt-1 flex items-center justify-between text-xs font-semibold">
-                  <span className="text-[var(--muted)]">
-                    {hc.baselineLabel}: <strong className="font-mono-num text-[var(--ink)]">{activeTier.startScore}</strong>
-                  </span>
-                  <span className="text-[var(--accent-ink)]">
-                    {hc.targetLabel}: <strong className="font-mono-num">{activeTier.endScore} / 700</strong>
-                  </span>
-                </div>
-              </div>
-
-              {/* Target University Orbit Strip */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-0.5">
-                <div className="flex items-center gap-1.5">
-                  <GraduationCap size={15} weight="fill" className="text-[var(--accent-ink)]" aria-hidden="true" />
-                  {activeTier.universities.map((uni) => (
-                    <span
-                      key={uni}
-                      className="rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-2.5 py-0.5 font-mono-num text-[11px] font-bold text-[var(--ink)]"
-                    >
-                      {uni}
-                    </span>
-                  ))}
-                </div>
-
-                <span className="text-[11px] font-semibold text-[var(--accent-ink)]">
-                  650+ · UFAZ / BANM / ADA
-                </span>
-              </div>
+            {/* 3D Animated Tilted Orbit Ring 1 */}
+            <div
+              aria-hidden="true"
+              style={{
+                transform: 'translateZ(-10px) rotateX(68deg) rotateY(-16deg)',
+                transformStyle: 'preserve-3d',
+              }}
+              className="pointer-events-none absolute h-[300px] w-[300px] sm:h-[340px] sm:w-[340px]"
+            >
+              <motion.div
+                animate={{ rotateZ: 360 }}
+                transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border-2 border-dashed border-emerald-500/45 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+              >
+                <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-[#C8F542] shadow-[0_0_18px_#C8F542]" />
+              </motion.div>
             </div>
+
+            {/* 3D Animated Tilted Orbit Ring 2 (Counter-rotating) */}
+            <div
+              aria-hidden="true"
+              style={{
+                transform: 'translateZ(5px) rotateX(62deg) rotateY(22deg)',
+                transformStyle: 'preserve-3d',
+              }}
+              className="pointer-events-none absolute h-[240px] w-[240px] sm:h-[276px] sm:w-[276px]"
+            >
+              <motion.div
+                animate={{ rotateZ: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-full rounded-full border border-sky-400/50 dark:border-[#C8F542]/45"
+              >
+                <span className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-emerald-400 shadow-[0_0_16px_#10B981]" />
+              </motion.div>
+            </div>
+
+            {/* Central 3D Volumetric Glowing Core Sphere (Z = +20px) */}
+            <motion.div
+              animate={{ y: [-7, 7, -7] }}
+              transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(20px)' }}
+              className="relative z-10 flex h-36 w-36 flex-col items-center justify-center rounded-full border border-white/40 bg-gradient-to-br from-[#0F172A] via-[#0F4C5C] to-[#10B981] text-white shadow-[0_28px_60px_-10px_rgba(16,185,129,0.55),inset_0_4px_14px_rgba(255,255,255,0.4)] sm:h-40 sm:w-40"
+            >
+              {/* Gloss Specular Reflection on 3D Sphere */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute top-2.5 left-4 h-12 w-20 -rotate-20 rounded-full bg-gradient-to-b from-white/45 to-transparent blur-[2px]"
+              />
+              {/* Spinning 3D Polyhedron Geometric Ring inside Core */}
+              <motion.svg
+                viewBox="0 0 100 100"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-2 h-[calc(100%-16px)] w-[calc(100%-16px)] opacity-35"
+                aria-hidden="true"
+              >
+                <polygon
+                  points="50,6 90,28 90,72 50,94 10,72 10,28"
+                  fill="none"
+                  stroke="#C8F542"
+                  strokeWidth="1.2"
+                />
+                <polygon
+                  points="50,16 80,50 50,84 20,50"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="0.9"
+                />
+              </motion.svg>
+
+              <span className="font-mono-num relative z-10 text-xs font-black tracking-[0.22em] text-[#C8F542]">
+                {hc.orbCenterTop}
+              </span>
+              <span className="relative z-10 mt-0.5 font-mono-num text-[10px] font-semibold tracking-wider text-emerald-100/90">
+                {hc.orbCenterSub}
+              </span>
+            </motion.div>
+
+            {/* Floating 3D Card 1 — Student Trial Funnel (Top Left, Z = +50px) */}
+            <motion.button
+              type="button"
+              onClick={onQuickApply}
+              animate={{ y: [-6, 6, -6] }}
+              transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(50px)' }}
+              className="em-glass group absolute top-1 left-0 z-20 flex max-w-[168px] cursor-pointer items-center gap-2 rounded-2xl border border-white/90 bg-[var(--surface)]/92 p-2.5 text-left shadow-[0_24px_48px_-14px_rgba(15,23,42,0.22)] transition-transform hover:scale-105 dark:border-emerald-500/30 dark:bg-[#132033]/92 sm:top-6 sm:left-2 sm:max-w-[245px] sm:gap-2.5 sm:p-3"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-[var(--accent-ink)] sm:h-9 sm:w-9">
+                <CurrencyCircleDollar size={18} weight="fill" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--muted)] sm:text-[10px]">
+                  {hc.cardTrialLabel}
+                </div>
+                <div className="font-mono-num text-xs font-extrabold text-[var(--ink)] sm:text-sm">
+                  {hc.cardTrialValue}
+                </div>
+                <div className="hidden truncate text-[10px] text-[var(--muted)] sm:block">
+                  {hc.cardTrialSub}
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Floating 3D Card 2 — 12% Commission Escrow (Top Right, Z = +62px) */}
+            <motion.div
+              animate={{ y: [6, -6, 6] }}
+              transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(62px)' }}
+              className="absolute top-14 right-0 z-20 flex max-w-[168px] items-center gap-2 rounded-2xl border border-emerald-400/35 bg-[#0F172A]/95 p-2.5 text-white shadow-[0_28px_54px_-12px_rgba(15,23,42,0.55)] backdrop-blur-xl sm:top-10 sm:right-2 sm:max-w-[235px] sm:gap-2.5 sm:p-3"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--lime)] text-[#0F172A] sm:h-9 sm:w-9">
+                <ShieldCheck size={18} weight="fill" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-emerald-300 sm:text-[10px]">
+                  {hc.cardEscrowLabel}
+                </div>
+                <div className="font-mono-num text-xs font-black text-[#C8F542] sm:text-sm">
+                  {hc.cardEscrowValue}
+                </div>
+                <div className="hidden truncate text-[10px] text-slate-300 sm:block">
+                  {hc.cardEscrowSub}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Floating 3D Card 3 — PRO SaaS MRR (Bottom Left, Z = +45px) */}
+            <motion.button
+              type="button"
+              onClick={onSwitchToTeacher}
+              animate={{ y: [5, -5, 5] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(45px)' }}
+              className="em-glass absolute bottom-14 left-0 z-20 flex max-w-[172px] cursor-pointer items-center gap-2 rounded-2xl border border-white/90 bg-[var(--surface)]/92 p-2.5 text-left shadow-[0_22px_45px_-12px_rgba(14,116,144,0.22)] transition-transform hover:scale-105 dark:border-amber-400/30 dark:bg-[#132033]/92 sm:bottom-8 sm:left-4 sm:max-w-[235px] sm:gap-2.5 sm:p-3"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-amber-400/20 text-amber-600 dark:text-amber-300 sm:h-9 sm:w-9">
+                <Crown size={18} weight="fill" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--muted)] sm:text-[10px]">
+                  {hc.cardSaasLabel}
+                </div>
+                <div className="font-mono-num text-xs font-extrabold text-[var(--ink)] sm:text-sm">
+                  {hc.cardSaasValue}
+                </div>
+                <div className="hidden truncate text-[10px] text-[var(--muted)] sm:block">
+                  {hc.cardSaasSub}
+                </div>
+              </div>
+            </motion.button>
+
+            {/* Floating 3D Card 4 — Course Storefront (Bottom Right, Z = +56px) */}
+            <motion.div
+              animate={{ y: [-5, 7, -5] }}
+              transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transform: 'translateZ(56px)' }}
+              className="em-glass absolute right-0 bottom-2 z-20 flex max-w-[162px] items-center gap-2 rounded-2xl border border-white/90 bg-[var(--surface)]/92 px-3 py-2 shadow-[0_22px_45px_-12px_rgba(15,23,42,0.18)] dark:border-sky-400/30 dark:bg-[#132033]/92 sm:right-5 sm:bottom-7 sm:max-w-[210px] sm:gap-2.5 sm:px-3.5 sm:py-2.5"
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300">
+                <FilmSlate size={17} weight="fill" aria-hidden="true" />
+              </span>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                  {hc.cardStudioLabel}
+                </div>
+                <div className="font-mono-num text-xs font-extrabold text-[var(--ink)]">
+                  {hc.cardStudioValue}
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

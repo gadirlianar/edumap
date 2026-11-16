@@ -4,7 +4,11 @@ import React, { useRef, useState } from 'react';
 import {
   ArrowCounterClockwise,
   ArrowRight,
+  Atom,
+  BookOpenText,
+  Calculator,
   ChalkboardTeacher,
+  Flask,
   GraduationCap,
   Heart,
   MapPin,
@@ -13,6 +17,8 @@ import {
   SlidersHorizontal,
   Sparkle,
   Star,
+  TerminalWindow,
+  Translate,
   TrendUp,
   X,
 } from '@phosphor-icons/react';
@@ -34,7 +40,7 @@ import {
   SUBJECT_LABELS,
 } from '@/data/i18n';
 import { resolveLocalized, resolveTutorName } from '@/data/tutors';
-import { COMPARE_COPY } from '@/data/tutorVisuals';
+import { COMPARE_COPY, getSubjectTheme } from '@/data/tutorVisuals';
 import { GeoRadarCard } from '@/components/GeoRadarCard';
 import { HeroOpening } from '@/components/HeroOpening';
 import { TutorCard } from '@/components/TutorCard';
@@ -53,6 +59,7 @@ import type {
   LocationState,
   SearchFilters,
   StudentState,
+  SubjectId,
   TutorProfile,
 } from '@/types/edumatch';
 
@@ -84,6 +91,18 @@ interface SearchWorkspaceProps {
   tutorsOpen: boolean;
   onTutorsOpenChange: (open: boolean) => void;
 }
+
+const SUBJECT_ICONS: Record<
+  SubjectId,
+  React.ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'fill'; className?: string }>
+> = {
+  Математика: Calculator,
+  Физика: Atom,
+  Химия: Flask,
+  'Английский язык': Translate,
+  'Азербайджанский язык': BookOpenText,
+  Информатика: TerminalWindow,
+};
 
 export function SearchWorkspace({
   locale,
@@ -202,6 +221,25 @@ export function SearchWorkspace({
 
   const extraFilterCount =
     (filters.lang ? 1 : 0) + (filters.sty ? 1 : 0) + (filters.price < 60 ? 1 : 0);
+  const totalActiveFilterCount =
+    extraFilterCount +
+    (filters.subj ? 1 : 0) +
+    (filters.cat ? 1 : 0) +
+    (filters.fmt ? 1 : 0) +
+    (filters.fav ? 1 : 0);
+
+  const resetAllFilters = () => {
+    onFiltersChange({
+      subj: '',
+      cat: '',
+      lang: '',
+      fmt: '',
+      price: 60,
+      sty: '',
+      fav: false,
+    });
+    onRadiusChange(51);
+  };
 
   const stackedPreviewTutors = (
     filteredTutors.length > 0 ? filteredTutors : tutors
@@ -346,16 +384,32 @@ export function SearchWorkspace({
           </div>
         ) : null}
 
-        {/* Pill-First Anti-Boxy Toolbar & Instant Filters */}
+        {/* Pill-First Anti-Boxy Filter Studio */}
         <div className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)]/95 p-4 shadow-[var(--shadow-card)] sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-baseline gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)] sm:text-xl">
                 {copy.search.title}
               </h2>
               <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono-num text-xs font-semibold text-[var(--accent-ink)]">
                 {filteredTutors.length}
               </span>
+              {totalActiveFilterCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/50 dark:text-rose-300"
+                >
+                  <ArrowCounterClockwise size={11} weight="bold" aria-hidden="true" />
+                  <span>
+                    {locale === 'az'
+                      ? `Sıfırla (${totalActiveFilterCount})`
+                      : locale === 'en'
+                        ? `Reset (${totalActiveFilterCount})`
+                        : `Сбросить (${totalActiveFilterCount})`}
+                  </span>
+                </button>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -465,9 +519,9 @@ export function SearchWorkspace({
             </div>
           </div>
 
-          {/* Instant 1-Click Pill Filters (Zero Lag, Non-Boxy) */}
+          {/* Instant 1-Click Visual Filter Grid */}
           <div className="mt-4 space-y-3 border-t border-[var(--border)]/70 pt-3.5">
-            {/* Subject Row */}
+            {/* Subject Row with Icons & Subject Accent Themes */}
             <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={copy.search.subject}>
               <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
                 {copy.search.subject}
@@ -486,43 +540,51 @@ export function SearchWorkspace({
               </button>
               {SUBJECTS.map((s) => {
                 const active = filters.subj === s;
+                const theme = getSubjectTheme(s);
+                const SubjIcon = SUBJECT_ICONS[s];
                 return (
                   <button
                     key={s}
                     type="button"
                     aria-pressed={active}
                     onClick={() => onFiltersChange({ subj: active ? '' : s })}
-                    className={`min-h-[32px] cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
+                    className={`inline-flex min-h-[32px] cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.97] ${
                       active
-                        ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs'
-                        : 'bg-[var(--surface-subtle)] text-[var(--ink-2)] hover:bg-[var(--accent-soft)]/55 hover:text-[var(--ink)]'
+                        ? 'bg-[var(--primary-btn)] text-[var(--primary-btn-ink)] shadow-xs ring-2 ring-[var(--accent)]/35'
+                        : `border hover:-translate-y-0.5 ${theme.pillClass}`
                     }`}
                   >
-                    {SUBJECT_LABELS[s][locale]}
+                    <SubjIcon
+                      size={13}
+                      weight={active ? 'fill' : 'bold'}
+                      aria-hidden="true"
+                      className={active ? 'text-[var(--lime)]' : ''}
+                    />
+                    <span>{SUBJECT_LABELS[s][locale]}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Format + Grade + Sort Segmented Tracks */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-              {/* Format */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+            {/* Clean 3-Pod Format + Grade + Sort Studio */}
+            <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
+              {/* Format Pod */}
+              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-3">
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
                   {copy.search.format}
-                </span>
+                </div>
                 <div
                   role="group"
                   aria-label={copy.search.format}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                  className="flex flex-wrap items-center gap-1"
                 >
                   <button
                     type="button"
                     aria-pressed={filters.fmt === ''}
                     onClick={() => onFiltersChange({ fmt: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                    className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
                       filters.fmt === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
                         : 'text-[var(--muted)] hover:text-[var(--ink)]'
                     }`}
                   >
@@ -536,9 +598,9 @@ export function SearchWorkspace({
                         type="button"
                         aria-pressed={active}
                         onClick={() => onFiltersChange({ fmt: active ? '' : f })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
                           active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
                             : 'text-[var(--muted)] hover:text-[var(--ink)]'
                         }`}
                       >
@@ -549,23 +611,23 @@ export function SearchWorkspace({
                 </div>
               </div>
 
-              {/* Grade */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+              {/* Grade Pod */}
+              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-5">
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
                   {copy.search.grade}
-                </span>
+                </div>
                 <div
                   role="group"
                   aria-label={copy.search.grade}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                  className="flex flex-wrap items-center gap-1"
                 >
                   <button
                     type="button"
                     aria-pressed={filters.cat === ''}
                     onClick={() => onFiltersChange({ cat: '' })}
-                    className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                    className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
                       filters.cat === ''
-                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                        ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
                         : 'text-[var(--muted)] hover:text-[var(--ink)]'
                     }`}
                   >
@@ -579,9 +641,9 @@ export function SearchWorkspace({
                         type="button"
                         aria-pressed={active}
                         onClick={() => onFiltersChange({ cat: active ? '' : g })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
                           active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
                             : 'text-[var(--muted)] hover:text-[var(--ink)]'
                         }`}
                       >
@@ -592,15 +654,15 @@ export function SearchWorkspace({
                 </div>
               </div>
 
-              {/* Sort */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+              {/* Sort Pod */}
+              <div className="rounded-2xl border border-[var(--border)]/80 bg-[var(--surface-subtle)]/55 p-2.5 lg:col-span-4">
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)]">
                   {copy.search.sort}
-                </span>
+                </div>
                 <div
                   role="group"
                   aria-label={copy.search.sort}
-                  className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-[var(--surface-subtle)] p-1"
+                  className="flex flex-wrap items-center gap-1"
                 >
                   {(
                     [
@@ -617,9 +679,9 @@ export function SearchWorkspace({
                         type="button"
                         aria-pressed={active}
                         onClick={() => onFiltersChange({ sort: val })}
-                        className={`min-h-[28px] cursor-pointer rounded-full px-3 text-xs font-semibold transition-all duration-150 ${
+                        className={`min-h-[28px] cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-all duration-150 ${
                           active
-                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs'
+                            ? 'bg-[var(--surface)] text-[var(--ink)] shadow-xs ring-1 ring-[var(--border)]'
                             : 'text-[var(--muted)] hover:text-[var(--ink)]'
                         }`}
                       >
