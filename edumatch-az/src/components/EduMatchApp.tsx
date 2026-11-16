@@ -1134,6 +1134,7 @@ export function EduMatchApp() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Footer
           locale={locale}
+          activeStrategy={role === 'student' && studentTab === 'strategy'}
           onNavigateSearch={() => {
             setRole('student');
             setStudentTab('search');
@@ -1152,6 +1153,11 @@ export function EduMatchApp() {
           onNavigateLessons={() => {
             setRole('student');
             setStudentTab('lessons');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onNavigateStrategy={() => {
+            setRole('student');
+            setStudentTab('strategy');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onSelectSubject={(subj) => {
