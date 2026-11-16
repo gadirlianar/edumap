@@ -321,7 +321,7 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     });
   });
 
-  it('renders clean Hero spotlight while keeping catalog collapsed and opens 1v1 VS compare modal', async () => {
+  it('renders continuous 3D startup monetization Hero while keeping catalog collapsed and opens 1v1 VS compare modal', async () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
@@ -330,9 +330,8 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     expect(document.getElementById('tutor-catalog-toggle')).toBeInTheDocument();
 
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-    expect(within(showcase).getByText('VERIFIED DİM')).toBeInTheDocument();
-    expect(within(showcase).queryByText('12% Escrow')).not.toBeInTheDocument();
-    expect(within(showcase).queryByText(/PRO · 19 ₼/i)).not.toBeInTheDocument();
+    expect(within(showcase).getByText('12% Escrow')).toBeInTheDocument();
+    expect(within(showcase).getByText(/PRO · 19 ₼/i)).toBeInTheDocument();
 
     // Clickable VS button opens Compare modal directly
     await user.click(screen.getByRole('button', { name: /1v1 VS/i }));

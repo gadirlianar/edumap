@@ -9,6 +9,7 @@ import React, {
   useSyncExternalStore,
 } from 'react';
 import { MotionConfig } from 'motion/react';
+import { CursorCatTrail } from '@/components/ui/CursorCatTrail';
 import { Footer } from '@/components/Footer';
 import {
   CITIES,
@@ -694,6 +695,7 @@ export function EduMatchApp() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="em-solaris-canvas min-h-screen pb-20 sm:pb-12">
+        <CursorCatTrail />
       <Header
         locale={locale}
         onLocaleChange={setLocale}
@@ -1128,55 +1130,51 @@ export function EduMatchApp() {
         )}
       </main>
 
-      {/* Clean Full-Width Corporate Footer */}
-      <Footer
-        locale={locale}
-        activeStrategy={role === 'student' && studentTab === 'strategy'}
-        onNavigateSearch={() => {
-          setRole('student');
-          setStudentTab('search');
-          setTutorsOpen(true);
-          window.setTimeout(() => {
-            document
-              .getElementById('tutor-catalog')
-              ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
-          }, 60);
-        }}
-        onNavigateTest={() => {
-          setRole('student');
-          setStudentTab('test');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigateLessons={() => {
-          setRole('student');
-          setStudentTab('lessons');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigateStrategy={() => {
-          setRole('student');
-          setStudentTab('strategy');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onSelectSubject={(subj) => {
-          setRole('student');
-          setStudentTab('search');
-          setFilters((prev) => ({ ...prev, subj }));
-          setSwipeIndex(0);
-          setTutorsOpen(true);
-          window.setTimeout(() => {
-            document
-              .getElementById('tutor-catalog')
-              ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
-          }, 60);
-        }}
-        onOpenTour={() => setTourOpen(true)}
-        onSwitchToTeacher={() => {
-          setRole('teacher');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenPrivacy={() => setPrivacyWho(role)}
-        onResetDemo={handleResetDemo}
-      />
+      {/* Clean Structured Minimalist Footer */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Footer
+          locale={locale}
+          onNavigateSearch={() => {
+            setRole('student');
+            setStudentTab('search');
+            setTutorsOpen(true);
+            window.setTimeout(() => {
+              document
+                .getElementById('tutor-catalog')
+                ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+            }, 60);
+          }}
+          onNavigateTest={() => {
+            setRole('student');
+            setStudentTab('test');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onNavigateLessons={() => {
+            setRole('student');
+            setStudentTab('lessons');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onSelectSubject={(subj) => {
+            setRole('student');
+            setStudentTab('search');
+            setFilters((prev) => ({ ...prev, subj }));
+            setSwipeIndex(0);
+            setTutorsOpen(true);
+            window.setTimeout(() => {
+              document
+                .getElementById('tutor-catalog')
+                ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+            }, 60);
+          }}
+          onOpenTour={() => setTourOpen(true)}
+          onSwitchToTeacher={() => {
+            setRole('teacher');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenPrivacy={() => setPrivacyWho(role)}
+          onResetDemo={handleResetDemo}
+        />
+      </div>
 
       <MobileNav
         role={role}

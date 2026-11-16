@@ -11,29 +11,25 @@
  */
 
 :root {
-  --bg: #F7F9FE;
+  --bg: #F6FAFE;
   --surface: #FFFFFF;
-  --surface-subtle: #F1F5FD;
-  --surface-hover: #E6EEFC;
-  --glass: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.90);
+  --surface-subtle: #EFF6FC;
+  --surface-hover: #E5F1FA;
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.85);
 
   --ink: #0F172A;
   --ink-2: #334155;
   --muted: #64748B;
 
-  --border: #E2E8F5;
-  --border-strong: #CBD5EA;
+  --border: #E1EDF7;
+  --border-strong: #C6DAEC;
 
-  /* Fresh Emerald, Electric Indigo & Solaris Neon-Lime Accent System */
+  /* Fresh Emerald & Solaris Neon-Lime Accent System */
   --accent: #10B981;
   --accent-ink: #047857;
   --accent-soft: #ECFDF5;
   --accent-border: #A7F3D0;
-
-  --electric: #4F46E5;
-  --electric-soft: #EEF2FF;
-  --electric-border: #C7D2FE;
 
   --lime: #C8F542;
   --lime-soft: #ECFCCB;
@@ -50,9 +46,9 @@
   --primary: #0F172A;
   --primary-hover: #1E293B;
   --primary-soft: rgba(15, 23, 42, 0.06);
-  --indigo: #4F46E5;
-  --indigo-soft: rgba(79, 70, 229, 0.08);
-  --indigo-border: #C7D2FE;
+  --indigo: #0F172A;
+  --indigo-soft: rgba(14, 116, 144, 0.06);
+  --indigo-border: #CBE2F2;
 
   --gold: #10B981;
   --gold-soft: #ECFDF5;
@@ -60,33 +56,29 @@
   --danger: #DC2626;
   --danger-soft: rgba(220, 38, 38, 0.10);
 
-  --shadow-card: 0 6px 24px -12px rgba(30, 41, 59, 0.08), 0 1px 3px rgba(15, 23, 42, 0.03);
-  --shadow-float: 0 24px 56px -18px rgba(30, 41, 59, 0.15), 0 4px 14px rgba(15, 23, 42, 0.05);
+  --shadow-card: 0 4px 20px -12px rgba(14, 116, 144, 0.10), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-float: 0 24px 56px -20px rgba(14, 116, 144, 0.16), 0 4px 14px rgba(15, 23, 42, 0.04);
 }
 
 [data-theme="dark"] {
-  --bg: #080E1C;
-  --surface: #111A2E;
-  --surface-subtle: #17233B;
-  --surface-hover: #1F2F4D;
-  --glass: rgba(11, 18, 32, 0.86);
-  --glass-border: rgba(226, 232, 245, 0.13);
+  --bg: #0B1220;
+  --surface: #121D30;
+  --surface-subtle: #182740;
+  --surface-hover: #1F3252;
+  --glass: rgba(11, 18, 32, 0.84);
+  --glass-border: rgba(225, 237, 247, 0.12);
 
   --ink: #F8FAFC;
   --ink-2: #E2E8F0;
   --muted: #94A3B8;
 
-  --border: rgba(226, 232, 245, 0.12);
-  --border-strong: rgba(226, 232, 245, 0.24);
+  --border: rgba(225, 237, 247, 0.12);
+  --border-strong: rgba(225, 237, 247, 0.24);
 
   --accent: #34D399;
   --accent-ink: #6EE7B7;
   --accent-soft: rgba(16, 185, 129, 0.16);
   --accent-border: rgba(52, 211, 153, 0.34);
-
-  --electric: #818CF8;
-  --electric-soft: rgba(99, 102, 241, 0.18);
-  --electric-border: rgba(129, 140, 248, 0.35);
 
   --lime: #C8F542;
   --lime-soft: rgba(200, 245, 66, 0.16);
@@ -102,9 +94,9 @@
   --primary: #F8FAFC;
   --primary-hover: #E2E8F0;
   --primary-soft: rgba(248, 250, 252, 0.09);
-  --indigo: #818CF8;
-  --indigo-soft: rgba(99, 102, 241, 0.14);
-  --indigo-border: rgba(129, 140, 248, 0.28);
+  --indigo: #F8FAFC;
+  --indigo-soft: rgba(248, 250, 252, 0.08);
+  --indigo-border: rgba(248, 250, 252, 0.20);
 
   --gold: #34D399;
   --gold-soft: rgba(52, 211, 153, 0.15);
@@ -112,8 +104,8 @@
   --danger: #F87171;
   --danger-soft: rgba(248, 113, 113, 0.14);
 
-  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.32);
-  --shadow-float: 0 24px 52px -16px rgba(0, 0, 0, 0.62);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 24px 52px -16px rgba(0, 0, 0, 0.56);
 }
 
 @layer base {
@@ -150,25 +142,23 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Signature Aurora Indigo, Sky & Emerald Architectural Mesh Canvas */
+/* Signature Solaris Sky-Blue, Architectural Dot Grid & Pastel Mint Wash */
 .em-solaris-canvas {
   background-color: var(--bg);
   background-image:
-    radial-gradient(rgba(15, 23, 42, 0.042) 1px, transparent 1px),
-    radial-gradient(760px 420px at 16% 0%, rgba(99, 102, 241, 0.15), transparent 68%),
-    radial-gradient(820px 440px at 84% 2%, rgba(16, 185, 129, 0.15), transparent 68%),
-    linear-gradient(180deg, #EDF2FF 0%, #F0F9FF 260px, #F6FAFE 560px, var(--bg) 860px);
-  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
+    radial-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+    radial-gradient(960px 440px at 50% 0%, rgba(167, 243, 208, 0.42), transparent 68%),
+    linear-gradient(180deg, #C7E6FF 0%, #DEF3FB 260px, #EDF8F5 540px, var(--bg) 840px);
+  background-size: 28px 28px, 100% 100%, 100% 100%;
 }
 
 [data-theme="dark"] .em-solaris-canvas {
   background-color: var(--bg);
   background-image:
-    radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    radial-gradient(740px 400px at 18% 0%, rgba(99, 102, 241, 0.22), transparent 68%),
-    radial-gradient(780px 420px at 82% 4%, rgba(16, 185, 129, 0.18), transparent 68%),
-    linear-gradient(180deg, #0D162C 0%, #0A1224 460px, var(--bg) 840px);
-  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
+    radial-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+    radial-gradient(900px 420px at 50% 0%, rgba(16, 185, 129, 0.18), transparent 70%),
+    linear-gradient(180deg, #0F2038 0%, #0D1729 460px, var(--bg) 820px);
+  background-size: 28px 28px, 100% 100%, 100% 100%;
 }
 
 /* Airy Frosted Glass & Card Primitives */
