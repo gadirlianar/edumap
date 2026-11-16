@@ -429,9 +429,9 @@ describe('EduMatch Tier-1 UI Integration', () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
-    // Open from Header Strategy tab
-    const header = screen.getByRole('banner');
-    await user.click(within(header).getByRole('button', { name: 'Стратегия' }));
+    // Open from Footer Strategy dock button
+    const footer = screen.getByRole('contentinfo');
+    await user.click(within(footer).getByRole('button', { name: 'Стратегия' }));
     const gtmSection = document.getElementById('gtm-strategy')!;
     expect(gtmSection).toBeInTheDocument();
     expect(

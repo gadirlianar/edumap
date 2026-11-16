@@ -8,7 +8,6 @@ import {
   FilmSlate,
   IdentificationCard,
   MagnifyingGlass,
-  RocketLaunch,
   Sparkle,
   UsersThree,
 } from '@phosphor-icons/react';
@@ -38,7 +37,6 @@ export function MobileNav({
           { id: 'search', label: copy.nav.search, icon: MagnifyingGlass },
           { id: 'test', label: copy.nav.test, icon: Sparkle },
           { id: 'lessons', label: copy.nav.lessons, icon: BookOpenText },
-          { id: 'strategy', label: copy.nav.strategy, icon: RocketLaunch },
         ]
       : [
           { id: 'inbox', label: copy.nav.inbox, icon: ChatCircleDots },
