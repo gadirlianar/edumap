@@ -473,7 +473,6 @@ export function GeoRadarCard({
                 <h3 className="mt-2 text-lg font-bold tracking-tight text-[var(--ink)]">
                   {displayCity}
                 </h3>
-                <p className="mt-0.5 text-xs text-[var(--muted)]">{copy.radar.hint}</p>
               </div>
 
               <button

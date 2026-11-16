@@ -354,21 +354,21 @@ describe('EduMatch Teacher Workflows, Modal Hygiene, and Normal UI Guarantees', 
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Закрыть' }));
   });
 
-  it('supports Hero Goal Presets, clickable showcase mini-avatars, collapsed toggle portraits, and compact 2-tier Footer', async () => {
+  it('supports 3D Hero showcase switching via subject pills & mini-avatars, collapsed toggle portraits, and compact 2-tier Footer', async () => {
     const user = userEvent.setup();
     render(<EduMatchApp />);
 
-    // 1. Clicking a Hero Goal Preset updates subject & spotlight mentor while keeping catalog collapsed
+    // 1. Selecting Informatics in Hero updates 3D showcase mentor while keeping catalog collapsed
     const showcase = screen.getByRole('region', { name: /EduMatch showcase/i });
-    await user.click(within(showcase).getByRole('button', { name: /Олимпиада & IT/i }));
+    await user.click(within(showcase).getByRole('button', { name: 'Информатика' }));
     expect(
       within(showcase).getByRole('heading', { level: 2, name: 'Эльнур Гасанов' }),
     ).toBeInTheDocument();
     expect(document.getElementById('tutor-catalog')).toBeNull();
 
-    // 2. Quick-switch mini-avatar group switches active mentor in Hero spotlight
+    // 2. Quick-switch mini-avatar group switches active mentor in 3D Hero showcase
     await user.click(within(showcase).getByRole('button', { name: 'Все предметы' }));
-    const switcher = within(showcase).getByRole('group', { name: /Быстрый выбор ментора/i });
+    const switcher = within(showcase).getByRole('group', { name: /Выбор ментора/i });
     const avatarButtons = within(switcher).getAllByRole('button');
     expect(avatarButtons.length).toBeGreaterThanOrEqual(2);
     await user.click(avatarButtons[1]);

@@ -363,13 +363,6 @@ export function SearchWorkspace({
                     {card.title}
                   </span>
                 </div>
-                <p
-                  className={`mt-0.5 line-clamp-1 text-[11px] ${
-                    isDuel ? 'text-slate-300' : 'text-[var(--muted)]'
-                  }`}
-                >
-                  {card.sub}
-                </p>
               </div>
             </>
           );
@@ -432,9 +425,9 @@ export function SearchWorkspace({
               })}
             </div>
 
-            <div className="min-w-0 space-y-1">
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)] sm:text-xl">
+                <h2 className="text-base font-semibold tracking-tight text-[var(--ink)] sm:text-lg">
                   {copy.search.title}
                 </h2>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 font-mono-num text-xs font-semibold text-[var(--accent-ink)]">
@@ -442,13 +435,6 @@ export function SearchWorkspace({
                   {filteredTutors.length}
                 </span>
               </div>
-              <p className="text-xs text-[var(--muted)] sm:text-sm">
-                {locale === 'az'
-                  ? 'Müəllimlərin tam siyahısını, filtrləri və müqayisəni açmaq üçün düyməyə toxunun.'
-                  : locale === 'en'
-                    ? 'Click to open the full tutor catalog, filters, and side-by-side comparison.'
-                    : 'Нажмите, чтобы открыть полный каталог репетиторов, фильтры и сравнение.'}
-              </p>
             </div>
           </div>
 
